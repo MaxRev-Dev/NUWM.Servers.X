@@ -1,0 +1,672 @@
+
+02-Feb-18
+11:16:10 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=42&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:16:19 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=41&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:16:24 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=40&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:16:29 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=39&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:16:36 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:16:37 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&weeks=4,6&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:16:38 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=7&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:17:08 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=3&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:17:17 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=8&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:17:24 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=9&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:18:27 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=10&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:20:44 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=5&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:22:06 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=5&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:25:12 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=6&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:25:18 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=7&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:25:38 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=8&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:26:52 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=4&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:27:18 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=3&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:27:19 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=2&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:27:21 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=1&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:27:22 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=52&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:27:23 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=51&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:27:25 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=50&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:27:27 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=49&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:27:29 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=48&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:27:31 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=47&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:27:33 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=46&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:27:38 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=45&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:28:12 PM
+ip:unknown
+from: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36 MaxRev
+req=/api/sched_pattern_update
+
+
+02-Feb-18
+11:28:20 PM
+ip:unknown
+from: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36 MaxRev
+req=/api/ar_update
+
+
+02-Feb-18
+11:28:29 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=44&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:28:32 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=43&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:28:39 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=42&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:28:46 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=41&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:28:56 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=40&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:29:03 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=39&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:29:16 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:29:18 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&weeks=4,6&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:29:20 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=3&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:29:31 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=2&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:29:33 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=1&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:29:35 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=52&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:29:37 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=51&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:29:39 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=50&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:29:41 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=49&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:29:43 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=48&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:29:49 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=47&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:36:57 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=5&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:36:58 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=6&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:37:03 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=7&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:37:15 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:37:17 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&weeks=4,6&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:37:22 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=3&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:37:24 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=2&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:37:26 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=1&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:37:27 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=52&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:37:28 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=51&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:37:30 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=50&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:37:32 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=49&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:37:33 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=48&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:37:43 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:37:45 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&weeks=4,6&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:06 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=3&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:08 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=2&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:09 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=1&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:11 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=52&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:38:14 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=51&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:38:16 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=50&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:38:17 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=49&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:38:19 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=48&lect=false&year=2017&type=weeks
+
+
+02-Feb-18
+11:38:29 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:46 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:48 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&weeks=4,6&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:53 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=3&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:54 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=2&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:56 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=1&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:38:58 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=52&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:39:01 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=51&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:39:02 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=50&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:39:04 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=49&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:39:06 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=48&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:39:09 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=47&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:39:12 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=46&lect=true&year=2017&type=weeks
+
+
+02-Feb-18
+11:39:20 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:39:21 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&weeks=4,6&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:41:59 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=5&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:42:01 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=6&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:42:47 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&week=4&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:43:01 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:43:03 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&weeks=4,6&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:43:09 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:43:10 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&weeks=4,6&lect=false&year=2018&type=weeks
+
+
+02-Feb-18
+11:45:31 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:45:31 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&weeks=4,6&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:45:37 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?name=%D0%86%D0%B2%D0%B0%D0%BD%D1%87%D1%83%D0%BA%20%D0%9D%D0%B0%D1%82%D0%B0%D0%BB%D1%96%D1%8F%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B0&week=5&lect=true&year=2018&type=weeks
+
+
+02-Feb-18
+11:45:39 PM
+ip:unknown
+from: (Windows 10 - MyNUWM)
+req=/api/sched?group=%D0%9F%D0%9C-21&weeks=4,6&lect=false&year=2018&type=weeks
+

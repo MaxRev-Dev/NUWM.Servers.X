@@ -1,0 +1,11 @@
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\bin\Release\netcoreapp2.0\NUWM.Servers.Sched.deps.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\bin\Release\netcoreapp2.0\NUWM.Servers.Sched.runtimeconfig.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\bin\Release\netcoreapp2.0\NUWM.Servers.Sched.runtimeconfig.dev.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\bin\Release\netcoreapp2.0\NUWM.Servers.Sched.dll
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\bin\Release\netcoreapp2.0\NUWM.Servers.Sched.pdb
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\obj\Release\netcoreapp2.0\NUWM.Servers.Sched.csprojResolveAssemblyReference.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\obj\Release\netcoreapp2.0\NUWM.Servers.Sched.csproj.CoreCompileInputs.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\obj\Release\netcoreapp2.0\NUWM.Servers.Sched.AssemblyInfoInputs.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\obj\Release\netcoreapp2.0\NUWM.Servers.Sched.AssemblyInfo.cs
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\obj\Release\netcoreapp2.0\NUWM.Servers.Sched.dll
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Sched\NUWM.Servers.Sched\obj\Release\netcoreapp2.0\NUWM.Servers.Sched.pdb

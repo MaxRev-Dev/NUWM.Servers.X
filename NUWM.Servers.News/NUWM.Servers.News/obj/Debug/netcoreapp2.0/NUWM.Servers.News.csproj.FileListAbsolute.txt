@@ -1,0 +1,11 @@
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\bin\Debug\netcoreapp2.0\NUWM.Servers.News.deps.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\bin\Debug\netcoreapp2.0\NUWM.Servers.News.runtimeconfig.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\bin\Debug\netcoreapp2.0\NUWM.Servers.News.runtimeconfig.dev.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\bin\Debug\netcoreapp2.0\NUWM.Servers.News.dll
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\obj\Debug\netcoreapp2.0\NUWM.Servers.News.csprojResolveAssemblyReference.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\obj\Debug\netcoreapp2.0\NUWM.Servers.News.csproj.CoreCompileInputs.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\obj\Debug\netcoreapp2.0\NUWM.Servers.News.AssemblyInfoInputs.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\obj\Debug\netcoreapp2.0\NUWM.Servers.News.AssemblyInfo.cs
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\bin\Debug\netcoreapp2.0\NUWM.Servers.News.pdb
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\obj\Debug\netcoreapp2.0\NUWM.Servers.News.dll
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.News\NUWM.Servers.News\obj\Debug\netcoreapp2.0\NUWM.Servers.News.pdb

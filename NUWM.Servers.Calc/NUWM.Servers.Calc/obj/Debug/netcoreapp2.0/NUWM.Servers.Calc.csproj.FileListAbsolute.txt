@@ -1,0 +1,11 @@
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\bin\Debug\netcoreapp2.0\NUWM.Servers.Calc.deps.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\bin\Debug\netcoreapp2.0\NUWM.Servers.Calc.runtimeconfig.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\bin\Debug\netcoreapp2.0\NUWM.Servers.Calc.runtimeconfig.dev.json
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\bin\Debug\netcoreapp2.0\NUWM.Servers.Calc.dll
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\obj\Debug\netcoreapp2.0\NUWM.Servers.Calc.csprojResolveAssemblyReference.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\obj\Debug\netcoreapp2.0\NUWM.Servers.Calc.csproj.CoreCompileInputs.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\obj\Debug\netcoreapp2.0\NUWM.Servers.Calc.AssemblyInfoInputs.cache
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\obj\Debug\netcoreapp2.0\NUWM.Servers.Calc.AssemblyInfo.cs
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\bin\Debug\netcoreapp2.0\NUWM.Servers.Calc.pdb
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\obj\Debug\netcoreapp2.0\NUWM.Servers.Calc.dll
+C:\Users\MaxRev\Documents\Visual Studio 2017\Projects\NUWM.Servers.X\NUWM.Servers.Calc\NUWM.Servers.Calc\obj\Debug\netcoreapp2.0\NUWM.Servers.Calc.pdb
