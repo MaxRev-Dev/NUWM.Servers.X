@@ -47,16 +47,16 @@ namespace APIUtilty
                             "CPU Total: " + t.TotalProcessorTime.Days + "d " + t.TotalProcessorTime.Hours + "h " +
                             +t.TotalProcessorTime.Minutes + "m " + t.TotalProcessorTime.Seconds + "s\n" +
                             "RAM memory size: " + (t.WorkingSet64 / 1048576).ToString() + "mb\n" +
-                           
+
                         String.Format("\nServer uptime: {0}d {1}h {2}m {3}s\n\n", d.Days, d.Hours, d.Minutes, d.Seconds);
-                       
+
 
 
 
                         TimeSpan m = new TimeSpan();
                         if (ScheduleTask.scheduledTime != null)
                             m = ScheduleTask.scheduledTime - TimeChron.GetRealTime();
-                        resp +=  "\nSpecialties count: " + Server.CurrentParser.res.Count +
+                        resp += "\nSpecialties count: " + Server.CurrentParser.res.Count +
                             "\nSpecialty parser encounter: " + String.Format("{0}d {1}h {2}m {3}s", m.Days, m.Hours, m.Minutes, m.Seconds);
                         if (Server.log != null && Server.log.Count > 0)
                         {
@@ -65,7 +65,7 @@ namespace APIUtilty
                             foreach (var h in f.Reverse())
                                 resp += h + "\n";
                         }
-                            
+
                         FS = resp; ContentType = "text/plain";
                     }
                     else if (action == "svlog")
@@ -75,11 +75,12 @@ namespace APIUtilty
                     }
                     else if (action == "ulog")
                     {
-                        foreach(var i in Server.log)
+                        foreach (var i in Server.log)
                         {
-                            FS += i;FS +="\n";
-                        }if (FS == null) FS = "NOTHING";
-                        ContentType = "text/plain"; 
+                            FS += i; FS += "\n";
+                        }
+                        if (FS == null) FS = "NOTHING";
+                        ContentType = "text/plain";
                     }
 
                     else
@@ -214,10 +215,10 @@ namespace APIUtilty
             for (int l = 0; l < coefnames.Count(); l++)
             {
                 if (listing.Count() > 0)
-                    listing = listing.Where(x => x.Modulus.CoefName.
-                    Where(cx => cx.ToLower().Contains(coefnames[l].ToLower())).Count() == 1).ToArray();
+                    listing = listing.Where(x => Contains(x.Modulus.CoefName, coefnames)).ToArray();
                 else return new Tuple<List<Specialty>, CalcMarkInfo>(obj, cmi);
             }
+
             double min = 200, max = 0;
             foreach (var i in listing)
             {
@@ -293,6 +294,23 @@ namespace APIUtilty
             return resp;
         }
 
+        private bool Contains(string[] arr1, string[] arr2)
+        {
+            List<int> ch = new List<int>();
+            for (int j = 0; j < arr2.Count(); j++)
+            {
+                bool found = false;
+                for (int i = 0; i < arr1.Count(); i++)
+                {
+                    if (arr1[i].Contains(arr2[j]) && !ch.Contains(i))
+                    {
+                        ch.Add(i); found = true; break;
+                    }
+                }
+                if (!found) return false;
+            }
+            return true;
+        }
 
         public static string CreateSPResponse(List<Specialty> obj, Exception err)
         {
