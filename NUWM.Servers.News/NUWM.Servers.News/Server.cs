@@ -15,11 +15,13 @@ namespace Server
     using HelperUtilties;
     using JSON;
     using Lead;
+    using Newtonsoft.Json;
     using System.Diagnostics;
-
+    using System.Globalization;
 
     class Server
     {
+        public static int AllUsersCount = 0;
         public static int taskDelayM, pagesDef;
         public static ParserPool CurrentParserPool;
 
@@ -29,6 +31,7 @@ namespace Server
                 "./log",
                 "./cache"
         };
+        public static List<Exception> Errors;
         private void CheckDirs()
         {
             foreach (var item in dirs)
@@ -36,10 +39,56 @@ namespace Server
                 if (!Directory.Exists(item)) Directory.CreateDirectory(item);
             }
         }
+        public class UserStats
+        {
+            public static UserStats Current;
+            private Dictionary<string, StatsInfo> UstatsIP;
+            public UserStats()
+            {
+                UstatsIP = new Dictionary<string, StatsInfo>();
+            }
+            public string UniqueUsers()
+            {
+                return (Server.AllUsersCount + UstatsIP.Keys.Count).ToString();
+            }
+            public string UniqueUsersInHour()
+            {
+                return (UstatsIP.Keys.Count).ToString();
+            }
+            public void CheckUser(string ip, string request, string user)
+            {
+                if (!UstatsIP.Keys.Contains(ip))
+                {
+                    UstatsIP.Add(ip, new StatsInfo()
+                    {
+                        RequestsCount = 1
+                    });
+                }
+                else
+                {
+                    UstatsIP[ip].RequestsCount++;
+                }
+                if (!UstatsIP[ip].Devices.Contains(user)) UstatsIP[ip].Devices.Add(user);
+                UstatsIP[ip].Requests.Add(DateTime.Now.ToString("hh:mm:ss - dd.MM.yyyy") + " => " + request);
+            }
+            public void DeleteStats()
+            {
+                Server.AllUsersCount += UstatsIP.Keys.Count;
+                UstatsIP.Clear();
+            }
+            public class StatsInfo
+            {
+                public List<string> Devices = new List<string>();
+                public int RequestsCount { get; set; }
+                public List<string> Requests = new List<string>();
+            }
+        }
         public Server(int Port)
         {
             CheckDirs();
 
+            Errors = new List<Exception>();
+            UserStats.Current = new UserStats();
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Listener = new TcpListener(IPAddress.Any, Port);
             try { Listener.Start(); }
@@ -59,13 +108,18 @@ namespace Server
 
             ParserPool.CacheUpdater.Schedule_Timer();
             TimeChron.TimeSyncRelay.Schedule_Timer();
+            LogScheduler.Schedule_Timer();
             ParserPool.Parser.ScheduleInstantCacheSave.Schedule_Timer();
 
             while (true)
             {
-                TcpClient Client = Listener.AcceptTcpClient();
-                new Thread(new ParameterizedThreadStart(ClientThread)).Start(Client);
-                ConnectionsClosedCount++;
+                try
+                {
+                    TcpClient Client = Listener.AcceptTcpClient();
+                    new Thread(new ParameterizedThreadStart(ClientThread)).Start(Client);
+                    ConnectionsClosedCount++;
+                }
+                catch (Exception e) { Errors.Add(e); }
             }
         }
 
@@ -106,8 +160,11 @@ namespace Server
         public static List<string> log = new List<string>();
         public static void Log(string address, string request, string user)
         {
-            if (!request.Contains("ulog") && !request.Contains("trace"))
-                log.Add("\n" + DateTime.Now.ToShortDateString() + "\n" + DateTime.Now.ToLongTimeString() + "\nip:" + address + "\nfrom:" + user + "\nreq=" + request + "\n");
+            if (address.Contains(':')) address = address.Substring(0, address.IndexOf(':'));
+            if (address.Contains('.')) UserStats.Current.CheckUser(address, request, user);
+            var d = DateTime.Now.ToString("hh:mm:ss - dd.MM.yyyy", CultureInfo.CreateSpecificCulture("en-US"));
+            if (!request.Contains("ulog") && !request.Contains("trace") && !user.Contains("MaxRev"))
+                log.Add("\n" + d + "\nip:" + address + "\nfrom:" + user + "\nreq=" + request + "\n");
         }
     }
 
@@ -127,6 +184,7 @@ namespace Server
             catch (Exception) { }
         }
         TcpClient client;
+        Dictionary<string, string> Headers = new Dictionary<string, string>();
         public Client(TcpClient Client)
         {
             client = Client;
@@ -147,18 +205,16 @@ namespace Server
             }
             try
             {
+                foreach (var i in Request.Split('\n'))
+                {
+                    if (i.IndexOf(": ") == -1) continue;
+                    var t = i.Substring(0, i.IndexOf(": "));
+                    var s = i.Substring(i.IndexOf(": ") + 2);
+                    Headers.Add(t.ToLower(), s);
+                }
                 if (Request.ToLower().Contains("content-length"))
                 {
-                    var o = Request.ToLower().IndexOf("content-length:") + "content-length:".Length;
-
-                    string g = null;
-                    g = Request.Substring(o + 1);
-                    if (Request.EndsWith("\r\n"))
-                    {
-                        int t = Request.IndexOf("\r\n", o);
-                        g = Request.Substring(o + 1, t - o - 1);
-                    }
-                    if (int.TryParse(g, out int res))
+                    if (int.TryParse(Headers["content-length"], out int res))
                     {
                         int cont = Encoding.UTF8.GetBytes(Content).Length;
                         var ui = Encoding.UTF8.GetBytes(Content).Length;
@@ -180,17 +236,22 @@ namespace Server
             string ipus = "unknown";
             if (Request.ToLower().Contains("x-routed-by: maxrev.nuwm.server.bridge"))
             {
-                if (Request.ToLower().Contains("x-from-ip:"))
-                {
-                    var io = Request.IndexOf("x-from-ip:") + "x-from-ip:".Length;
-                    ipus = Request.Substring(io, Request.IndexOf('\n', io) - io);
-                }
+                if (Request.ToLower().Contains("x-from-ip"))
+                    ipus = Headers["x-from-ip"];
                 if (Content.Contains("\r\n\r\n"))
                 {
                     Content = Content.Substring(Request.IndexOf("\r\n\r\n"));
                     Request = Content.Substring(0, Request.IndexOf("\r\n\r\n"));
                 }
                 else Request = Content;
+                Headers.Clear();
+                foreach (var i in Request.Split('\n'))
+                {
+                    if (i.IndexOf(": ") == -1) continue;
+                    var t = i.Substring(0, i.IndexOf(": "));
+                    var s = i.Substring(i.IndexOf(": ") + 2);
+                    Headers.Add(t.ToLower(), s);
+                }
             }
             Match ReqMatch = Regex.Match(Request, @"^\w+\s+([^\s\?]+)[^\s]*\s+HTTP/.*|");
 
@@ -208,11 +269,7 @@ namespace Server
                     {
                         string useragent = "unknown";
                         if (Request.ToLower().Contains("user-agent"))
-                        {
-                            var f = Request.ToLower().IndexOf("user-agent:") + "user-agent:".Length;
-                            useragent = Request.Substring(f, Request.ToLower().IndexOf('\n', f) - f);
-                        }
-
+                            useragent = Headers["user-agent"];
                         SetLog(RequestUri, ipus, useragent);
                     }
                     catch (Exception) { }
@@ -234,6 +291,7 @@ namespace Server
                         {
                             try
                             {
+                                if (!kp.Contains('=')) { query.Add(kp, ""); }
                                 var k_p = kp.Split('=');
                                 query.Add(k_p[0], k_p[1]);
                             }
@@ -241,6 +299,11 @@ namespace Server
                             {
                                 SendError(Client, 501); return;
                             }
+                            catch (InvalidOperationException)
+                            {
+                                SendError(Client, 501); return;
+                            }
+                            catch { }
                         }
                     }
                     else
@@ -252,8 +315,27 @@ namespace Server
                     {
                         try
                         {
+#if DEBUG           
+                            Console.WriteLine("\n\nClient API handler start");
+#endif
+                            CancellationTokenSource source = new CancellationTokenSource();
+                            source.CancelAfter(10 * 1000);
+                            var token = source.Token;
                             var task = api.PrepareForResponse(Request, Content, action);
-                            while (!task.IsCompleted) Task.Delay(10);
+                            while (!task.IsCompleted)
+                            {
+                                if (token.IsCancellationRequested)
+                                {
+                                    SendResponseStr(JsonConvert.SerializeObject(new Response()
+                                    {
+                                        Code = StatusCode.GatewayTimeout,
+                                        Error = "Gateway Timeout of desk.numw.edu.ua",
+                                        Content = null
+                                    }), "text/json", Buffer, Count, Client);
+                                    return;
+                                }
+                                Task.Delay(10);
+                            }
                             if (task.Result == null)
                             {
                                 SendError(Client, 501); return;
@@ -266,6 +348,10 @@ namespace Server
                             SendResponseStr(APIUtilty.API.CreateResponse(null, ex), "text/json", Buffer, Count, Client);
                         }
                         return;
+                    }
+                    else if (action == "gt")
+                    {
+                        Task.Delay(60 * 1000).Wait();
                     }
                     else
                     {
@@ -355,9 +441,16 @@ namespace Server
 
         private string GetHeaders(string contentType, long contentLength)
         {
-            return "HTTP/1.1 200 OK\nContent-Type: " + contentType + ((contentType != "image/x-icon") ? "; charset=utf-8" : "") +
-                "\nPragma: no-cache\nAccess-Control-Allow-Origin:*\nAccess-Control-Allow-Methods:*\nContent-Language: uk-UA\nX-Powered-By: NUWM.Servers by MaxRev" +
-                "\nDate:" + TimeChron.GetRealTime().ToString("hh:mm:ss - dd.MM.yyyy") + "\nContent-Length: " + contentLength + "\n\n";
+            return "HTTP/1.1 200 OK" +
+                "\nContent-Type: " + contentType + ((contentType != "image/x-icon") ? "; charset=utf-8" : "") +
+                "\nPragma: no-cache" +
+                "\nAccess-Control-Allow-Origin:*" +
+                "\nAccess-Control-Allow-Methods:*" +
+                "\nContent-Language: uk-UA" +
+                "\nX-NS-Type: News" +
+                "\nX-Powered-By: NUWM.Servers by MaxRev" +
+                "\nDate:" + TimeChron.GetRealTime().ToString("hh:mm:ss - dd.MM.yyyy") +
+                "\nContent-Length: " + contentLength + "\n\n";
         }
 
         private void SendResponse(FileStream FS, string ContentType, byte[] Buffer, int Count, TcpClient Client)

@@ -196,13 +196,6 @@ namespace Lead
                     var g = File.CreateText("./cache/instantCache.txt");
                     g.WriteAsync(JsonConvert.SerializeObject(InstantCache)).Wait();
                     g.Close();
-
-                    var d = DateTime.Now;
-                    var gg = File.CreateText("./cache/clientLog" + d.ToLongTimeString() + ".txt");
-                    foreach (var i in Server.Server.log)
-                        gg.WriteLine(i);
-                    Server.Server.log.Clear();
-                    gg.Close();
                 }
 
                 public static DateTime scheduledTime;
@@ -382,8 +375,8 @@ namespace Lead
                         ImageURL = img,
                         Title = title,
                         Date = date,
-                        Url = read,
-                        PageId = articles.Item2
+                        Url = read
+                       // PageId = articles.Item2
                     });
                 }
                 return CurrentPageNews;

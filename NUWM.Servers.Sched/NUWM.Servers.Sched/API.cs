@@ -11,6 +11,7 @@ namespace APIUtilty
     using JSON;
     using Server;
     using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
 
     class API
@@ -24,7 +25,7 @@ namespace APIUtilty
         public async Task<Tuple<string, string>> PrepareForResponse(string Request, string Content, string action)
         {
             string FS = null, ContentType = "text/json";
-            
+
             action = action.Substring(action.IndexOf('/') + 1);
             try
             {
@@ -43,41 +44,35 @@ namespace APIUtilty
                             +t.TotalProcessorTime.Minutes + "m " + t.TotalProcessorTime.Seconds + "s\n" +
                             "RAM memory size: " + (t.WorkingSet64 / 1048576).ToString() + "mb\n" +
                         String.Format("\nServer uptime: {0}d {1}h {2}m {3}s\n\n", d.Days, d.Hours, d.Minutes, d.Seconds);
-                    
+                        resp += string.Format("\nAutoReplace is {0}", SubjectParser.AutoReplaceHelper.Current.Now ? "ON" : "OFF");
+                        resp += string.Format("\nFix22:LectName is {0}", Server.Fix22_lecturerName ? "ON" : "OFF");
+                        resp += string.Format("\nUnique users in session: {0}", Server.UserStats.Current.UniqueUsers());
+                        resp += string.Format("\nUnique users in last hour: {0}", Server.UserStats.Current.UniqueUsersInHour());
                         if (Server.log != null && Server.log.Count > 0)
                         {
                             var f = Server.log.TakeLast(20);
                             resp += "\n\nLOG: (last " + f.Count() + " req)\n";
-                            foreach (var h in Server.log)
+                            foreach (var h in f.Reverse())
                                 resp += h + "\n";
+                            var g = LogScheduler.scheduledTime - TimeChron.GetRealTime();
+                            resp += "\nLog saving in " + g.Hours + "h " + g.Minutes + "m " + g.Seconds + "s\n";
                         }
-
+                        else
+                        {
+                            resp += "\n\nLog is clear\n";
+                        }
                         FS = resp; ContentType = "text/plain";
                     }
                     else if (action == "sched")
                         FS = await Schedule();
-                    else if (action == "ulog")
+                    else if (action == "lect")
                     {
-                        foreach (var i in Server.log)
-                        {
-                            FS += i; FS += "\n";
-                        }
-                        if (FS == null) FS = "NOTHING";
-                        ContentType = "text/plain";
+                        FS = Lect();
                     }
-                    else if (action == "sched_pattern_update")
+                    else if (action == "set")
                     {
-                        var p = Server.CurrentSubjectParser.UpdatePatern();
-                        FS = "{code:100; response: " + (p ? "Pattern Updated" :
-                             "Pattern not updated or failed to find file") + ", error:null}";
-                        ContentType = "text/json";
-                    }
-                    else if (action == "ar_update")
-                    {
-                        var p = Server.CurrentSubjectParser.UpdateAutoreplace();
-                        FS = "{code:100; response: " + (p ? "Dictionary Updated" :
-                             "Dictionary wasn`t updated or failed to find file") + ", error:null}";
-                        ContentType = "text/json";
+                        var t = Setting();
+                        FS = t.Item1; ContentType = t.Item2;
                     }
                     else
                         throw new FormatException("InvalidRequest: invalid key parameter");
@@ -102,7 +97,14 @@ namespace APIUtilty
                                 if (query.ContainsKey("content"))
                                 {
                                     query.TryGetValue("content", out string contents);
-                                    var res = Server.CurrentSubjectParser.Parse(System.Net.WebUtility.UrlDecode(contents), lect);
+                                    bool auto = false;
+                                    if (query.ContainsKey("auto"))
+                                    {
+                                        query.TryGetValue("auto", out string autox);
+                                        auto = (autox == "true" || "autox" == "1" ? true : false);
+                                    }
+
+                                    var res = Server.CurrentSubjectParser.Parse(System.Net.WebUtility.UrlDecode(contents), lect, auto, "");
                                     FS = APIUtilty.API.CreateResponseSubjects(res.Item1, res.Item2);
                                 }
                                 throw new FormatException("InvalidRequest: expected content parameter");
@@ -118,16 +120,91 @@ namespace APIUtilty
             }
             return new Tuple<string, string>(FS, ContentType);
         }
+        public Tuple<string, string> Setting()
+        {
+            string FS = "", ContentType = "text/plain";
+            if (query.ContainsKey("ulog"))
+            {
+                foreach (var i in Server.log)
+                {
+                    FS += i; FS += "\n";
+                }
+                if (FS == null)
+                    FS = "NOTHING";               
+            }
+            else if (query.ContainsKey("flush_err"))
+            {
+                Server.Errors.Clear();
+                FS = "Cleared errors";
+            }
+            else if (query.ContainsKey("errors"))
+            {
+                if (Server.Errors.Count > 0)
+                    foreach (var i in Server.Errors)
+                        FS += i.Message + "\n" + i.StackTrace + "\n\n";
+                else FS = "All is bright!";
+            }
+            else if (query.ContainsKey("svlog"))
+            {
+                LogScheduler.LogManage();
+                FS = "OK. Log managed";
+            }
+            else if (query.ContainsKey("sched_pattern_update"))
+            {
+                var p = Server.CurrentSubjectParser.UpdatePatern();
+                FS = (p ? "Pattern Updated" :
+                     "Pattern not updated or failed to find file");
+            }
+            else if (query.ContainsKey("ar_update"))
+            {
+                var p = Server.CurrentSubjectParser.UpdateAutoreplace();
+                FS =  (p ? "Dictionary Updated" :
+                     "Dictionary wasn't updated or failed to find file");
+            }
+            else if (query.ContainsKey("ar"))
+            {
+                if (query["ar"] == "true")
+                {
+                    SubjectParser.AutoReplaceHelper.Current.Now = true;
+                    FS = "AutoReplace is ON";  
+                }
+                else
+                {
+                    SubjectParser.AutoReplaceHelper.Current.Now = false;
+                    FS = "AutoReplace is OFF"; 
+                }
+            }
+            else if (query.ContainsKey("ln_helper"))
+            {
+                if (query["ln_helper"] == "true")
+                {
+                    Server.Fix22_lecturerName = true;
+                    FS = "Now this fix is turned ON";  
+                }
+                else
+                {
+                    Server.Fix22_lecturerName = false;
+                    FS = "Now this fix is turned OFF";  
+                }
+            }
+            return new Tuple<string, string>(FS, ContentType);
+        }
         public async Task<string> Schedule()
         {
             try
             {
+                bool auto = SubjectParser.AutoReplaceHelper.Current.Now;
+                if (query.ContainsKey("auto"))
+                {
+                    query.TryGetValue("auto", out string autox);
+                    auto = (autox == "true" || "autox" == "1" ? true : false);
+                }
                 if (query.ContainsKey("group") || query.ContainsKey("name"))
                 {
                     query.TryGetValue("group", out string group);
                     query.TryGetValue("name", out string name);
 
-                        int year = -100;
+                    int year = TimeChron.GetRealTime().Year;
                     if (query.ContainsKey("year"))
                     {
                         query.TryGetValue("year", out string ryear);
@@ -150,7 +227,8 @@ namespace APIUtilty
                             query.TryGetValue("edate", out string edate);
                             bool isLecturer = !string.IsNullOrEmpty(name);
                             DataSpace.GetData data = new DataSpace.GetData(isLecturer ? name : group, sdate, edate, isLecturer, type);
-                            var rp = await data.GetDays();
+
+                            var rp = await data.GetDays(auto);
                             if (data.R != null)
                                 return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser() { Data = rp }));
                             return JsonConvert.SerializeObject(new Response()
@@ -160,10 +238,10 @@ namespace APIUtilty
                                 {
                                     Data = rp
                                 },
-                                Error = "null"
+                                Error = null
                             });
                         }
-                        return CreateErrorResp( new InvalidOperationException("InvalidKey: edate expexted - format dd.MM.yyyy"));
+                        return CreateErrorResp(new InvalidOperationException("InvalidKey: edate expected - format dd.MM.yyyy"));
                     }
                     else if (query.ContainsKey("week"))
                     {
@@ -175,7 +253,7 @@ namespace APIUtilty
                         int cury = TimeChron.GetRealTime().Year;
                         if (year > cury + 1 || year < cury - 1) throw new InvalidOperationException("InvalidKey: year must be in bounds (current year+-1)");
                         DataSpace.GetData data = new DataSpace.GetData(isLecturer ? name : group, week, year, isLecturer, type);
-                        var rp = await data.GetDays();
+                        var rp = await data.GetDays(auto);
                         if (data.R != null)
                             return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser() { Data = rp }));
                         return JsonConvert.SerializeObject(new Response()
@@ -185,13 +263,13 @@ namespace APIUtilty
                             {
                                 Data = rp
                             },
-                            Error = "null"
+                            Error = null
                         });
                     }
                     else if (query.ContainsKey("weeks"))
                     {
                         query.TryGetValue("weeks", out string rweek);
-                        string[] weeks = null; 
+                        string[] weeks = null;
                         if (rweek.Contains(','))
                         {
                             weeks = rweek.Split(',');
@@ -208,8 +286,8 @@ namespace APIUtilty
 
                         int cury = TimeChron.GetRealTime().Year;
                         if (year > cury + 1 || year < cury - 1) throw new InvalidOperationException("InvalidKey: year must be in bounds (current year+-1)");
-                        DataSpace.GetData data = new DataSpace.GetData(isLecturer ? name : group, t1,t2, year, isLecturer, type);
-                        var rp = await data.GetDays();
+                        DataSpace.GetData data = new DataSpace.GetData(isLecturer ? name : group, t1, t2, year, isLecturer, type);
+                        var rp = await data.GetDays(auto);
                         if (data.R != null)
                             return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser() { Data = rp }));
                         return JsonConvert.SerializeObject(new Response()
@@ -219,12 +297,12 @@ namespace APIUtilty
                             {
                                 Data = rp
                             },
-                            Error = "null"
+                            Error = null
                         });
                     }
-                    return CreateErrorResp(new InvalidOperationException("InvalidKey: sdate expexted - format dd.MM.yyyy"));
+                    return CreateErrorResp(new InvalidOperationException("InvalidKey: sdate expected - format dd.MM.yyyy"));
                 }
-                return CreateErrorResp( new InvalidOperationException("InvalidKey: group expexted"));
+                return CreateErrorResp(new InvalidOperationException("InvalidKey: group expected"));
             }
             catch (Exception ex)
             {
@@ -232,6 +310,48 @@ namespace APIUtilty
             }
         }
 
+
+        public string Lect()
+        {
+            try
+            {
+                if (query.ContainsKey("name"))
+                {
+                    var name = query["name"]; var surn = "";
+
+                    if (name.Contains(' '))
+                        surn = name.Substring(name.IndexOf(' '));
+                    else surn = name;
+                    var obj =
+                        SubjectParser.AutoReplaceHelper.Dictionary.Keys.Where(x => x.ToLower().Contains(surn));
+                    if (obj.Any())
+                    {
+                        return JsonConvert.SerializeObject(SubjectParser.AutoReplaceHelper.Dictionary[obj.First()]);
+                    }
+                    else throw new InvalidOperationException("Collection not ready");
+                }
+                else if (query.ContainsKey("subj"))
+                {
+                    var name = query["subj"]; var surn = "";
+
+                    if (name.Contains(' '))
+                        surn = name.Substring(name.IndexOf(' '));
+                    else surn = name;
+                    List<string> obj = new List<string>();
+                    obj = SubjectParser.AutoReplaceHelper.SmartSearch(name);
+                    if (obj.Any())
+                    {
+                        return JsonConvert.SerializeObject(obj);
+                    }
+                    else throw new InvalidOperationException("Collection not ready");
+                }
+                throw new FormatException("InvalidRequest: name expected");
+            }
+            catch (Exception ex)
+            {
+                return JsonConvert.SerializeObject(ResponseTyper(ex, null));
+            }
+        }
 
         public static string CreateErrorResp(Exception err)
         {
@@ -261,29 +381,34 @@ namespace APIUtilty
                 resp = new Response()
                 {
                     Code = StatusCode.Success,
-                    Error = "null",
+                    Error =null,
                     Content = obj
                 };
             }
             else
             if (err != null && err.GetType() == typeof(FormatException))
-                resp = new Response() { Code = StatusCode.InvalidRequest, Error = err.Message + "\n" + err.StackTrace, Content = null };
+                resp = new Response() { Code = StatusCode.InvalidRequest, Error = err.Message, Content = null };
             else if (err != null && err.GetType() == typeof(InvalidOperationException))
             {
                 resp = new Response() { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
             }
+            else if (err != null && err.GetType() == typeof(EntryPointNotFoundException))
+            {
+                resp = new Response() { Code = StatusCode.DeprecatedMethod, Error = err.Message, Content = null };
+            }
             else if (err != null && err.GetType() == typeof(InvalidDataException))
             {
-                resp = new Response() { Code = StatusCode.NotFound, Error = err.Message + "\n" + err.StackTrace, Content = null };
+                resp = new Response() { Code = StatusCode.NotFound, Error = err.Message, Content = null };
             }
             else
             {
+                Server.Errors.Add(err);
                 resp = new Response() { Code = StatusCode.Undefined, Error = (err != null) ? err.Message + "\n" + err.StackTrace : "", Content = obj };
             }
 
             return resp;
         }
-        
+
         public static string CreateResponseSubjects(DayInstance result, Exception err)
         {
             Response resp;

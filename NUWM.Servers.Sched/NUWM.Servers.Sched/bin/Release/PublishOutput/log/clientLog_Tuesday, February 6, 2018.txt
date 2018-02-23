@@ -1,0 +1,266 @@
+
+2/6/18
+9:46:21 AM
+ip: 46.133.243.248:24809
+from: Dalvik/2.1.0 (Linux; U; Android 7.1.2; Redmi 4X MIUI/V9.1.1.0.NAMMIEI)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%95%D0%9F-21
+
+
+2/6/18
+9:46:25 AM
+ip: 46.133.243.248:24772
+from: Dalvik/2.1.0 (Linux; U; Android 7.1.2; Redmi 4X MIUI/V9.1.1.0.NAMMIEI)
+req=/api/sched?v=0.0&sdate=26.02.2018&edate=25.03.2018&type=weeks&group=%D0%95%D0%9F-21
+
+
+2/6/18
+9:47:11 AM
+ip: 194.44.165.194:34448
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; SM-J330F Build/NRD90M)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%9E%D0%90-21
+
+
+2/6/18
+9:47:18 AM
+ip: 194.44.165.194:34456
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; SM-J330F Build/NRD90M)
+req=/api/sched?v=0.0&sdate=26.02.2018&edate=25.03.2018&type=weeks&group=%D0%9E%D0%90-21
+
+
+2/6/18
+10:09:18 AM
+ip: 37.52.100.175:40376
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; SM-A720F Build/NRD90M)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%9C-11%D1%96%D0%BD%D1%82
+
+
+2/6/18
+10:09:24 AM
+ip: 37.52.100.175:40378
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; SM-A720F Build/NRD90M)
+req=/api/sched?v=0.0&sdate=26.02.2018&edate=25.03.2018&type=weeks&group=%D0%9C-11%D1%96%D0%BD%D1%82
+
+
+2/6/18
+10:46:26 AM
+ip: 172.18.34.118:34073
+from: Dalvik/1.6.0 (Linux; U; Android 4.4.2; Z520 Build/KOT49H)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%93%D0%92%D0%A0-32
+
+
+2/6/18
+10:48:53 AM
+ip: 78.111.185.114:57574
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; Redmi Note 4 MIUI/V9.0.3.0.NCFMIEI)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%90%D0%93%D0%A0-21
+
+
+2/6/18
+10:48:56 AM
+ip: 78.111.185.114:57576
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; Redmi Note 4 MIUI/V9.0.3.0.NCFMIEI)
+req=/api/sched?v=0.0&sdate=26.02.2018&edate=25.03.2018&type=weeks&group=%D0%90%D0%93%D0%A0-21
+
+
+2/6/18
+10:51:22 AM
+ip: 78.111.185.114:57589
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; Redmi Note 4 MIUI/V9.0.3.0.NCFMIEI)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=11.02.2018&type=weeks&name=%D0%92%D0%BE%D0%BB%D0%BE%D1%88%D0%B8%D0%BD%20%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%20%D0%A1%D1%82%D0%B5%D0%BF%D0%B0%D0%BD%D0%BE%D0%B2%D0%B8%D1%87
+
+
+2/6/18
+10:51:22 AM
+ip: 78.111.185.114:57593
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; Redmi Note 4 MIUI/V9.0.3.0.NCFMIEI)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=11.02.2018&type=weeks&name=%D0%92%D0%BE%D0%BB%D0%BE%D1%88%D0%B8%D0%BD%20%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%20%D0%A1%D1%82%D0%B5%D0%BF%D0%B0%D0%BD%D0%BE%D0%B2%D0%B8%D1%87
+
+
+2/6/18
+10:51:27 AM
+ip: 78.111.185.114:57594
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; Redmi Note 4 MIUI/V9.0.3.0.NCFMIEI)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=11.02.2018&type=weeks&name=%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D0%B5%D1%86%D1%8C%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D0%B9%20%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%D0%BE%D0%B2%D0%B8%D1%87
+
+
+2/6/18
+10:51:27 AM
+ip: 78.111.185.114:57595
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; Redmi Note 4 MIUI/V9.0.3.0.NCFMIEI)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=11.02.2018&type=weeks&name=%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D0%B5%D1%86%D1%8C%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D0%B9%20%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%D0%BE%D0%B2%D0%B8%D1%87
+
+
+2/6/18
+10:52:01 AM
+ip: 37.53.96.22:15555
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; Redmi Note 3 MIUI/V9.2.4.0.MHOMIEK)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%A2%D0%A2-31
+
+
+2/6/18
+11:05:57 AM
+ip: 46.133.31.4:24421
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; Redmi Note 4 MIUI/V9.2.1.0.NCFMIEK)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%9C%D0%91%D0%93-31
+
+
+2/6/18
+11:06:37 AM
+ip: 194.44.99.101:27484
+from: Dalvik/2.1.0 (Linux; U; Android 5.0.2; PSP3530DUO Build/LRX22L)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%90%D0%A2-31
+
+
+2/6/18
+11:08:28 AM
+ip: 94.254.247.250:54922
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; HUAWEI NMO-L31 Build/HUAWEINMO-L31)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%90%D0%93%D0%A0-21
+
+
+2/6/18
+11:08:33 AM
+ip: 94.254.247.250:46181
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; HUAWEI NMO-L31 Build/HUAWEINMO-L31)
+req=/api/sched?v=0.0&sdate=26.02.2018&edate=25.03.2018&type=weeks&group=%D0%90%D0%93%D0%A0-21
+
+
+2/6/18
+11:08:43 AM
+ip: 46.211.116.164:48729
+from: Dalvik/2.1.0 (Linux; U; Android 5.1.1; SM-J320H Build/LMY47V)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%90%D0%93%D0%A0-11
+
+
+2/6/18
+11:08:53 AM
+ip: 46.211.113.167:21687
+from: Dalvik/1.6.0 (Linux; U; Android 4.4.2; SM-G7102 Build/KOT49H)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks
+
+
+2/6/18
+11:15:20 AM
+ip: 46.133.9.72:32810
+from: Dalvik/2.1.0 (Linux; U; Android 7.0; SM-G570F Build/NRD90M)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%93%D0%92%D0%A0-32
+
+
+2/6/18
+11:18:08 AM
+ip: 77.123.61.101:39658
+from: Dalvik/2.1.0 (Linux; U; Android 6.0; Redmi Note 4X MIUI/V9.2.2.0.MBFMIEK)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%90%D0%A2-21%D1%96%D0%BD%D1%82
+
+
+2/6/18
+11:18:14 AM
+ip: 77.123.61.101:36498
+from: Dalvik/2.1.0 (Linux; U; Android 6.0; Redmi Note 4X MIUI/V9.2.2.0.MBFMIEK)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=11.02.2018&type=weeks&name=%D0%93%D0%BE%D0%BB%D0%BE%D1%82%D1%8E%D0%BA%20%D0%9C%D0%B8%D0%BA%D0%BE%D0%BB%D0%B0%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D0%B9%D0%BE%D0%B2%D0%B8%D1%87
+
+
+2/6/18
+11:18:14 AM
+ip: 77.123.61.101:58992
+from: Dalvik/2.1.0 (Linux; U; Android 6.0; Redmi Note 4X MIUI/V9.2.2.0.MBFMIEK)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=11.02.2018&type=weeks&name=%D0%93%D0%BE%D0%BB%D0%BE%D1%82%D1%8E%D0%BA%20%D0%9C%D0%B8%D0%BA%D0%BE%D0%BB%D0%B0%20%D0%92%D1%96%D1%82%D0%B0%D0%BB%D1%96%D0%B9%D0%BE%D0%B2%D0%B8%D1%87
+
+
+2/6/18
+11:20:33 AM
+ip: 37.73.230.231:37597
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; PRO 6 Plus Build/MMB29T)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%9A%D0%9D-11
+
+
+2/6/18
+11:20:36 AM
+ip: 37.73.230.231:37598
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; PRO 6 Plus Build/MMB29T)
+req=/api/sched?v=0.0&sdate=26.02.2018&edate=25.03.2018&type=weeks&group=%D0%9A%D0%9D-11
+
+
+2/6/18
+11:20:38 AM
+ip: 37.73.230.231:37599
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; PRO 6 Plus Build/MMB29T)
+req=/api/sched?v=0.0&sdate=05.03.2018&edate=25.03.2018&type=weeks&group=%D0%9A%D0%9D-11
+
+
+2/6/18
+11:20:44 AM
+ip: 37.73.230.231:37600
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; PRO 6 Plus Build/MMB29T)
+req=/api/sched?v=0.0&sdate=29.01.2018&edate=04.03.2018&type=weeks&group=%D0%9A%D0%9D-11
+
+
+2/6/18
+11:35:43 AM
+ip: 207.154.216.175:42967
+from: Dalvik/2.1.0 (Linux; U; Android 5.0.2; Lenovo A6010 Build/LRX22G)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%93%D0%95-21
+
+
+2/6/18
+11:38:57 AM
+ip: 128.199.46.131:58561
+from: Dalvik/2.1.0 (Linux; U; Android 5.1; HUAWEI LUA-U22 Build/HUAWEILUA-U22)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%9A%D0%9D%D0%86%D0%A2-31%D1%96%D0%BD%D1%82
+
+
+2/6/18
+11:41:50 AM
+ip: 46.211.6.141:57111
+from: Dalvik/2.1.0 (Linux; U; Android 6.0; BV5000 Build/MRA58K)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%97%D0%92%D0%9A-41
+
+
+2/6/18
+11:42:05 AM
+ip: 46.211.6.141:57052
+from: Dalvik/2.1.0 (Linux; U; Android 6.0; BV5000 Build/MRA58K)
+req=/api/sched?v=0.0&sdate=26.02.2018&edate=25.03.2018&type=weeks&group=%D0%97%D0%92%D0%9A-41
+
+
+2/6/18
+11:42:23 AM
+ip: 37.73.205.113:56856
+from: Dalvik/1.6.0 (Linux; U; Android 4.4.4; TCL i708U Build/KTU84P)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%9E%D0%90-21
+
+
+2/6/18
+11:43:27 AM
+ip: 172.18.81.40:36341
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; Redmi 4A MIUI/V8.5.7.0.MCCMIED)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks
+
+
+2/6/18
+11:44:57 AM
+ip: 172.18.81.40:56079
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; Redmi 4A MIUI/V8.5.7.0.MCCMIED)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks
+
+
+2/6/18
+11:52:51 AM
+ip: 46.133.86.57:42504
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; Redmi 4 MIUI/V9.2.3.0.MBEMIEK)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%90%D0%A2-51%D0%BC
+
+
+2/6/18
+11:52:55 AM
+ip: 46.133.86.57:42589
+from: Dalvik/2.1.0 (Linux; U; Android 6.0.1; Redmi 4 MIUI/V9.2.3.0.MBEMIEK)
+req=/api/sched?v=0.0&sdate=26.02.2018&edate=25.03.2018&type=weeks&group=%D0%90%D0%A2-51%D0%BC
+
+
+2/6/18
+11:54:04 AM
+ip: 91.124.175.85:17772
+from: Dalvik/2.1.0 (Linux; U; Android 5.1; M3s Build/LMY47I)
+req=/api/sched?v=0.0&sdate=05.02.2018&edate=25.02.2018&type=weeks&group=%D0%9C-22
+

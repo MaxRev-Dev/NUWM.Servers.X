@@ -56,8 +56,8 @@ namespace JSON
         public NewsItemDetailed Detailed { get; set; }
         [JsonProperty("related")]
         public string RelUrl { get; set; }
-        [JsonProperty("page_id")]
-        public int PageId { get; set; }
+        //[JsonProperty("page_id")]
+       // public int PageId { get; set; }
     }
     public enum StatusCode
     {
@@ -67,6 +67,7 @@ namespace JSON
         AccessDenied = 60,
         DeprecatedMethod = 66,
         ServerSideError = 88,
+        GatewayTimeout,
         Success = 100
     }
 }

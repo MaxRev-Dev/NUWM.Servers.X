@@ -7,12 +7,19 @@
     <title>TEMPLATE</title>
     <script>
         setInterval(function() {
+            if(navigator.onLine){
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://calc.nuwm.edu.ua/api/trace', false);
-            xhr.send();
-            if (xhr.status == 200) {
-                document.body.innerHTML = "<pre>" + xhr.responseText + "</pre>";
-            }
+            xhr.open('GET', '../api/trace', true);
+            try {
+                xhr.send();
+            } catch (err) {}
+
+            xhr.onreadystatechange = function() { 
+                if (xhr.readyState != 4) return; 
+                if (xhr.status == 200) {
+                    document.body.innerHTML = "<pre>" + xhr.responseText + "</pre>";
+                }
+            }}
         }, 1000);
 
     </script>

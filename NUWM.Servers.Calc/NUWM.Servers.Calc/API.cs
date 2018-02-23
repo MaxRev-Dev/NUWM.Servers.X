@@ -34,7 +34,12 @@ namespace APIUtilty
                     if (action == "specAll")
                         FS = All();
                     else if (action == "calc")
-                        FS = Calc();
+                        FS = Calc(); 
+                    else if (action == "set")
+                    {
+                        var t = Setting();
+                        FS = t.Item1; ContentType = t.Item2;
+                    } 
                     else if (action == "trace")
                     {
 
@@ -50,13 +55,15 @@ namespace APIUtilty
 
                         String.Format("\nServer uptime: {0}d {1}h {2}m {3}s\n\n", d.Days, d.Hours, d.Minutes, d.Seconds);
 
-
-
+                        resp += string.Format("\nUnique users in session: {0}", Server.UserStats.Current.UniqueUsers());
+                        resp += string.Format("\nUnique users in last hour: {0}", Server.UserStats.Current.UniqueUsersInHour());
 
                         TimeSpan m = new TimeSpan();
                         if (ScheduleTask.scheduledTime != null)
                             m = ScheduleTask.scheduledTime - TimeChron.GetRealTime();
-                        resp += "\nSpecialties count: " + Server.CurrentParser.res.Count +
+
+
+                        resp += "\n\nSpecialties count: " + Server.CurrentParser.res.Count +
                             "\nSpecialty parser encounter: " + String.Format("{0}d {1}h {2}m {3}s", m.Days, m.Hours, m.Minutes, m.Seconds);
                         if (Server.log != null && Server.log.Count > 0)
                         {
@@ -64,32 +71,22 @@ namespace APIUtilty
                             resp += "\n\nLOG: (last " + f.Count() + " req)\n";
                             foreach (var h in f.Reverse())
                                 resp += h + "\n";
+                            var g = LogScheduler.scheduledTime - TimeChron.GetRealTime();
+                            resp += "\nLog saving in " + g.Hours + "h " + g.Minutes + "m " + g.Seconds + "s\n";
                         }
-
+                        else
+                        {
+                            resp += "\n\nLog is clear\n";
+                        }
                         FS = resp; ContentType = "text/plain";
                     }
-                    else if (action == "svlog")
-                    {
-                        TimeChron.TimeSyncRelay.LogManage();
-                        FS = "Success"; ContentType = "text/plain";
-                    }
-                    else if (action == "ulog")
-                    {
-                        foreach (var i in Server.log)
-                        {
-                            FS += i; FS += "\n";
-                        }
-                        if (FS == null) FS = "NOTHING";
-                        ContentType = "text/plain";
-                    }
-
                     else
                         throw new FormatException("InvalidRequest: invalid key parameter");
 
                 }
                 else if (Request.Contains("POST"))
-                {
-                    throw new FormatException("NOT IMPLEMENTED");
+                { 
+                        throw new FormatException("NOT IMPLEMENTED");
                 }
             }
             catch (Exception ex)
@@ -99,6 +96,54 @@ namespace APIUtilty
             return new Tuple<string, string>(FS, ContentType);
         }
 
+        public Tuple<string, string> Setting()
+        {
+            string FS = "", ContentType = "text/plain";
+            if (query.ContainsKey("ulog"))
+            {
+                foreach (var i in Server.log)
+                {
+                    FS += i; FS += "\n";
+                }
+                if (FS == null)
+                    FS = "NOTHING";
+            }else if (query.ContainsKey("reparse"))
+            {
+                if (query["reparse"]=="true")
+                {
+                    if (Server.CheckForInternetConnection()) Server.CurrentParser.GetLastModulus();
+                }
+                FS = "Started reparse task"; 
+            }
+            else if (query.ContainsKey("flush_err"))
+            {
+                Server.Errors.Clear();
+                FS = "Cleared errors";
+            }
+            else if (query.ContainsKey("errors"))
+            {
+                if (Server.Errors.Count > 0)
+                    foreach (var i in Server.Errors)
+                        FS += i.Message + "\n" + i.StackTrace + "\n\n";
+                else FS = "All is bright!";
+            }
+            else if (query.ContainsKey("svlog"))
+            {
+                LogScheduler.LogManage();
+                FS = "OK. Log managed";
+            }
+            else if (query.ContainsKey("list_sp"))
+            {
+                string resp = "";
+                int cnt = 1;
+                foreach (var i in Server.CurrentParser.res)
+                {
+                    resp += "\n[" + cnt++ + "] " + i.Title + " : " + i.SubTitle + "\n  <-> " + i.URL + "\n";
+                }
+                FS = resp; ContentType = "text/plain";
+            }
+            return new Tuple<string, string>(FS, ContentType);
+        }
 
         #region Specialties
         public string All()
@@ -215,7 +260,24 @@ namespace APIUtilty
             for (int l = 0; l < coefnames.Count(); l++)
             {
                 if (listing.Count() > 0)
-                    listing = listing.Where(x => Contains(x.Modulus.CoefName, coefnames)).ToArray();
+                {
+                    try
+                    {
+                        listing = listing.Where(x => Contains(x.Modulus.CoefName, coefnames)).ToArray();
+                    }
+                    catch
+                    {
+                        string all="";
+                        foreach(var i in listing.Where(x => x.Modulus.CoefName.Where(t=>t==null).Count()>0))
+                        {
+                            all += i.Title + '\n' + i.SubTitle + "\n\n";
+                        }
+                        Server.Errors.Add(new Exception(all));
+                        listing = listing.Where(x => Contains(x.Modulus.CoefName, coefnames,true)).ToArray();
+                    }
+
+
+                }
                 else return new Tuple<List<Specialty>, CalcMarkInfo>(obj, cmi);
             }
 
@@ -294,20 +356,27 @@ namespace APIUtilty
             return resp;
         }
 
-        private bool Contains(string[] arr1, string[] arr2)
+        private bool Contains(string[] arr1, string[] arr2,bool force= false)
         {
-            List<int> ch = new List<int>();
-            for (int j = 0; j < arr2.Count(); j++)
+            try
             {
-                bool found = false;
-                for (int i = 0; i < arr1.Count(); i++)
+                List<int> ch = new List<int>();
+                for (int j = 0; j < arr2.Count(); j++)
                 {
-                    if (arr1[i].Contains(arr2[j]) && !ch.Contains(i))
+                    bool found = false;
+                    for (int i = 0; i < arr1.Count(); i++)
                     {
-                        ch.Add(i); found = true; break;
+                        if (arr1[i].ToLower().Contains(arr2[j].ToLower()) && !ch.Contains(i))
+                        {
+                            ch.Add(i); found = true; break;
+                        }
                     }
+                    if (!found) return false;
                 }
-                if (!found) return false;
+            }
+            catch (Exception ex) { Server.Errors.Add(new Exception(string.Join(",", arr1)+"\n\n"+ string.Join(",", arr2))); Server.Errors.Add(ex);
+                if (force) return false;
+                throw ex;
             }
             return true;
         }

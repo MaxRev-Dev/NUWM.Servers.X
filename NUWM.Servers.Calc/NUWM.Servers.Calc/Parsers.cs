@@ -274,10 +274,10 @@ namespace JSON
 
                 public static string site_url = "http://nuwm.edu.ua";
 
-
+               
                 public static async void Run()
                 {
-                    GC.Collect();
+                    GC.Collect(); 
 
                     #region Modulus
                     GetModulus();
@@ -369,6 +369,8 @@ namespace JSON
 
                     if (linker != "null")
                     {
+                        if (linker.StartsWith("htt"))
+                            linker = linker.Replace(sitesUrl,"");
                         try
                         {
                             CreateClientRequest request = new CreateClientRequest(sitesUrl + linker);

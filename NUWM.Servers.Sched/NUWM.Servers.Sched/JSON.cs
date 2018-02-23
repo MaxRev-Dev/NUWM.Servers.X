@@ -32,6 +32,7 @@ namespace JSON
         AccessDenied = 60,
         DeprecatedMethod = 66,
         ServerSideError = 88,
+        GatewayTimeout,
         Success = 100
     }
 }

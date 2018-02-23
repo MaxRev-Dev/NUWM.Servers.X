@@ -12,6 +12,7 @@ using System.Timers;
 namespace HelperUtilties
 {
     using Server;
+    using System.Globalization;
 
     class TimeChron
     {
@@ -90,32 +91,9 @@ namespace HelperUtilties
             static void Timer_Elapsed(object sender, ElapsedEventArgs e)
             {
                 timer.Stop();
-                Offset = GetServerTimeDifference();
-                LogManage();
-
+                Offset = GetServerTimeDifference(); 
                 Schedule_Timer();
-            }
-            public static void LogManage()
-            {
-                var files = Directory.EnumerateFiles("./log");
-                foreach (var o in files)
-                {
-                    var f = o.IndexOf("clientLog_") + "clientLog_".Length;
-                    var t = o.Substring(0, f);
-                    var date = o.Replace(t, "").Replace(".txt", "");
-                    DateTime.TryParse(date, out DateTime datex);
-                    if (DateTime.Now - datex > new TimeSpan(7, 0, 0, 0))
-                    {
-                        Directory.Delete(o);
-                    }
-                }
-                var d = DateTime.Now;
-                var gg = File.CreateText("./log/clientLog_" + d.ToLongDateString() + ".txt");
-                foreach (var i in Server.log)
-                    gg.WriteLine(i);
-                Server.log.Clear();
-                gg.Close();
-            }
+            } 
             public static DateTime scheduledTime;
             public static void Schedule_Timer()
             {
@@ -137,6 +115,70 @@ namespace HelperUtilties
                 timer.Elapsed += new ElapsedEventHandler(Timer_Elapsed);
                 timer.Start();
             }
+        }
+    }
+
+    class LogScheduler
+    {
+        static System.Timers.Timer timer;
+        static void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            timer.Stop();
+            LogManage();
+            Schedule_Timer();
+        }
+        public static DateTime scheduledTime;
+
+        public static void LogManage()
+        {
+            try
+            {
+                var files = Directory.EnumerateFiles("./log");
+                foreach (var o in files)
+                {
+                    var f = o.IndexOf("clientLog_") + "clientLog_".Length;
+                    var t = o.Substring(0, f);
+                    var date = o.Replace(t, "").Replace(".txt", "").Replace("-", ":");
+                    var ts = TimeSpan.FromTicks(long.Parse(date));
+                    var gd = TimeSpan.FromTicks(DateTime.Now.Ticks) - ts;
+                    if (gd > new TimeSpan(7, 0, 0, 0))
+                    {
+                        File.Delete(o);
+                    }
+                }
+                var ci = CultureInfo.CreateSpecificCulture("uk-UA");
+                var d = DateTime.Now;
+                if (Server.log.Count > 0)
+                {
+                    var gg = File.CreateText("./log/clientLog_" + d.Ticks + ".txt");
+                    foreach (var i in Server.log)
+                        gg.WriteLine(System.Net.WebUtility.UrlDecode(i));
+                    Server.log.Clear();
+                    gg.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Server.Errors.Add(ex);
+            }
+        }
+
+        public static void Schedule_Timer()
+        {
+
+            DateTime nowTime = DateTime.Now;
+            // scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day,nowTime.Hour,nowTime.Minute, 0, 0).AddMinutes(1);
+            scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, nowTime.Hour, 0, 0, 0).AddHours(1);
+
+            if (nowTime > scheduledTime)
+            {
+                scheduledTime = scheduledTime.AddHours(12);
+            }
+
+            double tickTime = (scheduledTime - DateTime.Now).TotalMilliseconds;
+            timer = new System.Timers.Timer(tickTime);
+            timer.Elapsed += new ElapsedEventHandler(Timer_Elapsed);
+            timer.Start();
         }
     }
     class ScheduleTask

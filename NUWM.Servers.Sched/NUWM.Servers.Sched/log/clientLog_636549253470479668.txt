@@ -1,0 +1,157 @@
+Log #1 from start of session
+Uptime: 
+Server uptime: 0d 1h 37m 1s
+RAM memory size: 28mb
+
+Unique users in session: 0
+Unique users in last hour: 0
+
+06:06:44 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:06:58 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&week=10&year=2018&type=weeks&auto=true
+
+
+06:07:12 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&week=11&year=2018&type=weeks&auto=true
+
+
+06:08:34 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:13:40 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:15:03 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:17:48 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:18:56 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ФР-51м&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:19:07 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ФР-51м&weeks=8,10&year=2018&type=weeks&auto=true
+
+
+06:19:17 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:19:23 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:19:39 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ФР-51м&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:21:45 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:22:06 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ФР-51м&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:23:09 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ФР-51м&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:23:15 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:27:10 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:27:26 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=8,10&year=2018&type=weeks&auto=true
+
+
+06:27:56 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=8,10&year=2018&type=weeks&auto=true
+
+
+06:28:02 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=8,10&year=2018&type=weeks&auto=true
+
+
+06:28:17 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Гладун Любомир Володимирович&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:28:31 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Гладун Любомир Володимирович&week=10&year=2018&type=weeks&auto=true
+
+
+06:28:55 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+06:32:17 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&week=10&year=2018&type=weeks&auto=true
+
+
+06:32:23 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&week=11&year=2018&type=weeks&auto=true
+

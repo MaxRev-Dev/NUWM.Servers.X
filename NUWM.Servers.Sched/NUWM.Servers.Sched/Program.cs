@@ -48,13 +48,12 @@ namespace NUWM.Servers.Sched
                 WorkingDirectory = "/home/tea/NUWM.Servers.X/NUWM.Servers.Sched"
             });
             Console.WriteLine("Started Successfully");
-            Environment.Exit(0);
-            Console.ReadLine();
+            Environment.Exit(0); 
         }
 
         private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Rewave(e.ExceptionObject as Exception);
+           // Rewave(e.ExceptionObject as Exception);
         }
 
         static void OnProcessExit(object sender, EventArgs e)

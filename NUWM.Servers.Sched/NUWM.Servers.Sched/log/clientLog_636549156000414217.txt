@@ -1,0 +1,13 @@
+Log #1 from start of session
+Uptime: 
+Server uptime: 0d 0h 2m 46s
+RAM memory size: 39mb
+
+Unique users in session: 0
+Unique users in last hour: 0
+
+04:57:50 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+

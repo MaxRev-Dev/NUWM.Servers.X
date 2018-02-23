@@ -46,8 +46,9 @@ namespace APIUtilty
                                 FS = task ?? throw new FormatException("ID not found in pool");
                                 ContentType = "text/json";
                             }
+                            else
                             throw new FormatException("InvalidRequest: expected institute id");
-                        }
+                        }else
                         throw new FormatException("InvalidRequest: expected id");
                     }
 
@@ -102,20 +103,26 @@ namespace APIUtilty
                             resp += "\n" + new string('-', 20) + "\n";
                             countAllnews += (ert.newslist != null ? ert.newslist.Count : 0);
                         }
-
+                        resp += string.Format("\nUnique users in session: {0}", Server.UserStats.Current.UniqueUsers());
+                        resp += string.Format("\nUnique users in last hour: {0}", Server.UserStats.Current.UniqueUsersInHour());
                         resp += "\nAll articles count: " + countAllnews;
 
                         if (Server.log != null && Server.log.Count > 0)
                         {
                             var f = Server.log.TakeLast(20);
                             resp += "\n\nLOG: (last " + f.Count() + " req)\n";
-                            foreach (var h in Server.log)
+                            foreach (var h in f.Reverse())
                                 resp += h + "\n";
+                            var g = LogScheduler.scheduledTime - TimeChron.GetRealTime();
+                            resp += "\nLog saving in " + g.Hours + "h " + g.Minutes + "m " + g.Seconds + "s\n";
+                        }
+                        else
+                        {
+                            resp += "\n\nLog is clear\n";
                         }
 
                         FS = resp; ContentType = "text/plain";
                     }
-
                     else if (action == "saveinstcache")
                     {
                         if (query.ContainsKey("key"))
@@ -124,15 +131,13 @@ namespace APIUtilty
                             {
                                 ParserPool.Parser.SaveCache();
                                 FS = "saved ALL"; ContentType = "text/plain";
-
-
                             }
                             else if (Server.CurrentParserPool.POOL.ContainsKey(query["key"]))
                             {
                                 ParserPool.Parser.SaveCache(query["key"]);
                                 FS = "saved " + query["key"]; ContentType = "text/plain";
 
-                            }
+                            }else
                             throw new FormatException("InvalidRequest: invalid key parameter");
                         }
                         else
@@ -148,6 +153,12 @@ namespace APIUtilty
                             FS += i; FS += "\n";
                         }
                         if (FS == null) FS = "NOTHING";
+                        ContentType = "text/plain";
+                    }
+                    else if (action == "svlog")
+                    {
+                        LogScheduler.LogManage();
+                        FS = "OK. Log managed";
                         ContentType = "text/plain";
                     }
                     else
@@ -175,17 +186,18 @@ namespace APIUtilty
             List<NewsItem> obj = new List<NewsItem>();
             try
             {
-                if (query.ContainsKey("p_id"))
+                if (query.ContainsKey("p_id")&& query.Count==1)
                 {
-                    query.TryGetValue("p_id", out string param);
-                    int iparam = Convert.ToInt32(param);
-                    if (newslist.Count() > 0)
-                    {
-                        if (iparam > newslist.Last().PageId) throw new FormatException("Page ID is out of range");
-                        obj = newslist.Where(x => x.PageId == iparam).ToList();
+                    //query.TryGetValue("p_id", out string param);
+                    //int iparam = Convert.ToInt32(param);
+                    //if (newslist.Count() > 0)
+                    //{
+                    //    if (iparam > newslist.Last().PageId) throw new FormatException("Page ID is out of range");
+                    //    obj = newslist.Where(x => x.PageId == iparam).ToList();
 
-                    }
-                    else throw new FormatException("Page ID is out of range");
+                    //}
+
+                    throw new EntryPointNotFoundException("p_id is deprecated use => last,before,after");
                 }
                 if (query.ContainsKey("html"))
                 {
@@ -472,14 +484,17 @@ namespace APIUtilty
             }
             else
             if (err != null && err.GetType() == typeof(FormatException))
-                resp = new Response() { Code = StatusCode.InvalidRequest, Error = err.Message + "\n" + err.StackTrace, Content = null };
+                resp = new Response() { Code = StatusCode.InvalidRequest, Error = err.Message, Content = null };
             else if (err != null && err.GetType() == typeof(InvalidOperationException))
             {
                 resp = new Response() { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
             }
+            else if (err != null && err.GetType() == typeof(EntryPointNotFoundException)) {
+                resp = new Response() { Code = StatusCode.DeprecatedMethod, Error = err.Message, Content = null };
+            }
             else if (err != null && err.GetType() == typeof(InvalidDataException))
             {
-                resp = new Response() { Code = StatusCode.NotFound, Error = err.Message + "\n" + err.StackTrace, Content = null };
+                resp = new Response() { Code = StatusCode.NotFound, Error = err.Message, Content = null };
             }
             else if (err != null && err.GetType() == typeof(DivideByZeroException))
             {

@@ -1,0 +1,127 @@
+Log #3 from start of session
+Uptime: 
+Server uptime: 0d 2h 31m 2s
+RAM memory size: 46mb
+
+Unique users in session: 0
+Unique users in last hour: 0
+
+11:15:26 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:17:45 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:27:10 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:32:16 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:34:07 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Гладун Любомир Володимирович&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:34:17 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Прищепа Оксана Володимирівна&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:35:29 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Рощенюк Алла Михайлівна&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:35:37 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Мічута Ольга Романівна&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:35:40 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Прищепа Оксана Володимирівна&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:36:03 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Харів Наталія Олексіївна&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:36:54 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Хоменчук Олександр Анатолійович&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:38:18 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Іванчук Наталія Віталіївна&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:38:55 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?name=Стратонова Наталія Олегівна&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:41:31 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:45:00 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=УПЕП.ЕК-11&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:45:20 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=УПЕП.ЕК-11&week=10&year=2018&type=weeks&auto=true
+
+
+11:45:30 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=УПЕП.ЕК-11&week=11&year=2018&type=weeks&auto=true
+
+
+11:46:00 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&week=6&year=2018&type=weeks&auto=true
+
+
+11:46:19 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=УПЕП.ЕК-11&weeks=7,9&year=2018&type=weeks&auto=true
+
+
+11:48:18 - 22.02.2018
+ip:unknown
+from:(Windows 10 - MyNUWM)
+req=/api/sched?group=ПМ-21&weeks=7,9&year=2018&type=weeks&auto=true
+

@@ -10,6 +10,9 @@ using System.Timers;
 namespace HelperUtilties
 {
     using Server;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.Threading;
 
     class TimeChron
     {
@@ -73,7 +76,6 @@ namespace HelperUtilties
             return networkDateTime.ToLocalTime();
         }
 
-        // stackoverflow.com/a/3294698/162671
         static uint SwapEndianness(ulong x)
         {
             return (uint)(((x & 0x000000ff) << 24) +
@@ -117,6 +119,7 @@ namespace HelperUtilties
     }
     class LogScheduler
     {
+        static int LogEpoch = 0;
         static System.Timers.Timer timer;
         static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -128,32 +131,53 @@ namespace HelperUtilties
 
         public static void LogManage()
         {
-            var files = Directory.EnumerateFiles("./log");
-            foreach (var o in files)
+            try
             {
-                var f = o.IndexOf("clientLog_") + "clientLog_".Length;
-                var t = o.Substring(0, f);
-                var date = o.Replace(t, "").Replace(".txt", "");
-                DateTime.TryParse(date, out DateTime datex);
-                if (DateTime.Now - datex > new TimeSpan(7, 0, 0, 0))
+                var files = Directory.EnumerateFiles("./log");
+                foreach (var o in files)
                 {
-                    Directory.Delete(o);
+                    var f = o.IndexOf("clientLog_") + "clientLog_".Length;
+                    var t = o.Substring(0, f);
+                    var date = o.Replace(t, "").Replace(".txt", "").Replace("-", ":");
+                    var ts = TimeSpan.FromTicks(long.Parse(date));
+                    var gd = TimeSpan.FromTicks(DateTime.Now.Ticks) - ts;
+                    if (gd > new TimeSpan(7, 0, 0, 0))
+                    {
+                        File.Delete(o);
+                    }
                 }
+                var ci = CultureInfo.CreateSpecificCulture("uk-UA");
+                var d = DateTime.Now;
+                if (Server.log.Count > 0)
+                {
+                    var ds = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
+                    var gg = File.CreateText("./log/clientLog_" + d.Ticks + ".txt");
+                    gg.WriteLine("Log #{0} from start of session\nUptime: {1}",++LogEpoch,
+                        String.Format("\nServer uptime: {0}d {1}h {2}m {3}s", ds.Days, ds.Hours, ds.Minutes, ds.Seconds));
+                    gg.WriteLine("RAM memory size: " + (Process.GetCurrentProcess().WorkingSet64 / 1048576).ToString() + "mb\n");
+                    gg.WriteLine(string.Format("Unique users in session: {0}", Server.UserStats.Current.UniqueUsers()));
+                    gg.WriteLine(string.Format("Unique users in last hour: {0}", Server.UserStats.Current.UniqueUsersInHour()));
+                    foreach (var i in Server.log)
+                        gg.WriteLine(System.Net.WebUtility.UrlDecode(i));
+                    Server.log.Clear();
+                    gg.Close();
+                }
+                SubjectParser.AutoReplaceHelper.ManageAutoReplace();
+                Server.UserStats.Current.DeleteStats();
             }
-            var d = DateTime.Now;
-            var gg = File.CreateText("./log/clientLog_" + d.ToLongDateString() + ".txt");
-            foreach (var i in Server.log)
-                gg.WriteLine(i);
-            Server.log.Clear();
-            gg.Close();
+            catch (Exception ex)
+            {
+                Server.Errors.Add(ex);
+            }
         }
+
 
         public static void Schedule_Timer()
         {
 
             DateTime nowTime = DateTime.Now;
             // scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day,nowTime.Hour,nowTime.Minute, 0, 0).AddMinutes(1);
-            scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, 0, 0, 0, 0).AddHours(12);
+            scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, nowTime.Hour, 0, 0, 0).AddHours(1);
 
             if (nowTime > scheduledTime)
             {
@@ -200,7 +224,7 @@ namespace HelperUtilties
         {
             try
             {
-                responseMessage = await cl.PostAsync(requestUri, content);
+                responseMessage = await cl.PostAsync(requestUri, content); 
                 responseMessage.EnsureSuccessStatusCode();
                 return responseMessage;
             }
@@ -209,7 +233,6 @@ namespace HelperUtilties
                 return null;
             }
         }
-
     }
-    
+
 }

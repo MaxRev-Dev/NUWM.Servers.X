@@ -1,0 +1,7 @@
+
+2/2/18
+5:18:34 AM
+ip: 178.158.201.174:62288
+from: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36 MaxRev
+req=/api/sched?group=%D0%A4%D0%86%D0%9D-21&sdate=8.11.2017&edate=8.11.2017&lect=false&year=2017&type=days
+
