@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NUWM.Servers.Bridge": {
+      "commandName": "Project",
+      "commandLineArgs": "3001 3006"
+    }
+  }
+}

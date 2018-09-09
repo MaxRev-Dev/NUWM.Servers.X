@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NUWM.Servers.Core.Sched": {
+      "commandName": "Project",
+      "commandLineArgs": "3005"
+    }
+  }
+}

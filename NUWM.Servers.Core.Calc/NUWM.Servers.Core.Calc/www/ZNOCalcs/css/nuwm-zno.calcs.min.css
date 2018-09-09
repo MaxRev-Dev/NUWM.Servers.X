@@ -1,0 +1,1456 @@
+#alerter,
+.zc-gt {
+    margin: 10em auto;
+    text-align: center
+}
+
+body {
+    overflow-x: hidden;
+    overflow-y: scroll
+}
+
+#zno-calcs,
+#zno-calcs .wrap {
+    position: relative
+}
+
+.zc_logo,
+.zc_top_logo {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0; 
+    animation: .9s fadeIn02   forwards;
+}
+
+#zno-calcs .btn-primary {
+    background-color: #256589
+}
+
+body .tooltip .tooltip-inner {
+    background-color: #164662;
+    -webkit-box-shadow: 0 0 3px 2px;
+    box-shadow: 0 0 3px 2px
+}
+
+body .tooltip.bs-tooltip-left .arrow:before {
+    border-left-color: #164662
+}
+
+body .tooltip.bs-tooltip-right .arrow:before {
+    border-right-color: #164662
+}
+
+#zno-calcs input:focus {
+    outline: 0;
+    -webkit-box-shadow: 0 0 5px 0 #5894e1;
+    box-shadow: 0 0 5px 0 #5894e1
+}
+
+#zno-calcs .btn-primary:hover {
+    background-color: rgba(0, 71, 107, .69)
+}
+
+#zno-calcs .btn.disabled,
+#zno-calcs .btn:disabled {
+    opacity: .9
+}
+
+#zno-calcs .btn-primary:not([disabled]):not(.disabled).active,
+#zno-calcs .btn-primary:not([disabled]):not(.disabled):active,
+#zno-calcs .show > .btn-primary.dropdown-toggle {
+    -webkit-box-shadow: 0 0 0 .1rem rgba(0, 71, 107, .88);
+    box-shadow: 0 0 0 .1rem rgba(0, 71, 107, .88)
+}
+
+.zc_logo {
+    top: 50%;
+    bottom: 50%;
+    left: 0;
+    right: 0;
+    height: 20em;
+    margin: 0 auto
+}
+
+.zc_top_logo {
+    z-index: 10;
+    height: 3.5em;
+    margin: 3em 1em 1em
+}
+
+#zno-calcs .wrap {
+    background-color: #7fffd4;
+    min-height: 1000px
+}
+
+#zno-calcs .zc-lang {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    z-index: 10
+}
+#zno-calcs .zc_feedback {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 10
+}
+.zc_atent{
+  font-size: .7em;
+    color: gray;
+}
+.zc_ctable_content li:hover{
+    cursor: pointer;
+    transform: scale(1.5)
+}
+.zc_ctable_content a{
+    text-decoration: none;
+    color: black
+}
+.zc_ctable_content li{
+    width: auto
+}
+.zc_ctable_content *{
+    transition: all .3s ease;}
+.zc_ctable_content{
+    list-style: none;
+    text-align: center;
+    padding: 10px 0;
+    max-height: 20em;
+    overflow-x: hidden;
+    overflow-y: scroll; 
+    margin: 1em;
+    box-shadow: inset -9px 0px 20px 0px black;
+}
+.zc_ctable  input::placeholder{
+text-align: center;
+}
+
+#zno-calcs .tmp-left-content {
+    float: left
+}
+
+#zno-calcs {
+    -webkit-animation-name: animatebottom;
+    -webkit-animation-duration: 1s;
+    animation-name: animatebottom;
+    animation-duration: 1s
+}
+
+.zno-calcs {
+    margin: 0;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    z-index: 0;
+    height: inherit
+}
+
+.zno-calcs .modal-body {
+    min-height: 50vh
+}
+
+.zno-calcs_asside-inner * {
+    -webkit-transition: none;
+    -o-transition: none;
+    transition: none
+}
+
+.zno-calcs .container {
+    padding: 15px 0
+}
+
+.zc-full {
+    position: absolute
+}
+
+.zno-calcs_asside {
+    max-width: 25em;
+    position: -webkit-sticky;
+    position: sticky;
+    padding: 0;
+    max-height: 24.01em;
+    margin-left: -35%;
+    top: 0;
+    margin-top: 3em;
+    z-index: 10
+}
+
+.zno-calcs_asside-inner {
+    top: 20px;
+    min-height: 0;
+    padding: 10px;
+    height: auto;
+    max-height: inherit;
+    overflow-y: visible;
+    -webkit-transform: none;
+    -ms-transform: none;
+    transform: none;
+    background-color: #f7f7f7;
+    -webkit-box-shadow: 0 5px 10px 0 #b3b3b3;
+    box-shadow: 0 5px 10px 0 #b3b3b3;
+    border-radius: inherit;
+    max-width: 25em;
+    margin: 0 auto
+}
+
+.zno-calcs_asside-inner ul input[type=number] {
+    min-width: 3.2em
+}
+
+.zno-calcs_asside-inner input[type=number] {
+    min-width: 4em
+}
+
+#zno-calcs input::-webkit-input-placeholder {
+    opacity: .5
+}
+
+#zno-calcs input:-ms-input-placeholder {
+    opacity: .5
+}
+
+#zno-calcs input::-ms-input-placeholder {
+    opacity: .5
+}
+
+#zno-calcs input::placeholder {
+    opacity: .5
+}
+
+.zno-calcs .input-group-addon {
+    background-color: #fff
+}
+
+.zno-calcs_sidebar-active .zno-calcs_asside-inner {
+    -webkit-transform: none;
+    -ms-transform: none;
+    transform: none
+}
+
+.zno-calcs ul {
+    list-style: none;
+    padding: 0
+}
+
+.zno-calcs ul li {
+    padding: 5px 0
+}
+
+.zno-calcs .input-group-btn {
+    width: 75%
+}
+
+.zno-calcs_content {
+    width: 95%;
+    margin: -30em 0 5em;
+    z-index: 0
+}
+
+#zno-calcs_toggler {
+    position: absolute;
+    top: 0;
+    margin-left: 100%;
+    width: 2.5em;
+    height: 100%;
+    padding: 0;
+    -webkit-box-shadow: 0 5px 10px 0 #b3b3b3;
+    box-shadow: 0 5px 10px 0 #b3b3b3;
+    display: inline-block; 
+}
+
+.zc_ico_bottom:before,
+.zc_ico_top:before {
+    content: "";
+    -webkit-transition: all .6s ease;
+    -o-transition: all .6s ease;
+    transition: all .6s ease;
+    position: absolute;
+    width: 3em;
+    height: 2px;
+    left: -5%;
+    background-color: #8a8a8a
+}
+
+#zno-calcs_toggler .zc-toggler-text {
+    position: absolute;
+    top: 45%;
+    opacity: 0
+}
+
+#zno-calcs_toggler:hover .zc-toggler-text {
+    -webkit-animation: showex .9s linear;
+    animation: showex .9s linear;
+    opacity: 1
+}
+
+#zno-calcs_toggler:hover .zc_ico_top:before {
+    -webkit-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg)
+}
+
+#zno-calcs_toggler:hover .zc_ico_bottom:before {
+    -webkit-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg)
+}
+
+.zc_ico_top:before {
+    -webkit-transform: rotate(60deg);
+    -ms-transform: rotate(60deg);
+    transform: rotate(60deg)
+}
+
+.zc_ico_bottom:before {
+    -webkit-transform: rotate(-60deg);
+    -ms-transform: rotate(-60deg);
+    transform: rotate(-60deg)
+}
+
+.zno-calcs_sidebar-active #zno-calcs_toggler:hover .zc_ico_top:before {
+    -webkit-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg)
+}
+
+.zno-calcs_sidebar-active #zno-calcs_toggler:hover .zc_ico_bottom:before {
+    -webkit-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg)
+}
+
+.zno-calcs_sidebar-active #zno-calcs_toggler .zc_ico_top:before {
+    -webkit-transform: rotate(-60deg);
+    -ms-transform: rotate(-60deg);
+    transform: rotate(-60deg)
+}
+
+.zno-calcs_sidebar-active #zno-calcs_toggler .zc_ico_bottom:before {
+    -webkit-transform: rotate(60deg);
+    -ms-transform: rotate(60deg);
+    transform: rotate(60deg)
+}
+
+#zno-calcs_toggler {
+    -webkit-transition: all .6s ease;
+    -o-transition: all .6s ease;
+    transition: all .6s ease;
+    background-color: #f7f7f7;
+    max-height: 25em;
+    max-width: 25em;
+    margin: 0 auto;
+    right: -2.5em
+}
+
+#zno-calcs_toggler:hover {
+    background-color: #fdfdfd
+}
+
+.zc_ico_top:nth-child(1):before {
+    top: 41%
+}
+
+.zc_ico_top:nth-child(2):before {
+    top: 45%
+}
+
+.zc_ico_top:nth-child(3):before {
+    top: 49%
+}
+
+.zc_ico_bottom:nth-child(4):before {
+    bottom: 40%
+}
+
+.zc_ico_bottom:nth-child(5):before {
+    bottom: 44%
+}
+
+.zc_ico_bottom:nth-child(6):before {
+    bottom: 48%
+}
+
+#zno-calcs_toggler p {
+    -webkit-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    margin-left: -50%
+}
+
+#zno-calcs_toggler div {
+    display: table-cell
+}
+
+#zno-calcs_data {
+    min-height: 30px
+}
+
+.zno-calcs .form-control {
+    min-width: 5em
+}
+
+.zno-calcs_loader {
+    pointer-events: none;
+    opacity: 0;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    background: rgba(206, 206, 206, .44);
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column
+}
+
+.loader-text {
+    font: 1.1em Monospace, serif;
+    margin: .89em
+}
+
+.zno-calcs_loader-inner {
+    pointer-events: none;
+    border: 10px solid #f3f3f3;
+    border-top: 10px solid #3498db;
+    border-bottom: 10px solid #3498db;
+    border-radius: 50%;
+    width: 3em;
+    height: 3em;
+    text-align: center;
+    -webkit-animation: spin 3s linear infinite;
+    animation: spin 3s linear infinite
+}
+
+.zno-calcs_loader-wrapper {
+    z-index: 1000;
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    background-color: #acceff;
+    min-height: 4em;
+    border-radius: 60px;
+    padding: .5em
+}
+
+.zc_last_mark,
+.zc_your_mark {
+    white-space: nowrap;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    padding: 5px;
+    position: absolute
+}
+
+.zc_tmp_loader .zno-calcs_loader-wrapper {
+    background-color: transparent
+}
+
+.zc_tmp_loader .zno-calcs_loader-inner {
+    -webkit-animation: spin_pure 2s linear infinite;
+    animation: spin_pure 2s linear infinite
+}
+
+@-webkit-keyframes spin_pure {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0)
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes spin_pure {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0)
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg)
+    }
+}
+
+.zno-calcs_content-inner {
+    margin: 10px
+}
+
+.zno-calcs_asside i {
+    font-size: 2em;
+    margin: 1em 0
+}
+
+.zc_marks {
+    position: absolute;
+    right: 10em;
+    top: 10px;
+    width: 0;
+}
+
+.zc_last_mark {
+    left: 9.5em;
+    top: .6em;
+    font-size: .9em;
+    border: 1px solid #256589;
+    color: #787c7e;
+    /* border-top: none; */
+    border-radius: 30px;
+    /* -webkit-box-shadow: 2px 2px 12px 0 #8c8c8c; */
+    /* box-shadow: 2px 2px 12px 0 #8c8c8c; */
+    /* background: #25658926; */
+    /* max-width:  3em; */
+    /* word-break: break-all; */
+    /* word-wrap: break-word; */
+    white-space: normal;
+}
+
+.zc_your_mark {
+    top: .3em;
+    right: -6em;
+    z-index: 1;
+    font-size: 1.1em;
+    border: 1px solid #256589;
+    color: #256589;
+    font-weight: 600;
+    border-radius: 30px;
+    /* border-bottom: none; */
+    /* background: #fff; */
+    /* -webkit-box-shadow: 2px 2px 12px 0 #8c8c8c; */
+    /* box-shadow: 2px 2px 12px 0 #8c8c8c */
+}
+
+.zno-calcs_sp-data .clearfix .btn {
+    margin-right: 2em
+}
+
+.zno-calcs_sp-data .col-sm {
+    border: 1px solid #ddd
+}
+
+#zno-calcs .card-block {
+    overflow-x: scroll
+}
+
+.zno-calcs_sp-data_title {
+    margin: 0;
+    padding: 0 30px 10px;
+    max-width: 80%;
+}
+
+.zno-calcs_sp-data_code:before {
+    content: "Код: "
+}
+
+.en .zno-calcs_sp-data_code:before {
+    content: "Code: "
+}
+
+.zno-calcs_sp-data_code {
+    padding: 5px 15px;
+    margin-bottom: 0;
+    font-weight: 600
+}
+
+.zno-calcs_sp-data_title:before {
+    content: "Спеціальність: "
+}
+
+.zno-calcs_sp-data_subtitle:before {
+    content: "Спеціалізація: "
+}
+
+.en .zno-calcs_sp-data_title:before {
+    content: "Specialty: "
+}
+
+.en .zno-calcs_sp-data_subtitle:before {
+    content: "Specialization: "
+}
+
+.ru .zno-calcs_sp-data_title:before {
+    content: "Специальность: "
+}
+
+.ru .zno-calcs_sp-data_subtitle:before {
+    content: "Специализация: "
+}
+
+.zc-toggler-text:before {
+    content: "Показати"
+}
+
+.zno-calcs_sidebar-active .zc-toggler-text:before {
+    content: "Сховати"
+}
+
+.en .zc-toggler-text:before {
+    content: "Show"
+}
+
+.en .zno-calcs_sidebar-active .zc-toggler-text:before {
+    content: "Hide"
+}
+
+#zno-calcs_toggler .zc-toggler-text {
+    -webkit-transition: none;
+    -o-transition: none;
+    transition: none
+}
+
+.en #zno-calcs_toggler .zc-toggler-text {
+    margin-left: 0
+}
+
+.ru .zc-toggler-text:before {
+    content: "Показать"
+}
+
+.ru .zno-calcs_sidebar-active .zc-toggler-text:before {
+    content: "Спрятать"
+}
+
+.zno-calcs_sp-data_subtitle {
+    margin: 0;
+    padding: 0 30px 10px;
+}
+
+.form-num-inp {
+    max-width: 5em
+}
+
+.form-inp-mid {
+    max-width: inherit;
+    min-width: calc(100% - 7em)
+}
+
+.rth-loader {
+    -webkit-animation: rotatetohide .3s;
+    animation: rotatetohide .3s
+}
+
+.form-group button {
+    white-space: normal
+}
+
+#alerter {
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    bottom: -10em;
+    width: 20em;
+    z-index: 100
+}
+
+.input-rounded {
+    border-radius: 6px;
+    padding: 3px
+}
+
+@media (max-width:767px) {
+    .zno-calcs {
+        display: inline-block
+    }
+    .zno-calcs_content {
+        padding: 0
+    }
+    .zno-calcs_asside {
+        margin-left: 0;
+        min-width: 100%;
+        position: relative
+    }
+}
+
+@media (min-width:767px) {
+    .zno-calcs_sidebar-active .zno-calcs_content {
+        margin-left: 0;
+        margin-top: -30em;
+        -webkit-transition: none;
+        -o-transition: none;
+        transition: none
+    }
+    .zno-calcs_sidebar-active .zno-calcs_asside {
+        margin-left: 0;
+        position: -webkit-sticky;
+        position: sticky;
+        max-width: 25em
+    }
+    .zno-calcs_sidebar-active .zno-calcs_asside-inner {
+        -webkit-transform: initial;
+        -ms-transform: initial;
+        transform: initial
+    }
+    .zno-calcs_sidebar-active .zno-calcs_asside i {
+        -webkit-transform: rotate(-180deg);
+        -ms-transform: rotate(-180deg);
+        transform: rotate(-180deg)
+    }
+}
+
+@media (min-width:992px) {
+    .zno-calcs_sidebar-active .zno-calcs_content {
+        margin-top: -5em;
+        max-width: calc(100% - 30em);
+        -webkit-transition: none;
+        -o-transition: none;
+        transition: none
+    }
+    .zno-calcs_content {
+        padding-left: 4em;
+        margin-top: -34em
+    }
+    .modal-lg {
+        max-width: 980px
+    }
+    .zno-calcs_asside {
+        margin-left: 0;
+        height: 100%
+    }
+    #zno-calcs .zno-calcs_asside {
+        -webkit-animation-name: slideOutAssideLeft;
+        animation-name: slideOutAssideLeft
+    }
+    #zno-calcs .zno-calcs_asside-inner {
+        -webkit-animation-name: fadeInContentLeft;
+        animation-name: fadeInContentLeft
+    }
+    #zno-calcs .zno-calcs_sidebar-active .zno-calcs_asside {
+        -webkit-animation-name: slideInAssideLeft;
+        animation-name: slideInAssideLeft
+    }
+    #zno-calcs .zno-calcs_sidebar-active .zno-calcs_asside-inner {
+        -webkit-animation-name: fadeOutContentLeft;
+        animation-name: fadeOutContentLeft;
+        max-width: inherit
+    }
+}
+
+@media (max-width:992px) {
+    #zno-calcs_toggler .zc_ico_top:before {
+        pointer-events: none;
+        top: 50%;
+        bottom: auto;
+        -webkit-transform: rotate(30deg);
+        -ms-transform: rotate(30deg);
+        transform: rotate(30deg)
+    }
+    #zno-calcs_toggler .zc_ico_bottom:before {
+        bottom: auto;
+        top: 50%;
+        left: auto;
+        -webkit-transform: rotate(-30deg);
+        -ms-transform: rotate(-30deg);
+        transform: rotate(-30deg)
+    }
+    .zc_ico_top:nth-child(1):before {
+        left: 5%
+    }
+    .zc_ico_top:nth-child(2):before {
+        left: 22%
+    }
+    .zc_ico_top:nth-child(3):before {
+        left: 40%
+    }
+    .zc_ico_bottom:nth-child(4):before {
+        right: 5%
+    }
+    .zc_ico_bottom:nth-child(5):before {
+        right: 22%
+    }
+    .zc_ico_bottom:nth-child(6):before {
+        right: 40%
+    }
+    #zno-calcs_toggler:hover .zc-toggler-text {
+        top: 10%
+    }
+    .zc_ico {
+        height: inherit;
+        position: relative;
+        width: 10em
+    }
+    .zc_ico_top:before {
+        -webkit-transform: rotate(60deg);
+        -ms-transform: rotate(60deg);
+        transform: rotate(60deg)
+    }
+    .zc_ico_bottom:before {
+        -webkit-transform: rotate(-60deg);
+        -ms-transform: rotate(-60deg);
+        transform: rotate(-60deg)
+    }
+    #zno-calcs_toggler:hover .zc_ico_bottom:before,
+    #zno-calcs_toggler:hover .zc_ico_top:before,
+    .zno-calcs_sidebar-active #zno-calcs_toggler:hover .zc_ico_bottom:before,
+    .zno-calcs_sidebar-active #zno-calcs_toggler:hover span.zc_ico_top:before {
+        top: 80%;
+        -webkit-transform: rotate(0);
+        -ms-transform: rotate(0);
+        transform: rotate(0)
+    }
+    .zno-calcs_sidebar-active #zno-calcs_toggler .zc_ico_top:before {
+        -webkit-transform: rotate(-30deg);
+        -ms-transform: rotate(-30deg);
+        transform: rotate(-30deg)
+    }
+    .zno-calcs_sidebar-active #zno-calcs_toggler .zc_ico_bottom:before {
+        -webkit-transform: rotate(30deg);
+        -ms-transform: rotate(30deg);
+        transform: rotate(30deg)
+    }
+    .zno-calcs_asside {
+        margin-top: 0;
+        margin-left: 0;
+        min-width: 100%;
+        -webkit-animation: .5s assideSlideUp ease;
+        animation: .5s assideSlideUp ease;
+        position: -webkit-sticky;
+        position: sticky;
+        -webkit-transform: initial;
+        -ms-transform: initial;
+        transform: initial;
+        margin-bottom: 3em;
+        bottom: 3em
+    }
+    #zno-calcs_toggler {
+        width: 100%;
+        height: 2em;
+        margin-bottom: -10%;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        top: 100%;  
+        display: -webkit-inline-box;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        left: 0;
+        right: 0
+    }
+    #zno-calcs_toggler.show {
+        display: -webkit-inline-box;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        opacity: 1;  
+    }
+    .zno-calcs_asside i {
+        font-size: 1.5em;
+        margin: 0 10px;
+        -webkit-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+        transform: rotate(90deg)
+    }
+    #zno-calcs_toggler p {
+        display: inline-block;
+        -webkit-transform: rotate(0);
+        -ms-transform: rotate(0);
+        transform: rotate(0);
+        margin: 0;
+        left: 43%;
+        left: 0;
+        right: 0;
+        text-align: center
+    }
+    .zno-calcs_asside .dropdown-item {
+        margin: 0!important
+    }
+    .zno-calcs_sidebar-active .zno-calcs_asside {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        max-width: inherit;
+        -webkit-animation: .5s assideSlideDown ease;
+        animation: .5s assideSlideDown ease
+    }
+    .zno-calcs_sidebar-active .zno-calcs_asside i {
+        -webkit-transform: rotate(-90deg);
+        -ms-transform: rotate(-90deg);
+        transform: rotate(-90deg)
+    }
+}
+
+@-webkit-keyframes spin {
+    0%,
+    100% {
+        -webkit-filter: hue-rotate(360deg);
+        filter: hue-rotate(360deg);
+        -webkit-transform: rotate3d(0, 0, 0, 0deg);
+        transform: rotate3d(0, 0, 0, 0deg)
+    }
+    30%,
+    80% {
+        -webkit-transform: rotate3d(0, 0, 90, 360deg);
+        transform: rotate3d(0, 0, 90, 360deg)
+    }
+    50% {
+        -webkit-filter: hue-rotate(0);
+        filter: hue-rotate(0);
+        -webkit-transform: rotate3d(90, 90, 90, 0deg);
+        transform: rotate3d(90, 90, 90, 0deg);
+        -webkit-box-shadow: inset 0 0 50px 5px #005fff;
+        box-shadow: inset 0 0 50px 5px #005fff
+    }
+}
+
+@keyframes spin {
+    0%,
+    100% {
+        -webkit-filter: hue-rotate(360deg);
+        filter: hue-rotate(360deg);
+        -webkit-transform: rotate3d(0, 0, 0, 0deg);
+        transform: rotate3d(0, 0, 0, 0deg)
+    }
+    30%,
+    80% {
+        -webkit-transform: rotate3d(0, 0, 90, 360deg);
+        transform: rotate3d(0, 0, 90, 360deg)
+    }
+    50% {
+        -webkit-filter: hue-rotate(0);
+        filter: hue-rotate(0);
+        -webkit-transform: rotate3d(90, 90, 90, 0deg);
+        transform: rotate3d(90, 90, 90, 0deg);
+        -webkit-box-shadow: inset 0 0 50px 5px #005fff;
+        box-shadow: inset 0 0 50px 5px #005fff
+    }
+}
+ 
+@keyframes fadeIn02 {
+    from { opacity: 0 }
+    to { opacity: 0.2 }
+}
+
+
+@-webkit-keyframes showbtn {
+    0% {
+        opacity: 0
+    }
+    10% {
+        opacity: .1
+    }
+    30% {
+        opacity: .3
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+@keyframes showbtn {
+    0% {
+        opacity: 0
+    }
+    10% {
+        opacity: .1
+    }
+    30% {
+        opacity: .3
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+@-webkit-keyframes hidebtn {
+    0% {
+        opacity: 1
+    }
+    10% {
+        opacity: .9
+    }
+    30% {
+        opacity: .3
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+@keyframes hidebtn {
+    0% {
+        opacity: 1
+    }
+    10% {
+        opacity: .9
+    }
+    30% {
+        opacity: .3
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+@-webkit-keyframes slideOutAssideLeft {
+    from {
+        -webkit-transform: none;
+        transform: none
+    }
+    to {
+        -webkit-transform: translate3d(-100%, 0, 0);
+        transform: translate3d(-100%, 0, 0)
+    }
+}
+
+@keyframes slideOutAssideLeft {
+    from {
+        -webkit-transform: none;
+        transform: none
+    }
+    to {
+        -webkit-transform: translate3d(-100%, 0, 0);
+        transform: translate3d(-100%, 0, 0)
+    }
+}
+
+@-webkit-keyframes fadeInContentLeft {
+    from {
+        opacity: 1
+    }
+    to {
+        opacity: 0
+    }
+}
+
+@keyframes fadeInContentLeft {
+    0% {
+        opacity: 1
+    }
+    99% {
+        opacity: 0;
+        -webkit-transform: rotateY(0);
+        transform: rotateY(0)
+    }
+    100% {
+        -webkit-transform: rotateY(90deg);
+        transform: rotateY(90deg)
+    }
+}
+
+@-webkit-keyframes slideInAssideLeft {
+    from {
+        -webkit-transform: translate3d(-100%, 0, 0);
+        transform: translate3d(-100%, 0, 0)
+    }
+    to {
+        -webkit-transform: none;
+        transform: none
+    }
+}
+
+@keyframes slideInAssideLeft {
+    from {
+        -webkit-transform: translate3d(-100%, 0, 0);
+        transform: translate3d(-100%, 0, 0)
+    }
+    to {
+        -webkit-transform: none;
+        transform: none
+    }
+}
+
+@-webkit-keyframes fadeOutContentLeft {
+    from {
+        opacity: 0
+    }
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes fadeOutContentLeft {
+    0% {
+        -webkit-transform: rotateY(90deg);
+        transform: rotateY(90deg)
+    }
+    1% {
+        -webkit-transform: rotateY(0);
+        transform: rotateY(0);
+        opacity: 0
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+@-webkit-keyframes rotatetohide {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0)
+    }
+    100% {
+        -webkit-transform: rotateX(-90deg);
+        transform: rotateX(-90deg)
+    }
+}
+
+@keyframes rotatetohide {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0)
+    }
+    100% {
+        -webkit-transform: rotateX(-90deg);
+        transform: rotateX(-90deg)
+    }
+}
+
+@-webkit-keyframes assideSlideUp {
+    from {
+        -webkit-transform: none;
+        transform: none
+    }
+    to {
+        -webkit-transform: translate3d(0, -100%, 0);
+        transform: translate3d(0, -100%, 0)
+    }
+}
+
+@keyframes assideSlideUp {
+    from {
+        -webkit-transform: none;
+        transform: none
+    }
+    to {
+        -webkit-transform: translate3d(0, -100%, 0);
+        transform: translate3d(0, -100%, 0)
+    }
+}
+
+@-webkit-keyframes assideSlideDown {
+    from {
+        -webkit-transform: translate3d(0, -100%, 0);
+        transform: translate3d(0, -100%, 0)
+    }
+    to {
+        -webkit-transform: none;
+        transform: none
+    }
+}
+
+@keyframes assideSlideDown {
+    from {
+        -webkit-transform: translate3d(0, -100%, 0);
+        transform: translate3d(0, -100%, 0)
+    }
+    to {
+        -webkit-transform: none;
+        transform: none
+    }
+}
+
+@-webkit-keyframes showex {
+    from {
+        opacity: 0
+    }
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes showex {
+    from {
+        opacity: 0
+    }
+    to {
+        opacity: 1
+    }
+}
+
+.nuwm-loader_cp {
+    pointer-events: all;
+    margin: 0 auto;
+    color: #fff;
+    z-index: 10000
+}
+
+.nuwm-loader_reactor,
+.nuwm-loader_reactor * {
+    -webkit-box-sizing: initial;
+    box-sizing: initial
+}
+
+.nuwm-loader_core-fade {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    background-color: rgba(58, 58, 58, .5)
+}
+
+.nuwm-loader_reactor {
+    position: relative;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    z-index: 10000;
+    width: 10rem;
+    height: 10rem;
+    background-color: #fff;
+    border: 3px solid #256589;
+    padding: 2rem;
+    margin: 0 auto
+}
+
+.nuwm-loader {
+    height: 1rem;
+    width: 4rem;
+    position: relative;
+    float: right;
+    margin: 1.1rem -15px 1.1rem -.5rem
+}
+
+.nuwm-loader_line {
+    max-width: 10rem;
+    margin: 0 -2rem;
+    clear: both
+}
+
+.nuwm-loader-r {
+    margin-right: 3px;
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    transform: rotate(180deg)
+}
+
+.nuwm-loader_part:before {
+    content: "";
+    top: 36%;
+    width: 2rem;
+    background-color: #256589;
+    height: 3px;
+    -webkit-box-sizing: inherit;
+    box-sizing: inherit;
+    border: 1px solid transparent;
+    position: absolute;
+    -webkit-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    transform: rotate(-45deg)
+}
+
+.nuwm-loader_part:nth-child(2n):before {
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg)
+}
+
+.nuwm-loader_part:nth-child(1):before {
+    right: 5%;
+    -webkit-animation: heavyload 2s linear infinite .3s;
+    animation: heavyload 2s linear infinite .3s
+}
+
+.nuwm-loader_part:nth-child(2):before {
+    left: 10%;
+    -webkit-animation: heavyload2 2s linear infinite .5s;
+    animation: heavyload2 2s linear infinite .5s
+}
+
+.nuwm-loader_part:nth-child(3):before {
+    left: 69%;
+    margin-left: -3.65rem;
+    -webkit-animation: heavyload3 2s linear infinite .2s;
+    animation: heavyload3 2s linear infinite .2s
+}
+
+.nuwm-loader_part:nth-child(4):before {
+    right: 64%;
+    margin-right: -3.65rem;
+    -webkit-animation: heavyload4 2s linear infinite .4s;
+    animation: heavyload4 2s linear infinite .4s
+}
+
+@-webkit-keyframes heavyload {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, -35px, 0) rotateZ(45deg);
+        transform: translate3d(-100%, -35px, 0) rotateZ(45deg)
+    }
+    20%,
+    80% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateZ(45deg);
+        transform: translate3d(0, 0, 0) rotateZ(45deg)
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, 35px, 0) rotateZ(45deg);
+        transform: translate3d(100%, 35px, 0) rotateZ(45deg)
+    }
+}
+
+@keyframes heavyload {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, -35px, 0) rotateZ(45deg);
+        transform: translate3d(-100%, -35px, 0) rotateZ(45deg)
+    }
+    20%,
+    80% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateZ(45deg);
+        transform: translate3d(0, 0, 0) rotateZ(45deg)
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, 35px, 0) rotateZ(45deg);
+        transform: translate3d(100%, 35px, 0) rotateZ(45deg)
+    }
+}
+
+@-webkit-keyframes heavyload2 {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, -35px, 0) rotateZ(-45deg);
+        transform: translate3d(100%, -35px, 0) rotateZ(-45deg)
+    }
+    20%,
+    80% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateZ(-45deg);
+        transform: translate3d(0, 0, 0) rotateZ(-45deg)
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, 35px, 0) rotateZ(-45deg);
+        transform: translate3d(-100%, 35px, 0) rotateZ(-45deg)
+    }
+}
+
+@keyframes heavyload2 {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, -35px, 0) rotateZ(-45deg);
+        transform: translate3d(100%, -35px, 0) rotateZ(-45deg)
+    }
+    20%,
+    80% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateZ(-45deg);
+        transform: translate3d(0, 0, 0) rotateZ(-45deg)
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, 35px, 0) rotateZ(-45deg);
+        transform: translate3d(-100%, 35px, 0) rotateZ(-45deg)
+    }
+}
+
+@-webkit-keyframes heavyload3 {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, 35px, 0) rotateZ(45deg);
+        transform: translate3d(100%, 35px, 0) rotateZ(45deg)
+    }
+    20%,
+    80% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateZ(45deg);
+        transform: translate3d(0, 0, 0) rotateZ(45deg)
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, -35px, 0) rotateZ(45deg);
+        transform: translate3d(-100%, -35px, 0) rotateZ(45deg)
+    }
+}
+
+@keyframes heavyload3 {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, 35px, 0) rotateZ(45deg);
+        transform: translate3d(100%, 35px, 0) rotateZ(45deg)
+    }
+    20%,
+    80% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateZ(45deg);
+        transform: translate3d(0, 0, 0) rotateZ(45deg)
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, -35px, 0) rotateZ(45deg);
+        transform: translate3d(-100%, -35px, 0) rotateZ(45deg)
+    }
+}
+
+@-webkit-keyframes heavyload4 {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, 35px, 0) rotateZ(-45deg);
+        transform: translate3d(-100%, 35px, 0) rotateZ(-45deg)
+    }
+    20%,
+    80% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateZ(-45deg);
+        transform: translate3d(0, 0, 0) rotateZ(-45deg)
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, -35px, 0) rotateZ(-45deg);
+        transform: translate3d(100%, -35px, 0) rotateZ(-45deg)
+    }
+}
+
+@keyframes heavyload4 {
+    0% {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, 35px, 0) rotateZ(-45deg);
+        transform: translate3d(-100%, 35px, 0) rotateZ(-45deg)
+    }
+    20%,
+    80% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0) rotateZ(-45deg);
+        transform: translate3d(0, 0, 0) rotateZ(-45deg)
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, -35px, 0) rotateZ(-45deg);
+        transform: translate3d(100%, -35px, 0) rotateZ(-45deg)
+    }
+}
+
+@supports (-ms-ime-align:auto) {
+    #zno-calcs .zno-calcs_asside {
+        position: fixed
+    }
+    #zno-calcs .zno-calcs_asside-inner {
+        padding-bottom: 20px
+    }
+    .zno-calcs_sidebar-active .zno-calcs_content {
+        max-width: inherit;
+        margin-top: -5em
+    }
+    .zno-calcs_content {
+        margin-top: -5em
+    }
+}

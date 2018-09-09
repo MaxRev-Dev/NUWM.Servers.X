@@ -1,0 +1,15 @@
+.login_prompt{
+    position: fixed;
+    top:20vh; 
+    left:0;
+    right:0;
+    margin: auto;  
+    max-width: 25em;
+    box-shadow: 0 0 1em 1px #aaa 
+}
+.footer {
+    position: fixed;
+    left: 0;
+    right:0;
+    bottom: 0;
+}

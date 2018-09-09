@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NUWM.Servers.Core.News": {
+      "commandName": "Project",
+      "commandLineArgs": "3006"
+    }
+  }
+}

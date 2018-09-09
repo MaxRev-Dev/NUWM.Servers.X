@@ -1,0 +1,10 @@
+{
+  "AccessFolders": {
+    "/www": "/www"
+  },
+  "Name": "News",
+  "ServerTypeName": {
+    "Key": "X-Type",
+    "Value": "Server"
+  }
+}
