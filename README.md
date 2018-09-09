@@ -1,6 +1,6 @@
 # NUWM.Servers.X
 
-## Different servers writen on __C# for netcoreapp2.0__ framework
+## Different servers writen on __C# for netcoreapp2.0__ framework using my MR.Servers.Core
 
 * Documentation is here http://calc.nuwm.edu.ua:3000/doc
 * Current Calc location on http://calc.nuwm.edu.ua:3000 and it's [trace](http://calc.nuwm.edu.ua:3000/itrace)
