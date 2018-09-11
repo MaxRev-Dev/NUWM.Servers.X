@@ -615,173 +615,7 @@ namespace SubjectParser
                         list.Add(_subject);
                     }
                 }
-
-
-                /*
-                if (m.Count == 0 && !isLecturer)
-                { // Subgroups
-                    m = new Regex(patern[ PType.Lect], RegexOptions.ECMAScript).Matches(subjectS);
-                    foreach (Match match in m)
-                    {
-                        SubjectInstance _subject = new SubjectInstance();
-                        GroupCollection g = match.Groups;
-                        string audit = (g[1].Value.Contains('.') ? "" : g[1].Value);
-                        string stream_or_groups_type = "";
-                        string groups_streams = g[5].Value.Contains('.') ? g[5].Value : "";
-                        string lecturer = g[3].Value;
-                        string subject = g[4].Value.TrimStart(' ').TrimEnd(' ');
-                        if (string.IsNullOrEmpty(subject))
-                        {
-                            subject = g[5].Value;
-                        }
-
-                        string type = (g[7].Value != "" ? g[7].Value : g[5].Value).TrimStart(' ').TrimEnd(' ');
-
-
-                        if (string.IsNullOrEmpty(time) && list.Count > 0)
-                        {
-                            time = list.Last().TimeStamp;
-                        }
-
-                        ScheduleTimeViewItem tm = GetNum(time);
-                        _subject.Subject = subject.TrimStart(' ').TrimEnd(' ');
-                        _subject.SubGroup = groups_streams.TrimStart(new char[] { ' ', '(' }).TrimEnd(new char[] { ' ', ')' });
-                        _subject.Classroom = audit.TrimStart(' ').TrimEnd(' ');
-                        _subject.Lecturer = lecturer.TrimStart(' ').TrimEnd(' ');
-                        _subject.Streams = stream_or_groups_type.TrimStart(new char[] { ' ', '(' }).TrimEnd(new char[] { ' ', ')' });
-                        _subject.TimeStamp = (tm == null) ? "null" : tm.LessonTime;
-                        _subject.LessonNum = (tm == null) ? -1 : tm.LessonNum;
-                        _subject.Type = CheckType(type);
-                        if (AR != null && auto)
-                        {
-                            _subject.Subject = AutoReplace(lecturer, _subject.Subject);
-                        }
-
-                        list.Add(_subject);
-                    }
-                }
-                else
-                {
-                    foreach (Match match in m)
-                    {
-                        string[] hj = match.Groups[0].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        if (hj.Count() < 1 || match.Value == " ")
-                        {
-                            continue;
-                        }
-
-                        ScheduleTimeViewItem tm = GetNum(time);
-
-                        GroupCollection g = match.Groups;
-
-                        SubjectInstance _subject = new SubjectInstance();
-                        if (g[0].Value.Contains("Фізичне ви") ||
-                            g[0].Value.Contains("Військова") ||
-                            g[0].Value.Contains("Директорат") ||
-                            g[0].Value.Contains("Вчена рада"))
-                        {
-
-                            list.Add(new SubjectInstance(tm.LessonTime, g[0].Value, tm.LessonNum.ToString()));
-                        }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(time) && list.Count > 0)
-                            {
-                                time = list.Last().TimeStamp;
-                            }
-
-                            string audit = (g[1].Value.Contains('.') ? "" : g[1].Value);
-                            if (string.IsNullOrEmpty(audit) && list.Count > 0)
-                            {
-                                audit = list.Last().Classroom;
-                            }
-
-                            string lecturer = (g[2].Value == "") ? g[1].Value : g[2].Value;
-                            if (string.IsNullOrEmpty(lecturer) && list.Count > 0)
-                            {
-                                lecturer = list.Last().Lecturer;
-                            }
-                            else if (!lecturer.Contains('.'))
-                            {
-                                lecturer = g[1].Value;
-                            }
-
-                            string stream_or_groups_type = !isLecturer ? g[7].Value : (g[3].Value string.IsNullOrEmpty(g[3].Value) ? g[4].Value : g[3].Value);
-                            string groups_streams = !isLecturer ? g[8].Value : g[4].Value;
-                            string subject = (!isLecturer ? g[6].Value : g[2].Value).TrimStart(' ').TrimEnd(' ');
-                            if (string.IsNullOrEmpty(subject))
-                            {
-                                subject = g[5].Value;
-                            }
-
-                            string type = (isLecturer ? g[5].Value : g[9].Value).TrimStart(' ').TrimEnd(' ');
-
-                            if ((type.Count(f => f == '(' || f == ')') % 2 != 0))
-                            {
-                                string t = type.Substring(type.IndexOf('(', 3));
-                                _subject.Type = CheckType(t);
-                                _subject.Subject += subject + " " + type.Substring(0, type.IndexOf('(', 3));
-                            }
-                            else
-                            {
-                                if (!isLecturer)
-                                {
-                                    _subject.Type = CheckType(g[9].Value);
-                                }
-                                else
-                                {
-                                    if (!g[5].Value.Contains("підг"))
-                                    {
-                                        _subject.Type = CheckType(g[5].Value);
-                                    }
-                                    else
-                                    {
-                                        stream_or_groups_type = g[4].Value;
-                                        groups_streams = g[5].Value;
-                                        _subject.Type = CheckType(g[6].Value);
-                                    }
-                                }
-                                _subject.Subject = subject.TrimStart(' ').TrimEnd(' ');
-                            }
-                            _subject.SubGroup = groups_streams.TrimStart(new char[] { ' ', '(' }).TrimEnd(new char[] { ' ', ')' });
-                            _subject.Classroom = audit.TrimStart(' ').TrimEnd(' ');
-                            if (!isLecturer)
-                            {
-                                _subject.Lecturer = lecturer.TrimStart(' ').TrimEnd(' ');
-                            }
-
-                            _subject.Streams = stream_or_groups_type.TrimStart(new char[] { ' ', '(' }).TrimEnd(new char[] { ' ', ')' });
-                            _subject.TimeStamp = (tm == null) ? "null" : tm.LessonTime;
-                            _subject.LessonNum = (tm == null) ? -1 : tm.LessonNum;
-
-                            if (AR != null && auto)
-                            {
-                                _subject.Subject = AutoReplace(lecturer, _subject.Subject);
-                            }
-
-                            if (isLecturer)
-                            {
-                                if (!string.IsNullOrEmpty(g[6].Value.Trim(' ')) && !g[6].Value.Trim(' ').Contains("("))
-                                {
-                                    list.Add(new SubjectInstance(tm.LessonTime, g[6].Value, tm.LessonNum.ToString()));
-                                }
-                                if (MainApp.Fix22_lecturerName)
-                                {
-                                    try
-                                    {
-
-                                        string[] tf = LectName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                                        _subject.Lecturer = tf[0] + " " + tf[1][0] + "." + tf[2][0] + ".";
-
-                                    }
-                                    catch { }
-                                }
-                            }
-                            list.Add(_subject);
-                        }
-                    }
-                }
-    */
+                                
                 return list.ToArray();
             }
             catch (Exception) { return null; }
@@ -821,7 +655,7 @@ namespace SubjectParser
 
         public bool UpdateAutoreplace()
         {
-            string f = "./addons/subjects_parser/autoreplace.txt";
+            string f =Path.Combine(Reactor.Current.DirectoryManager[MainApp.Dirs.Subject_Parser],"autoreplace.txt");
             if (File.Exists(f))
             {
                 AR = new Dictionary<string, string>();
@@ -881,32 +715,7 @@ namespace SubjectParser
                 result.Add(GetPatternFor(a));
             }
             return !result.Where(x => x == false).Any();
-        }
-        //public Tuple<DayInstance, Exception> Test()
-        //{
-        //    string lines = "";
-        //    try
-        //    {
-        //        sr = lines.Split('\n');
-        //        list = new List<SubjectInstance>();
-        //        foreach (string i in sr)
-        //        {
-        //            string time = "08:00-09:20";
-        //            if (i.Substring(i.IndexOf(' ') + 1).Contains('-'))
-        //            {
-        //                time = i.Substring(0, i.IndexOf(' '));
-        //            }
-
-        //            string trash = i.Substring(i.IndexOf(' ') + 1);
-        //            list.AddRange(Parsing(time, trash, false, true, ""));
-        //        }
-        //        return new Tuple<DayInstance, Exception>(new DayInstance()
-        //        {
-        //            Subjects = list.ToArray()
-        //        }, err);
-        //    }
-        //    catch (Exception) { return new Tuple<DayInstance, Exception>(null, err); }
-        //}
+        } 
         private string CheckType(string what)
         {
             what = what.Replace('(', ' ').Replace(')', ' ').TrimStart(' ').TrimEnd(' ');

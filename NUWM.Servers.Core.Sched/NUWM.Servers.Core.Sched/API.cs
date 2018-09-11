@@ -15,7 +15,7 @@ namespace APIUtilty
 {
     [RouteBase("api")]
     public sealed class API : CoreAPI
-    { 
+    {
         public async Task<Tuple<string, string>> PrepareForResponse(string Request, string Content, string action)
         {
             var query = Info.Query;
@@ -108,7 +108,8 @@ namespace APIUtilty
                     throw new FormatException("InvalidRequest: expected content parameter");
                 }
                 throw new FormatException("InvalidRequest: expected lect parameter");
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return JsonConvert.SerializeObject(ResponseTyper(ex, null));
             }
@@ -166,10 +167,10 @@ namespace APIUtilty
                     }
                     if (query.HasKey("sdate"))
                     {
-                        string sdate = query["sdate"];
+                        string sdate = Uri.UnescapeDataString(query["sdate"]);
                         if (query.HasKey("edate"))
                         {
-                            string edate = query["edate"];
+                            string edate = Uri.UnescapeDataString(query["edate"]);
                             bool isLecturer = !string.IsNullOrEmpty(name);
                             DataSpace.GetData data = new DataSpace.GetData(isLecturer ? name : group, sdate, edate, isLecturer, type);
 
@@ -227,7 +228,7 @@ namespace APIUtilty
                     }
                     else if (query.HasKey("weeks"))
                     {
-                        string rweek = query["weeks"];
+                        string rweek = Uri.UnescapeDataString(query["weeks"]);
                         string[] weeks = null;
                         if (rweek.Contains(','))
                         {
@@ -384,7 +385,7 @@ namespace APIUtilty
             {
                 if (query.HasKey("name"))
                 {
-                    var name = query["name"]; var surn = "";
+                    var name = Uri.UnescapeDataString(query["name"]); var surn = "";
 
                     if (name.Contains(' '))
                     {
@@ -408,7 +409,7 @@ namespace APIUtilty
                 }
                 else if (query.HasKey("subj"))
                 {
-                    var name = query["subj"]; var surn = "";
+                    var name = Uri.UnescapeDataString(query["subj"]); var surn = "";
 
                     if (name.Contains(' '))
                     {
