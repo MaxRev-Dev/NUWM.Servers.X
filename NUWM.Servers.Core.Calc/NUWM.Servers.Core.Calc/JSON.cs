@@ -1,84 +1,94 @@
-﻿using HelperUtilties;
-using HtmlAgilityPack;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 
-
-namespace JSON
+namespace NUWM.Servers.Core.Calc
 {
-    public class ContentVisualiser
+    interface ICodeItem
     {
-        [JsonProperty("content")]
-        public Dictionary<string, List<string>> Content { get; set; }
+        string Code { get; set; }
     }
-    public partial class SpecialtiesVisualiser
+    public class BaseItem : ICodeItem
     {
-        [JsonProperty("speciality")]
-        public List<Specialty> List { get; set; }
-        public partial class Specialty
+        public BaseItem()
         {
-            [JsonProperty("modulus")]
-            public ModulusList Modulus { get; set; }
-            [JsonProperty("branch_name")]
-            public JSON.Item BranchName { get; set; }
-            [JsonProperty("title")]
-            public string Title { get; set; }
-            [JsonProperty("subtitle")]
-            public string SubTitle { get; set; }
-
-            [JsonProperty("aver_mark")]
-            public string AverMark { get; set; }
-            [JsonProperty("aver_mark_calc")]
-            public string YourAverMark { get; set; }
-
-            [JsonProperty("code")]
-            public string Code { get; set; }
-            [JsonProperty("page_content")]
-            public ContentVisualiser Content { get; set; }
-            [JsonProperty("links")]
-            public LinksVisualiser Links { get; set; }
-            [JsonProperty("program_provided_by")]
-            public TupleVisualiser ChairsProvidesProg { get; set; }
-            [JsonProperty("url")]
-            public string URL { get; set; }
-            [JsonProperty("page_parsing_errors")]
-            public List<string> Errors { get; set; }
-            public class CalcMarkInfo
+            PassMarks = new Dictionary<int, double>();
+        }
+        [JsonProperty("code")]
+        public string Code { get; set; }
+        [JsonProperty("title")]
+        public string Title { get; set; }
+        [JsonProperty("subtitle")]
+        public string SubTitle { get; set; }
+        [JsonProperty("special")]
+        public bool IsSpecial { get; internal set; }
+        [JsonProperty("modulus")]
+        public ModulusList Modulus { get; set; } = new ModulusList();
+        [JsonIgnore]
+        public string Branch { get; set; }
+        [JsonIgnore]
+        public string InnerCode { get; set; }
+        [JsonProperty("branch_coef")]
+        public double BranchCoef { get; internal set; } = 1.0;
+        [JsonProperty("pass_marks")]
+        public Dictionary<int, double> PassMarks { get; internal set; }
+    }
+    public class CalculatedSpecialty : SpecialtyInfo
+    {
+        public CalculatedSpecialty(SpecialtyInfo specialty)
+        {
+            var tb = specialty.GetType();
+            var properties = tb.GetProperties();
+            var t = GetType();
+            properties.ToList().ForEach(property =>
             {
-                [JsonProperty("min")]
-                public double Min { get; set; }
-                [JsonProperty("max")]
-                public double Max { get; set; }
-                [JsonProperty("aver")]
-                public double Aver { get; set; }
-            }
-            public partial class ModulusList
-            {
-                [JsonProperty("c")]
-                public double[] Coef { get; set; }
-                [JsonProperty("cn")]
-                public string[] CoefName { get; set; }
+                var isPresent = t.GetProperty(property.Name);
+                if (isPresent != null)
+                {
+                    var value = tb.GetProperty(property.Name).GetValue(specialty, null);
+                    t.GetProperty(property.Name).SetValue(this, value, null);
+                }
+            });
+        }
+        [JsonProperty("aver_mark_calc")]
+        public double YourAverMark { get; set; }
+        [JsonProperty("aver_mark")]
+        public double PassMark { get; set; }
+        [JsonProperty("path")]
+        public string CalcPath { get; internal set; }
+    }
 
-                [JsonIgnore]
-                public string Name { get; set; }
-                [JsonIgnore]
-                public string Code { get; set; }
-            }
+    public class SpecialtyInfo : BaseItem
+    {
+        [JsonProperty("branch_name")]
+        public Item BranchName { get; set; }
+        [JsonProperty("page_content")]
+        public ContentVisualiser Content { get; set; }
+        [JsonProperty("links")]
+        public LinksVisualiser Links { get; set; }
+
+        [JsonProperty("program_provided_by")]
+        public TupleVisualiser ChairsProvidesProg { get; set; } = new TupleVisualiser();
+        [JsonProperty("url")]
+        public string URL { get; set; }
+        [JsonProperty("page_parsing_errors")]
+        public List<string> Errors { get; set; }
+        public override string ToString()
+        {
+            return Code + " - " + Title;
         }
     }
-    public class LinksVisualiser
+    public class CalcMarkInfo
     {
-        [JsonProperty("link")]
-        public Dictionary<string, List<LinkItem>> Links { get; set; }
+        [JsonProperty("min")]
+        public double Min { get; set; }
+        [JsonProperty("max")]
+        public double Max { get; set; }
+        [JsonProperty("aver")]
+        public double Aver { get; set; }
     }
-    public class TupleVisualiser
-    {
-        [JsonProperty("program_provider")]
-        public Tuple<string, List<LinkItem>> ChairsProvidesProg { get; set; }
-    }
-
-    public partial class Item : LinkItem
+    public class Item : LinkItem
     {
         [JsonProperty("name")]
         public override string Title { get; set; }
@@ -95,12 +105,34 @@ namespace JSON
         public virtual string Url { get; set; }
     }
 
+
+
+    public class ContentVisualiser
+    {
+        [JsonProperty("content")]
+        public Dictionary<string, List<string>> Content { get; set; }
+    }
+    public class SpecialtiesVisualiser
+    {
+        [JsonProperty("speciality")]
+        public IEnumerable<SpecialtyInfo> List { get; set; }
+    }
+
     public class ScheduleVisualiser
     {
         [JsonProperty("schedule")]
         public object Data { get; set; }
     }
-
+    public class LinksVisualiser
+    {
+        [JsonProperty("link")]
+        public Dictionary<string, List<LinkItem>> Links { get; set; }
+    }
+    public class TupleVisualiser
+    {
+        [JsonProperty("program_provider")]
+        public Tuple<string, List<LinkItem>> ChairsProvidesProg { get; set; }
+    }
     public class Response
     {
         [JsonProperty("code")]
@@ -126,6 +158,6 @@ namespace JSON
         AccessDenied = 60,
         DeprecatedMethod = 66,
         ServerSideError = 88,
-        Success = 100 
+        Success = 100
     }
 }

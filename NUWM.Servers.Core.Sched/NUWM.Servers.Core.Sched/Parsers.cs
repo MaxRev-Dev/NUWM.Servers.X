@@ -1,10 +1,4 @@
-﻿using HierarchyTime;
-using HtmlAgilityPack;
-using MR.Servers;
-using MR.Servers.Utils;
-using Newtonsoft.Json;
-using NUWM.Servers.Sched;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -14,9 +8,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static SubjectParser.ScheduleTimeViewItem;
+using HtmlAgilityPack;
+using MaxRev.Utils;
+using Newtonsoft.Json;
 
-namespace DataSpace
+namespace NUWM.Servers.Core.Sched
 {
     /// <summary>
     /// Almost big kitchen.
@@ -35,8 +31,8 @@ namespace DataSpace
         private List<WeekInstance> CurrentDays;
         private List<DayInstance> CurrentParsed;
 
-        private CultureInfo cultureInfo = new CultureInfo("uk-UA");
-        private DateTimeFormatInfo dateTimeInfo;
+        private readonly CultureInfo cultureInfo = new CultureInfo("uk-UA");
+        private readonly DateTimeFormatInfo dateTimeInfo;
         public Exception R = null;
         private readonly RetType ReturnType;
         public enum RetType
@@ -172,15 +168,21 @@ namespace DataSpace
             Uri requestUri = new Uri("http://desk.nuwm.edu.ua/cgi-bin/timetable.cgi");
             try
             {
+                string data = default;
                 try
                 {
-                    CreateClientRequest request = new CreateClientRequest(requestUri.OriginalString);
-                    responseMessage = await request.PostAsync(JsonData());
+                    using (Request request = new Request(requestUri.OriginalString))
+                    {
+                        responseMessage = await request.PostAsync(JsonData());
+                        responseMessage.EnsureSuccessStatusCode();
+                        data = await ParseResponse();
+                    }
                 }
                 catch { throw new OperationCanceledException("Connection failed"); }
-                responseMessage.EnsureSuccessStatusCode();
-                string data = await ParseResponse();
-                if (!data.Contains("не знайдено") && !data.Contains("У програмі виникла помилка"))
+                bool denied = data.Contains("Публікація розкладу тимчасово заблокована");
+                if (!data.Contains("не знайдено")
+                    && !data.Contains("У програмі виникла помилка")
+                    && !denied)
                 {
                     ParseHtmlToData(data, auto);
 
@@ -193,13 +195,18 @@ namespace DataSpace
                 }
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(data);
+                var alert = doc.DocumentNode.Descendants().FirstOrDefault(x => x.HasClass("alert"))?.InnerText;
                 if (data.Contains("не знайдено"))
                 {
                     R = new InvalidDataException("Not Found");
                 }
+                else if (denied)
+                {
+                    R = new DivideByZeroException("Timetable container not found. " + alert);
+                }
                 else
                 {
-                    R = new Exception(doc.DocumentNode.Descendants().Where(x => x.HasClass("alert")).First().InnerText);
+                    R = new Exception(alert);
                 }
             }
             catch (OperationCanceledException ex) { throw ex; }
@@ -222,16 +229,23 @@ namespace DataSpace
         {
             HtmlNode dsd = doc.CreateElement("div");
             List<HtmlNode> y = doc.DocumentNode.Descendants().Where
-                  (x => (x.Name == "div" && x.HasClass("jumbotron"))).ToList();
+                (x => (x.Name == "div" && x.HasClass("jumbotron"))).ToList();
             if (y.Any())
             {
-                HtmlNode footer = y.First().Descendants().Where(x => x.HasClass("container")).First();
-                foreach (HtmlNode r in footer.Elements("div"))
+                HtmlNode footer = y.First().Descendants().Where(x => x.HasClass("container")).FirstOrDefault();
+                if (footer != default)
                 {
-                    dsd.AppendChild(r);
-                }
+                    foreach (HtmlNode r in footer.Elements("div"))
+                    {
+                        dsd.AppendChild(r);
+                    }
 
-                return dsd;
+                    return dsd;
+                }
+                else
+                {
+                    R = new DivideByZeroException("Timetable container not found");
+                }
             }
             return null;
         }
@@ -254,7 +268,8 @@ namespace DataSpace
             }
 
             CurrentParsed = new List<DayInstance>();
-            foreach (HtmlNode iy in tableWrapper.Descendants("div").Where(x => x.HasClass("col-md-6")))
+            foreach (HtmlNode iy in tableWrapper.Descendants("div")
+                .Where(x => x.HasClass("col-md-6")))
             {
                 CurrentParsed.Add(ParseDay(iy, auto));
 
@@ -265,8 +280,12 @@ namespace DataSpace
                     while (t != null && t.HasClass("row"))
                     {
                         List<SubjectInstance> tgt = CurrentParsed.Last().Subjects.ToList();
-                        tgt.AddRange(ParseDayFix(t, auto));
-                        CurrentParsed.Last().Subjects = tgt.ToArray();
+                        var subj = ParseDayFix(t, auto);
+                        if (subj != default)
+                        {
+                            tgt.AddRange(subj);
+                            CurrentParsed.Last().Subjects = tgt.ToArray();
+                        }
                         t = t.NextSibling;
                     }
                 }
@@ -305,9 +324,9 @@ namespace DataSpace
             string g = node.ChildNodes.FindFirst("h4").InnerText;
             DayInstance day = new DayInstance(
 
-              //date && day
-              date: node.ChildNodes.FindFirst("h4").ChildNodes[0].InnerText.Trim(' '),
-               dayName: node.ChildNodes.FindFirst("h4").Element("small").InnerText
+                //date && day
+                date: node.ChildNodes.FindFirst("h4").ChildNodes[0].InnerText.Trim(' '),
+                dayName: node.ChildNodes.FindFirst("h4").Element("small").InnerText
             );
 
             HtmlNode table = node.ChildNodes.FindFirst("table");
@@ -318,7 +337,8 @@ namespace DataSpace
                 string ind = t.ElementAt(0).InnerText;
                 string times = t.ElementAt(1).InnerHtml.Replace("<br>", "-");
                 string trashed = t.ElementAt(2).InnerHtml.Replace("<br>", "\r");
-                slist.AddRange(InnerCheckParse(times, trashed, ind, auto));
+                if (!string.IsNullOrEmpty(trashed.Trim()))
+                    slist.AddRange(InnerCheckParse(times, trashed, ind, auto));
             }
             day.Subjects = slist.ToArray();
             return day;
@@ -338,7 +358,9 @@ namespace DataSpace
                 string ind = tr.ChildNodes[0].InnerText;
                 string times = tr.ChildNodes[1].InnerHtml.Replace("<br>", "-");
                 string trashed = tr.ChildNodes[2].InnerHtml.Replace("<br>", "\r");
-                return InnerCheckParse(times, trashed, ind, auto);
+                if (!string.IsNullOrEmpty(trashed.Trim()))
+                    return InnerCheckParse(times, trashed, ind, auto);
+                return default;
             }
             catch (Exception ex) { throw ex; }
         }
@@ -365,7 +387,7 @@ namespace DataSpace
                 }
                 else
                 {
-                    SubjectInstance[] df = SubjectParser.SubjectParser.Current.Parsing
+                    SubjectInstance[] df = SubjectParser.Current.Parsing
                         (times, trashed.Split(new char[] { '\r', '\n' }), TimetableForLecturer, auto, lecturer);
                     if (df != null)
                     {
@@ -380,7 +402,7 @@ namespace DataSpace
         private async Task<List<WeekInstance>> GetCache()
         {
             string f = "./cache/sched/" + (TimetableForLecturer ? "lects" : "groups")
-                   + "/" + (TimetableForLecturer ? lecturer : sname) + ".txt";
+                                        + "/" + (TimetableForLecturer ? lecturer : sname) + ".txt";
             if (File.Exists(f))
             {
                 StreamReader t = File.OpenText(f);
@@ -408,7 +430,7 @@ namespace DataSpace
                 }
             }
             StreamWriter t = File.CreateText("./cache/sched/" + (TimetableForLecturer ? "lects" : "groups")
-                + "/" + (TimetableForLecturer ? lecturer : sname) + ".txt");
+                                                              + "/" + (TimetableForLecturer ? lecturer : sname) + ".txt");
             await t.WriteAsync(JsonConvert.SerializeObject(CurrentDays));
             t.Close();
         }
@@ -494,10 +516,7 @@ namespace DataSpace
             return null;
         }
     }
-}
 
-namespace SubjectParser
-{
     public sealed class SubjectParser
     {
         private string[] sr = null;
@@ -515,16 +534,16 @@ namespace SubjectParser
             list = new List<SubjectInstance>();
             UpdatePatern();
             UpdateAutoreplace();
-            defTime = new[]{
-              new ScheduleTimeViewItem("08:00-09:20/20", "I"),
-            new ScheduleTimeViewItem("09:40-11:00/15", "II"),
-            new ScheduleTimeViewItem("11:15-12:35/25", "III"),
-            new ScheduleTimeViewItem("13:00-14:20/15", "IV"),
-            new ScheduleTimeViewItem("14:35-15:55/10", "V"),
-            new ScheduleTimeViewItem("16:05-17:25/10", "VI"),
-            new ScheduleTimeViewItem("17:35-18:55/10", "VII"),
-            new ScheduleTimeViewItem("19:05-20:25/0", "VIII")
-        };
+            ScheduleTimeViewItem.defTime = new[]{
+                new ScheduleTimeViewItem("08:00-09:20/20", "I"),
+                new ScheduleTimeViewItem("09:40-11:00/15", "II"),
+                new ScheduleTimeViewItem("11:15-12:35/25", "III"),
+                new ScheduleTimeViewItem("13:00-14:20/15", "IV"),
+                new ScheduleTimeViewItem("14:35-15:55/10", "V"),
+                new ScheduleTimeViewItem("16:05-17:25/10", "VI"),
+                new ScheduleTimeViewItem("17:35-18:55/10", "VII"),
+                new ScheduleTimeViewItem("19:05-20:25/0", "VIII")
+            };
             Current = this;
         }
 
@@ -570,9 +589,10 @@ namespace SubjectParser
 
             try
             {
-                ScheduleTimeViewItem tm = GetNum(time);
+                ScheduleTimeViewItem tm = ScheduleTimeViewItem.GetNum(time);
                 list = new List<SubjectInstance>();
                 Regex r = new Regex(patern[isLecturer ? PType.Lect : PType.Stud], RegexOptions.ECMAScript);
+                if (!isLecturer) subjectS = subjectS.Select(x => '-' + x).ToArray();
                 foreach (var sub in subjectS)
                 {
                     MatchCollection mc = r.Matches(sub.Replace('\r', ' '));
@@ -583,7 +603,7 @@ namespace SubjectParser
                         GroupCollection g = m.Groups;
                         if (isLecturer)
                         {
-                            var sname =   g[5].Value.Trim();
+                            var sname = g[5].Value.Trim();
                             sname = string.IsNullOrEmpty(sname) ? g[4].Value : sname;
                             _subject = new SubjectInstance(tm.LessonTime, sname, tm.LessonNum.ToString())
                             {
@@ -602,7 +622,8 @@ namespace SubjectParser
                                 subgroup = "вся група";
                             }
 
-                            _subject = new SubjectInstance(tm.LessonTime, g[6].Value.Trim(), tm.LessonNum.ToString())
+                            var subj = !string.IsNullOrEmpty(g[6].Value.Trim()) ? g[6].Value.Trim() : g[0].Value.Trim();
+                            _subject = new SubjectInstance(tm.LessonTime, subj, tm.LessonNum.ToString())
                             {
                                 SubGroup = subgroup,
                                 Streams = g[4].Value.Trim(),
@@ -615,7 +636,173 @@ namespace SubjectParser
                         list.Add(_subject);
                     }
                 }
-                                
+
+
+                /*
+                if (m.Count == 0 && !isLecturer)
+                { // Subgroups
+                    m = new Regex(patern[ PType.Lect], RegexOptions.ECMAScript).Matches(subjectS);
+                    foreach (Match match in m)
+                    {
+                        SubjectInstance _subject = new SubjectInstance();
+                        GroupCollection g = match.Groups;
+                        string audit = (g[1].Value.Contains('.') ? "" : g[1].Value);
+                        string stream_or_groups_type = "";
+                        string groups_streams = g[5].Value.Contains('.') ? g[5].Value : "";
+                        string lecturer = g[3].Value;
+                        string subject = g[4].Value.TrimStart(' ').TrimEnd(' ');
+                        if (string.IsNullOrEmpty(subject))
+                        {
+                            subject = g[5].Value;
+                        }
+
+                        string type = (g[7].Value != "" ? g[7].Value : g[5].Value).TrimStart(' ').TrimEnd(' ');
+
+
+                        if (string.IsNullOrEmpty(time) && list.Count > 0)
+                        {
+                            time = list.Last().TimeStamp;
+                        }
+
+                        ScheduleTimeViewItem tm = GetNum(time);
+                        _subject.Subject = subject.TrimStart(' ').TrimEnd(' ');
+                        _subject.SubGroup = groups_streams.TrimStart(new char[] { ' ', '(' }).TrimEnd(new char[] { ' ', ')' });
+                        _subject.Classroom = audit.TrimStart(' ').TrimEnd(' ');
+                        _subject.Lecturer = lecturer.TrimStart(' ').TrimEnd(' ');
+                        _subject.Streams = stream_or_groups_type.TrimStart(new char[] { ' ', '(' }).TrimEnd(new char[] { ' ', ')' });
+                        _subject.TimeStamp = (tm == null) ? "null" : tm.LessonTime;
+                        _subject.LessonNum = (tm == null) ? -1 : tm.LessonNum;
+                        _subject.Type = CheckType(type);
+                        if (AR != null && auto)
+                        {
+                            _subject.Subject = AutoReplace(lecturer, _subject.Subject);
+                        }
+
+                        list.Add(_subject);
+                    }
+                }
+                else
+                {
+                    foreach (Match match in m)
+                    {
+                        string[] hj = match.Groups[0].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        if (hj.Count() < 1 || match.Value == " ")
+                        {
+                            continue;
+                        }
+
+                        ScheduleTimeViewItem tm = GetNum(time);
+
+                        GroupCollection g = match.Groups;
+
+                        SubjectInstance _subject = new SubjectInstance();
+                        if (g[0].Value.Contains("Фізичне ви") ||
+                            g[0].Value.Contains("Військова") ||
+                            g[0].Value.Contains("Директорат") ||
+                            g[0].Value.Contains("Вчена рада"))
+                        {
+
+                            list.Add(new SubjectInstance(tm.LessonTime, g[0].Value, tm.LessonNum.ToString()));
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(time) && list.Count > 0)
+                            {
+                                time = list.Last().TimeStamp;
+                            }
+
+                            string audit = (g[1].Value.Contains('.') ? "" : g[1].Value);
+                            if (string.IsNullOrEmpty(audit) && list.Count > 0)
+                            {
+                                audit = list.Last().Classroom;
+                            }
+
+                            string lecturer = (g[2].Value == "") ? g[1].Value : g[2].Value;
+                            if (string.IsNullOrEmpty(lecturer) && list.Count > 0)
+                            {
+                                lecturer = list.Last().Lecturer;
+                            }
+                            else if (!lecturer.Contains('.'))
+                            {
+                                lecturer = g[1].Value;
+                            }
+
+                            string stream_or_groups_type = !isLecturer ? g[7].Value : (g[3].Value string.IsNullOrEmpty(g[3].Value) ? g[4].Value : g[3].Value);
+                            string groups_streams = !isLecturer ? g[8].Value : g[4].Value;
+                            string subject = (!isLecturer ? g[6].Value : g[2].Value).TrimStart(' ').TrimEnd(' ');
+                            if (string.IsNullOrEmpty(subject))
+                            {
+                                subject = g[5].Value;
+                            }
+
+                            string type = (isLecturer ? g[5].Value : g[9].Value).TrimStart(' ').TrimEnd(' ');
+
+                            if ((type.Count(f => f == '(' || f == ')') % 2 != 0))
+                            {
+                                string t = type.Substring(type.IndexOf('(', 3));
+                                _subject.Type = CheckType(t);
+                                _subject.Subject += subject + " " + type.Substring(0, type.IndexOf('(', 3));
+                            }
+                            else
+                            {
+                                if (!isLecturer)
+                                {
+                                    _subject.Type = CheckType(g[9].Value);
+                                }
+                                else
+                                {
+                                    if (!g[5].Value.Contains("підг"))
+                                    {
+                                        _subject.Type = CheckType(g[5].Value);
+                                    }
+                                    else
+                                    {
+                                        stream_or_groups_type = g[4].Value;
+                                        groups_streams = g[5].Value;
+                                        _subject.Type = CheckType(g[6].Value);
+                                    }
+                                }
+                                _subject.Subject = subject.TrimStart(' ').TrimEnd(' ');
+                            }
+                            _subject.SubGroup = groups_streams.TrimStart(new char[] { ' ', '(' }).TrimEnd(new char[] { ' ', ')' });
+                            _subject.Classroom = audit.TrimStart(' ').TrimEnd(' ');
+                            if (!isLecturer)
+                            {
+                                _subject.Lecturer = lecturer.TrimStart(' ').TrimEnd(' ');
+                            }
+
+                            _subject.Streams = stream_or_groups_type.TrimStart(new char[] { ' ', '(' }).TrimEnd(new char[] { ' ', ')' });
+                            _subject.TimeStamp = (tm == null) ? "null" : tm.LessonTime;
+                            _subject.LessonNum = (tm == null) ? -1 : tm.LessonNum;
+
+                            if (AR != null && auto)
+                            {
+                                _subject.Subject = AutoReplace(lecturer, _subject.Subject);
+                            }
+
+                            if (isLecturer)
+                            {
+                                if (!string.IsNullOrEmpty(g[6].Value.Trim(' ')) && !g[6].Value.Trim(' ').Contains("("))
+                                {
+                                    list.Add(new SubjectInstance(tm.LessonTime, g[6].Value, tm.LessonNum.ToString()));
+                                }
+                                if (MainApp.Fix22_lecturerName)
+                                {
+                                    try
+                                    {
+
+                                        string[] tf = LectName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                        _subject.Lecturer = tf[0] + " " + tf[1][0] + "." + tf[2][0] + ".";
+
+                                    }
+                                    catch { }
+                                }
+                            }
+                            list.Add(_subject);
+                        }
+                    }
+                }
+    */
                 return list.ToArray();
             }
             catch (Exception) { return null; }
@@ -655,7 +842,7 @@ namespace SubjectParser
 
         public bool UpdateAutoreplace()
         {
-            string f =Path.Combine(Reactor.Current.DirectoryManager[MainApp.Dirs.Subject_Parser],"autoreplace.txt");
+            string f = "./addons/subjects_parser/autoreplace.txt";
             if (File.Exists(f))
             {
                 AR = new Dictionary<string, string>();
@@ -674,7 +861,7 @@ namespace SubjectParser
 
         private bool GetPatternFor(PType type)
         {
-            string folder = Reactor.Current.DirectoryManager[MainApp.Dirs.Subject_Parser], fmt = "ddMMyy";
+            string folder = MainApp.Current.Core.DirectoryManager[MainApp.Dirs.Subject_Parser], fmt = "ddMMyy";
             rev:
             var files = Directory.EnumerateFiles(folder);
             if (files.Count() == 0)
@@ -715,7 +902,32 @@ namespace SubjectParser
                 result.Add(GetPatternFor(a));
             }
             return !result.Where(x => x == false).Any();
-        } 
+        }
+        //public Tuple<DayInstance, Exception> Test()
+        //{
+        //    string lines = "";
+        //    try
+        //    {
+        //        sr = lines.Split('\n');
+        //        list = new List<SubjectInstance>();
+        //        foreach (string i in sr)
+        //        {
+        //            string time = "08:00-09:20";
+        //            if (i.Substring(i.IndexOf(' ') + 1).Contains('-'))
+        //            {
+        //                time = i.Substring(0, i.IndexOf(' '));
+        //            }
+
+        //            string trash = i.Substring(i.IndexOf(' ') + 1);
+        //            list.AddRange(Parsing(time, trash, false, true, ""));
+        //        }
+        //        return new Tuple<DayInstance, Exception>(new DayInstance()
+        //        {
+        //            Subjects = list.ToArray()
+        //        }, err);
+        //    }
+        //    catch (Exception) { return new Tuple<DayInstance, Exception>(null, err); }
+        //}
         private string CheckType(string what)
         {
             what = what.Replace('(', ' ').Replace(')', ' ').TrimStart(' ').TrimEnd(' ');
@@ -772,7 +984,7 @@ namespace SubjectParser
             return defTime.Where(x => x.LessonNum == int.Parse(num)).FirstOrDefault();
         }
 
-        private static Dictionary<char, int> _romanMap = new Dictionary<char, int>
+        private static readonly Dictionary<char, int> _romanMap = new Dictionary<char, int>
         {
             {'I', 1}, {'V', 5}, {'X', 10}, {'L', 50}, {'C', 100}, {'D', 500}, {'M', 1000}
         };
@@ -808,7 +1020,7 @@ namespace SubjectParser
 
     }
 
-    // Not actual - already fixed on server
+// Not actual - already fixed on server
     public sealed class AutoReplaceHelper
     {
         public static AutoReplaceHelper Current;
@@ -823,16 +1035,18 @@ namespace SubjectParser
             Dictionary = new Dictionary<string, List<string>>();
             try
             {
-                CreateClientRequest request = new CreateClientRequest(st);
-                HttpResponseMessage resp = await request.GetAsync();
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(await resp.Content.ReadAsStringAsync());
-                foreach (HtmlNode i in doc.DocumentNode.Descendants("div").Where(x => x.HasClass("hvr")))
+                using (Request request = new Request(st))
                 {
-                    HtmlNode node = i.Descendants("a").First();
-                    string href = st + node.GetAttributeValue("href", "");
-                    new Thread(new ParameterizedThreadStart(ParseInstitute)).Start(href);
+                    HttpResponseMessage resp = await request.GetAsync();
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(await resp.Content.ReadAsStringAsync());
+                    foreach (HtmlNode i in doc.DocumentNode.Descendants("div").Where(x => x.HasClass("hvr")))
+                    {
+                        HtmlNode node = i.Descendants("a").First();
+                        string href = st + node.GetAttributeValue("href", "");
+                        new Thread(new ParameterizedThreadStart(ParseInstitute)).Start(href);
 
+                    }
                 }
             }
             catch (Exception ex)
@@ -911,13 +1125,15 @@ namespace SubjectParser
         {
             try
             {
-                CreateClientRequest request = new CreateClientRequest(href as string);
-                HttpResponseMessage resp = await request.GetAsync();
                 HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(await resp.Content.ReadAsStringAsync());
+                using (Request request = new Request(href as string))
+                {
+                    HttpResponseMessage resp = await request.GetAsync();
+                    doc.LoadHtml(await resp.Content.ReadAsStringAsync());
+                }
+
                 IEnumerable<HtmlNode> nodet = doc.GetElementbyId("xb-tree-title-id").Descendants()
                     .Where(x => x.InnerText.ToLower().Contains("кафедри"));
-
                 if (nodet.Any())
                 {
                     HtmlNode node = nodet.First();
@@ -949,13 +1165,15 @@ namespace SubjectParser
         {
             try
             {
-                CreateClientRequest request = new CreateClientRequest(href as string);
-                HttpResponseMessage resp = await request.GetAsync();
                 HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(await resp.Content.ReadAsStringAsync());
-                if (doc.GetElementbyId("sp") == null)
+                using (Request request = new Request(href as string))
                 {
-                    return;
+                    HttpResponseMessage resp = await request.GetAsync();
+                    doc.LoadHtml(await resp.Content.ReadAsStringAsync());
+                    if (doc.GetElementbyId("sp") == null)
+                    {
+                        return;
+                    }
                 }
 
                 IEnumerable<HtmlNode> node = doc.GetElementbyId("sp").Descendants("a")
@@ -986,10 +1204,12 @@ namespace SubjectParser
         {
             try
             {
-                CreateClientRequest request = new CreateClientRequest(href as string);
-                HttpResponseMessage resp = await request.GetAsync();
                 HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(await resp.Content.ReadAsStringAsync());
+                using (Request request = new Request(href as string))
+                {
+                    HttpResponseMessage resp = await request.GetAsync();
+                    doc.LoadHtml(await resp.Content.ReadAsStringAsync());
+                }
                 HtmlNode node = doc.DocumentNode.Descendants("table").Where(x => x.HasClass("sklad")).First();
 
                 foreach (HtmlNode i in node.ChildNodes.First().ChildNodes)
@@ -1031,10 +1251,7 @@ namespace SubjectParser
             }
         }
     }
-}
 
-namespace HierarchyTime
-{
     public partial class DayInstance
     {
         public DayInstance(DateTime date)
@@ -1140,7 +1357,7 @@ namespace HierarchyTime
             else
             {
                 return other != null &&
-                    Subjects == ((DayInstance)other).Subjects &&
+                       Subjects == ((DayInstance)other).Subjects &&
                        Day == ((DayInstance)other).Day &&
                        DayName == ((DayInstance)other).DayName;
             }
@@ -1160,12 +1377,12 @@ namespace HierarchyTime
         private void NullableAll()
         {
             Classroom =
-            Lecturer =
-            Streams =
-            SubGroup =
-            Subject =
-            Type =
-            TimeStamp = "";
+                Lecturer =
+                    Streams =
+                        SubGroup =
+                            Subject =
+                                Type =
+                                    TimeStamp = "";
         }
         public SubjectInstance()
         {
@@ -1246,4 +1463,3 @@ namespace HierarchyTime
         }
     }
 }
-

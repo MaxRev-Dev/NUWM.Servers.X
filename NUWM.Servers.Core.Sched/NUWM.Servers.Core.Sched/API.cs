@@ -1,26 +1,21 @@
-﻿using HierarchyTime;
-using JSON;
-using MR.Servers;
-using MR.Servers.Core.Route.Attributes;
-using MR.Servers.Utils;
-using Newtonsoft.Json;
-using NUWM.Servers.Sched;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using MaxRev.Servers.API;
+using MaxRev.Servers.Core.Route;
+using MaxRev.Servers.Utils;
+using MaxRev.Utils;
+using Newtonsoft.Json;
 
-namespace APIUtilty
+namespace NUWM.Servers.Core.Sched
 {
     [RouteBase("api")]
-    public sealed class API : CoreAPI
+    public sealed class API : CoreApi
     {
         public async Task<Tuple<string, string>> PrepareForResponse(string Request, string Content, string action)
         {
-            var query = Info.Query;
-            var headers = Info.Headers;
-
             string FS = null, ContentType = "text/json";
             action = action.Substring(action.IndexOf('/') + 1);
             try
@@ -69,20 +64,14 @@ namespace APIUtilty
 
             return new Tuple<string, string>(FS, ContentType);
         }
-        [Route("schedPost", MR.Servers.Core.Route.AccessMethod.POST)]
+        [Route("schedPost", AccessMethod.POST)]
         public string LectPost()
         {
             var query = Info.Query;
-            var headers = Info.Headers;
 
             try
             {
-                foreach (var kp in Info.Content.Split('&', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    var k_p = kp.Split('=');
-                    query.Add(k_p[0], k_p[1]);
-                }
-                bool lect = false;
+                bool lect;
                 if (query.HasKey("lect"))
                 {
                     var rlect = query["lect"];
@@ -102,8 +91,8 @@ namespace APIUtilty
 
                             date = query["date"];
                         }
-                        var res = SubjectParser.SubjectParser.Current.Parse(date, System.Net.WebUtility.UrlDecode(contents), lect, auto, "");
-                        return APIUtilty.API.CreateResponseSubjects(res.Item1, res.Item2);
+                        var res = SubjectParser.Current.Parse(date, System.Net.WebUtility.UrlDecode(contents), lect, auto, "");
+                        return API.CreateResponseSubjects(res.Item1, res.Item2);
                     }
                     throw new FormatException("InvalidRequest: expected content parameter");
                 }
@@ -118,8 +107,10 @@ namespace APIUtilty
         [Route("trace")]
         private string GetTrace()
         {
-            ((Server)Server).State.DecApiResponsesUser();
-            return Tools.GetBaseTrace(MainApp.Current.Core);
+            this.Server.State.OnApiResponse();
+            this.Server.State.DecApiResponseUser();
+
+            return Tools.GetBaseTrace(ModuleContext.Server);
         }
 
 
@@ -127,14 +118,13 @@ namespace APIUtilty
         public async Task<string> Schedule()
         {
             var query = Info.Query;
-            var headers = Info.Headers;
             try
             {
-                bool auto = SubjectParser.AutoReplaceHelper.Current?.Now ?? false;
+                bool auto = AutoReplaceHelper.Current?.Now ?? false;
                 if (query.HasKey("auto"))
                 {
                     string autox = query["auto"];
-                    auto = (autox == "true" || "autox" == "1" ? true : false);
+                    auto = autox == "true" || autox == "1";
                 }
                 if (query.HasKey("group") || query.HasKey("name"))
                 {
@@ -148,17 +138,17 @@ namespace APIUtilty
                         year = int.Parse(ryear);
                     }
 
-                    var type = DataSpace.GetData.RetType.days;
+                    var type = GetData.RetType.days;
                     if (query.HasKey("type"))
                     {
                         string rtype = query["type"];
                         if (rtype == "weeks")
                         {
-                            type = DataSpace.GetData.RetType.weeks;
+                            type = GetData.RetType.weeks;
                         }
                         else if (rtype == "days")
                         {
-                            type = DataSpace.GetData.RetType.days;
+                            type = GetData.RetType.days;
                         }
                         else
                         {
@@ -167,12 +157,12 @@ namespace APIUtilty
                     }
                     if (query.HasKey("sdate"))
                     {
-                        string sdate = Uri.UnescapeDataString(query["sdate"]);
+                        string sdate = query["sdate"];
                         if (query.HasKey("edate"))
                         {
-                            string edate = Uri.UnescapeDataString(query["edate"]);
+                            string edate = query["edate"];
                             bool isLecturer = !string.IsNullOrEmpty(name);
-                            DataSpace.GetData data = new DataSpace.GetData(isLecturer ? name : group, sdate, edate, isLecturer, type);
+                            GetData data = new GetData(isLecturer ? name : group, sdate, edate, isLecturer, type);
 
                             var rp = await data.GetDays(auto);
                             if (data.R != null)
@@ -209,7 +199,7 @@ namespace APIUtilty
                             throw new InvalidOperationException("InvalidKey: year must be in bounds (current year+-1)");
                         }
 
-                        DataSpace.GetData data = new DataSpace.GetData(isLecturer ? name : group, week, year, isLecturer, type);
+                        GetData data = new GetData(isLecturer ? name : group, week, year, isLecturer, type);
                         var rp = await data.GetDays(auto);
                         if (data.R != null)
                         {
@@ -228,7 +218,7 @@ namespace APIUtilty
                     }
                     else if (query.HasKey("weeks"))
                     {
-                        string rweek = Uri.UnescapeDataString(query["weeks"]);
+                        string rweek = query["weeks"];
                         string[] weeks = null;
                         if (rweek.Contains(','))
                         {
@@ -240,7 +230,8 @@ namespace APIUtilty
                         foreach (var weekq in weeks)
                         {
                             int week = int.Parse(weekq);
-                            if (week > 52 || week < 1)
+                            if (week > 52) week = 52;
+                            if (/*week > 52 ||*/ week < 1)
                             {
                                 throw new InvalidOperationException("InvalidKey: week is not valid");
                             }
@@ -253,7 +244,7 @@ namespace APIUtilty
                             throw new InvalidOperationException("InvalidKey: year must be in bounds (current year+-1)");
                         }
 
-                        DataSpace.GetData data = new DataSpace.GetData(isLecturer ? name : group, t1, t2, year, isLecturer, type);
+                        GetData data = new GetData(isLecturer ? name : group, t1, t2, year, isLecturer, type);
                         var rp = await data.GetDays(auto);
                         if (data.R != null)
                         {
@@ -293,11 +284,10 @@ namespace APIUtilty
         public Tuple<string, string> SettingTop()
         {
             var query = Info.Query;
-            var headers = Info.Headers;
 
-            var core = Reactor.Current;
+            var core = MainApp.Current.Core;
             string FS = "Context undefined", ContentType = "text/plain";
-            if (query.HasKey("reinit_users")) { core.AuthManager.InitUsersDB(); FS = "OK"; }
+            if (query.HasKey("reinit_users")) { core.AuthManager.InitializeUsersDb(); FS = "OK"; }
             else if (query.HasKey("ulog"))
             {
                 FS = core.Logger.GetLog();
@@ -324,18 +314,18 @@ namespace APIUtilty
             }
             else if (query.HasKey("svlog"))
             {
-                LogScheduler.Current.LogManage();
+                Server.Logger.Scheduler.LogManage();
                 FS = "OK. Log managed";
             }
             else if (query.HasKey("sched_pattern_update"))
             {
-                var p = SubjectParser.SubjectParser.Current.UpdatePatern();
+                var p = SubjectParser.Current.UpdatePatern();
                 FS = (p ? "Pattern Updated" :
                      "Pattern not updated or failed to find file");
             }
             else if (query.HasKey("ar_update"))
             {
-                var p = SubjectParser.SubjectParser.Current.UpdateAutoreplace();
+                var p = SubjectParser.Current.UpdateAutoreplace();
                 FS = (p ? "Dictionary Updated" :
                      "Dictionary wasn't updated or failed to find file");
             }
@@ -343,31 +333,31 @@ namespace APIUtilty
             {
                 if (query["ar"] == "true")
                 {
-                    SubjectParser.AutoReplaceHelper.Current.Now = true;
+                    AutoReplaceHelper.Current.Now = true;
                     FS = "AutoReplace is ON";
                 }
                 else
                 {
-                    SubjectParser.AutoReplaceHelper.Current.Now = false;
+                    AutoReplaceHelper.Current.Now = false;
                     FS = "AutoReplace is OFF";
                 }
             }
-            else if (query.HasKey("clear_stats"))
-            {
-                core.UserStats.ClearAll();
-                FS = "Stats cleared";
-            }
-            else if (query.HasKey("users"))
-            {
-                int it = 0;
-                FS += "Users:";
-                foreach (var i in UserStats.UniqueUsersList)
-                {
-                    FS += "\n[" + ++it + "] " + i;
-                }
+            //else if (query.HasKey("clear_stats"))
+            //{
+            //    Server.State.ClearAll();
+            //    FS = "Stats cleared";
+            //}
+            //else if (query.HasKey("users"))
+            //{
+            //    int it = 0;
+            //    FS += "Users:";
+            //    foreach (var i in UserStats.UniqueUsersList)
+            //    {
+            //        FS += "\n[" + ++it + "] " + i;
+            //    }
 
-                FS += "\nENDOFLIST";
-            }
+            //    FS += "\nENDOFLIST";
+            //}
             else
             {
                 FS = "NOT IMPLEMENTED"; ContentType = "text/plain";
@@ -385,7 +375,7 @@ namespace APIUtilty
             {
                 if (query.HasKey("name"))
                 {
-                    var name = Uri.UnescapeDataString(query["name"]); var surn = "";
+                    var name = query["name"]; var surn = "";
 
                     if (name.Contains(' '))
                     {
@@ -397,10 +387,10 @@ namespace APIUtilty
                     }
 
                     var obj =
-                        SubjectParser.AutoReplaceHelper.Dictionary.Keys.Where(x => x.ToLower().Contains(surn));
+                        AutoReplaceHelper.Dictionary.Keys.Where(x => x.ToLower().Contains(surn));
                     if (obj.Any())
                     {
-                        return JsonConvert.SerializeObject(SubjectParser.AutoReplaceHelper.Dictionary[obj.First()]);
+                        return JsonConvert.SerializeObject(AutoReplaceHelper.Dictionary[obj.First()]);
                     }
                     else
                     {
@@ -409,7 +399,7 @@ namespace APIUtilty
                 }
                 else if (query.HasKey("subj"))
                 {
-                    var name = Uri.UnescapeDataString(query["subj"]); var surn = "";
+                    var name = query["subj"]; var surn = "";
 
                     if (name.Contains(' '))
                     {
@@ -421,7 +411,7 @@ namespace APIUtilty
                     }
 
                     List<string> obj = new List<string>();
-                    obj = SubjectParser.AutoReplaceHelper.SmartSearch(name);
+                    obj = AutoReplaceHelper.SmartSearch(name);
                     if (obj.Any())
                     {
                         return JsonConvert.SerializeObject(obj);
@@ -471,26 +461,29 @@ namespace APIUtilty
                     Content = obj
                 };
             }
-            else
-            if (err != null && err.GetType() == typeof(FormatException))
+            else if (err.GetType() == typeof(FormatException))
             {
                 resp = new Response() { Code = StatusCode.InvalidRequest, Error = err.Message, Content = null };
             }
-            else if (err != null && err.GetType() == typeof(InvalidOperationException))
+            else if (err.GetType() == typeof(DivideByZeroException))
+            {
+                resp = new Response() { Code = StatusCode.ServerNotResponsing, Error = err.Message, Content = null };
+            }
+            else if (err.GetType() == typeof(InvalidOperationException))
             {
                 resp = new Response() { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
             }
-            else if (err != null && err.GetType() == typeof(EntryPointNotFoundException))
+            else if (err.GetType() == typeof(EntryPointNotFoundException))
             {
                 resp = new Response() { Code = StatusCode.DeprecatedMethod, Error = err.Message, Content = null };
             }
-            else if (err != null && err.GetType() == typeof(InvalidDataException))
+            else if (err.GetType() == typeof(InvalidDataException))
             {
                 resp = new Response() { Code = StatusCode.NotFound, Error = err.Message, Content = null };
             }
             else
             {
-                Reactor.Current.Logger.NotifyError(err);
+                MainApp.Current.Core.Logger.NotifyError(LogArea.Other, err);
                 resp = new Response() { Code = StatusCode.Undefined, Error = (err != null) ? err.Message + "\n" + err.StackTrace : "", Content = obj };
             }
 

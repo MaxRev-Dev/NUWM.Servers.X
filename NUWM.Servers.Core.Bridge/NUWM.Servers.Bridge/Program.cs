@@ -1,35 +1,40 @@
-﻿using MR.Servers;
+﻿
 using System;
-using System.Collections.Generic;
-using static MR.Servers.Core.Proxy.Bridge;
+using System.Threading.Tasks;
+using MaxRev.Servers;
+using MaxRev.Servers.API.Response;
+using MaxRev.Servers.Interfaces;
 
 namespace NUWM.Servers.Bridge
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static Task Main(string[] args)
         {
             if (args != null && args.Length == 2)
             {
-                Reactor Core = new Reactor();
+                //if (Core.Config.Main != null)
+                //    Core.Config.B = new KeyValuePair<string, string>("x-NS-type", "Bridge");
 
-                Core.Config.Main.ServerTypeName = new KeyValuePair<string, string>("x-NS-type", "Bridge");
-                new MR.Servers.Core.Proxy.Bridge(Core).
-                   UnavailableHandler(sender =>
-                   {
-                       string error = "It's NUWM.Servers.Bridge response. One of NUWM.Servers is anavailable now";
-                       sender.Send(System.Net.HttpStatusCode.OK,
-                           "{\"code\":" + ((int)StatusCode.ServerNotResponsing).ToString() +
-                           ",\"cache\":false,\"error\":\"" + error + "\",\"response\":null}");
-
-                   }).Link(
+                return ReactorStartup.From(args, new ReactorStartupConfig{AwaitForConsoleInput = false})
+                    .Configure((with, core) =>
+                {
+                    with.Bridge(out IBridgeServer server);
+                    server.UnavailableHandler(sender =>
+                    {
+                        string error = "It's NUWM.Servers.Bridge response. One of NUWM.Servers is anavailable now";
+                        sender.SendFromCode(System.Net.HttpStatusCode.OK, new JsonResponseContainer
+                        {
+                            Code = StatusCode.ServerNotResponding,
+                            Error = new object[] { error }
+                        });
+                    }).Link(
                         Convert.ToInt16(args[0]), //source client
                         Convert.ToInt16(args[1])); //localhost dest client
+                }).RunAsync();
             }
-            else
-            {
-                Environment.Exit(0);
-            }
+
+            return Task.CompletedTask;
         }
     }
 }

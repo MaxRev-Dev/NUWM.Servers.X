@@ -27,8 +27,8 @@
             } catch (err) {}
 
             xhr.onreadystatechange = function() { 
-                if (xhr.readyState != 4) return; 
-                if (xhr.status == 200) {
+                if (xhr.readyState !== 4) return; 
+                if (xhr.status === 200) {
                    $('#trace').text( xhr.responseText );
                 }
             }}

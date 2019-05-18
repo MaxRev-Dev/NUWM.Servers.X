@@ -1,328 +1,208 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using MaxRev.Servers.API;
+using MaxRev.Servers.Core.Http;
+using MaxRev.Servers.Core.Route;
+using MaxRev.Servers.Interfaces;
+using MaxRev.Servers.Utils;
+using MaxRev.Utils;
+using MaxRev.Utils.Methods;
+using Newtonsoft.Json;
 
-namespace APIUtilty
+namespace NUWM.Servers.Core.Calc
 {
-    using HelperUtilties;
-    using JSON;
-    using NUWM.Servers.Core.Calc;
-    using System.Diagnostics;
-    using System.Threading.Tasks;
-    using System.Web;
-    using static JSON.SpecialtiesVisualiser;
-    using static JSON.SpecialtiesVisualiser.Specialty;
-    class FeedbackHelper
+    [RouteBase("api")]
+    internal class CalcAPI : CoreApi
     {
-        public FeedbackHelper()
+        protected override void OnInitialized()
         {
-            Current = this;
-            Feed = new Dictionary<string, string>();
+            base.OnInitialized();
+          //  App.Get.Core.Logger.Notify(LogArea.Other, LogType.Info, Info?.a);
         }
-        public static FeedbackHelper Current;
-        public Dictionary<string, string> Feed;
-        public void Save()
+        public Query Query => Info.Query;
+
+        private void NotifyLoggerError(Exception ex)
         {
-            File.AppendAllText(MainApp.dirs.Last() + "/users_reviews.txt", GetAll(true));
-            for (int i = 0; i < Feed.Count; i++)
-                Feed[Feed.ElementAt(i).Key] = "";
+            App.Get.Core.Logger.NotifyError(LogArea.Other, ex);
         }
 
-        public string GetAll(bool strict = false)
+        [Route("feedback", AccessMethod.POST)]
+        public string FeedbackPost()
         {
-            string all = "";
-
-            var f = strict ? Feed.Where(x => x.Value != "") : Feed;
-            foreach (var i in f)
-                all += i.Key + "\n" + i.Value + "\n\n";
-            return all;
-        }
-
-        public bool Checker(string key)
-        {
-            var g = Feed.Where(x => x.Key != null && x.Key.Contains(key));
-            if (g.Any())
+            var gu = StatusCode.Success;
+            string cont;
+            if (FeedbackHandler(Info.FormData))
+                cont = "Дякуємо за Ваш відгук!";
+            else
             {
-                if (TimeChron.GetRealTime() - DateTime.ParseExact(g.Last().Key.Split("=>")[1].Trim(' '), "hh:mm:ss - dd.MM.yyyy", null) > new TimeSpan(0, 5, 0))
-                    return true;
-                return false;
+                cont = "Ваш відгук не зараховано. Перевищено кількість запитів. Повторіть спробу за декілька хвилин";
+                gu = StatusCode.ServerSideError;
             }
-            return true;
-        }
-    }
-    class API
-    {
-        public static long ApiRequestCount = 0;
-        Dictionary<string, string> query, headers;
-        public API(Dictionary<string, string> query, Dictionary<string, string> headers)
-        {
-            this.headers = headers;
-            this.query = query;
-        }
-        public Dictionary<string, string> Query { get { return query; } set { query = value; } }
-        public async Task<Tuple<string, string>> PrepareForResponse(string Request, string Content, string action)
-        {
-            ++ApiRequestCount;
-            string FS = null, ContentType = "text/json";
-            action = action.Substring(action.IndexOf('/') + 1);
-            try
-            {
-                if (Request.Contains("GET") || Request.Contains("JSON"))
-                {
-                    switch (action)
-                    {
-                        case "specAll":
-                            {
-                                FS = All(); break;
-                            }
-                        case "calc":
-                            {
-                                FS = Calc(); break;
-                            }
-                        case "ctable": { FS = GetTable(); break; }
-                        case "set":
-                            {
-                                var t = await Setting();
-                                FS = t.Item1; ContentType = t.Item2; break;
-                            }
-                        case "trace":
-                            {
-                                --ApiRequestCount;
-                                FS = Tracer(); ContentType = "text/plain"; break;
-                            }
-                        default: throw new FormatException("InvalidRequest: invalid key parameter");
-                    }
-                }
-                else if (Request.Contains("POST"))
-                {
-                    if (action == "feedback")
-                    {
-                        var gu = StatusCode.Success;
-                        string cont = "";
-                        if (FeedbackHandler(Content))
-                            cont = "Дякуємо за Ваш відгук!";
-                        else
-                        {
-                            cont = "Ваш відгук не зараховано. Перевищено кількість запитів. Повторіть спробу за декілька хвилин";
-                            gu = StatusCode.ServerSideError;
-                        }
-                        FS = JsonConvert.SerializeObject(new Response() { Content = cont, Code = gu });
-                    }
-                    else
-                        throw new FormatException("NOT IMPLEMENTED");
-                }
-            }
-            catch (Exception ex)
-            {
-                FS = Serialize(ResponseTyper(ex));
-            }
-            return new Tuple<string, string>(FS, ContentType);
+            return new Response() { Content = cont, Code = gu }.Serialize();
         }
 
-        private bool FeedbackHandler(string Content)
+        private bool FeedbackHandler(IRequestData Content)
         {
             try
             {
-                var qur = HttpUtility.ParseQueryString(Content);
-                if (qur["mail"] == null || !FeedbackHelper.Current.Checker(qur["mail"])) return false;
-                FeedbackHelper.Current.Feed.Add(qur["mail"] + " => " + TimeChron.GetRealTime().ToString("hh:mm:ss - dd.MM.yyyy"), qur["text"]);
+                var qur = Content.Form;
+                if (!qur.TryGetValue("mail", out var c1) ||
+                    !App.Get.FeedbackbHelper.Checker(c1))
+                {
+                    return false;
+                }
+
+                qur.TryGetValue("text", out var c2);
+                App.Get.FeedbackbHelper.Feed.Add(c1 + " => " + TimeChron.GetRealTime().ToString("hh:mm:ss - dd.MM.yyyy"), c2);
             }
             catch { return false; }
             return true;
         }
-
+        [Route("trace")]
         private string Tracer()
         {
-            string resp = NUWM.Servers.Core.Reactor.Current.GetBaseTrace();
+            this.Server.State.OnApiResponse();
+            this.Server.State.DecApiResponseUser();
 
-            TimeSpan m = new TimeSpan();
-            if (ScheduleTask.scheduledTime != null)
-                m = ScheduleTask.scheduledTime - TimeChron.GetRealTime();
+            var m = App.Get.ReparseScheduler.ScheduledTime - TimeChron.GetRealTime();
 
+            StringBuilder resp = new StringBuilder();
+            resp.Append(Tools.GetBaseTrace(Server));
 
-            resp += "\n\nSpecialties count: " + MainApp.CurrentParser.res.Count +
-                "\nSpecialty parser encounter: " + String.Format("{0}d {1}h {2}m {3}s", m.Days, m.Hours, m.Minutes, m.Seconds);
-            if (Logger.Current.Log != null && Logger.Current.Log.Count > 0)
-            {
-                var f = Logger.Current.Log.TakeLast(20);
-                resp += "\n\nLOG: (last " + f.Count() + " req)\n";
-                foreach (var h in f.Reverse())
-                    resp += h + "\n";
-                var g = LogScheduler.Current.ScheduledTime - TimeChron.GetRealTime();
-                resp += "\nLog saving in " + g.Hours + "h " + g.Minutes + "m " + g.Seconds + "s\n";
-            }
-            else
-            {
-                resp += "\n\nLog is clear\n";
-            }
-            return resp;
-        }
+            resp.Append("\n\nSpecialties count: " + App.Get.SpecialtyParser.SpecialtyList.Count +
+                "\nSpecialty parser encounter: " +
+                $"{m.Days}d {m.Hours}h {m.Minutes}m {m.Seconds}s");
 
-        private async void DelaySuspend()
-        {
-
-            LogScheduler.Current.LogManage();
-            FeedbackHelper.Current.Save();
-            await Task.Delay(2 * 1000);
-            Environment.Exit(0);
+            return resp.ToString();
         }
 
 
+        [Route("ctable")]
         private string GetTable()
         {
             List<string[]> list = new List<string[]>();
-            foreach (var i in converts)
-                list.Add(new string[] { i.Key.ToString("f1"), i.Value.ToString() });
+            foreach (var i in App.Get.SpecialtyParser.ConverterTable)
+                list.Add(new[] { i.Key.ToString("f1"), i.Value.ToString() });
             list.Reverse();
             return JsonConvert.SerializeObject(new Response() { Content = list, Code = StatusCode.Success, Error = null });
         }
 
-        public async Task<Tuple<string, string>> Setting()
+        [Route("set")]
+        public async Task<IResponseInfo> SettingTop()
         {
             string FS = "", ContentType = "text/plain";
-            if (query.ContainsKey("reinit_users")) { AutorizationManager.Current.InitUsersDB(); FS = "OK"; }
-            else if (query.ContainsKey("ulog"))
+
+            if (Query.HasKey("feedback"))
             {
-                foreach (var i in Logger.Current.Log)
-                {
-                    FS += i; FS += "\n";
-                }
-                if (FS == null)
-                    FS = "NOTHING";
-            }
-            else if (query.ContainsKey("feedback"))
-            {
-                var f = FeedbackHelper.Current.GetAll(true);
+                var f = App.Get.FeedbackbHelper.GetAll(true);
                 FS = (string.IsNullOrEmpty(f) ? "NO Reviews(" : f);
             }
-            else if (query.ContainsKey("flush_err"))
+            else if (Query.HasKey("svrev"))
             {
-                Logger.Current.Errors.Clear();
-                FS = "Cleared errors";
-            }
-            else if (query.ContainsKey("errors"))
-            {
-                if (Logger.Current.Errors.Count > 0)
-                    foreach (var i in Logger.Current.Errors)
-                        FS += i.Message + "\n" + i.StackTrace + "\n\n";
-                else FS = "All is bright!";
-            }
-            else if (query.ContainsKey("svrev"))
-            {
-                FeedbackHelper.Current.Save();
+                App.Get.FeedbackbHelper.Save();
                 FS = "OK. Reviews saved";
             }
-            else if (query.ContainsKey("svlog"))
-            {
-                LogScheduler.Current.LogManage();
-                FS = "OK. Log managed";
-            }
-            else if (query.ContainsKey("list_sp"))
+            else if (Query.HasKey("list_sp"))
             {
                 string resp = "";
                 int cnt = 1;
-                foreach (var i in MainApp.CurrentParser.res)
+                foreach (var i in App.Get.SpecialtyParser.SpecialtyList)
                 {
                     resp += "\n[" + cnt++ + "] " + i.Title + " : " + i.SubTitle + "\n  <-> " + i.URL + "\n";
                 }
                 FS = resp; ContentType = "text/plain";
             }
-            else if (query.ContainsKey("load"))
+            else if (Query.HasKey("load"))
             {
-                new Task(new Action(async () => { await MainApp.Current.LoadCache(); })).Start();
+                await Task.Run(async () => { await App.Get.LoadCache(); });
                 FS = "Loading cache";
             }
-            else if (query.ContainsKey("save"))
+            else if (Query.HasKey("save"))
             {
-                await MainApp.Current.SaveCache();
+                await App.Get.SaveCache();
                 FS = "Cache saved";
             }
             else
             {
-                if ((this.headers.ContainsKey("user-agent") && this.headers["user-agent"].Contains("MaxRev")) ||
-                    headers.ContainsKey("mx-ses") &&
-                    HelperUtilties.AutorizationManager.Current.IsLogined(null, headers["mx-ses"]))
+                if (Query.HasKey("reparse"))
                 {
-                    if (query.ContainsKey("suspend"))
+                    if (Tools.CheckForInternetConnection())
                     {
-                        FS = "SUSPENDING";
-                        DelaySuspend();
+                        App.Get.SpecialtyParser.RunAsync();
+                        FS = "Started reparse task";
                     }
-                    else if (query.ContainsKey("restart"))
-                    {
-                        MainApp.Restart();
-                        FS = "Restart scheduled. It takes near 1 minute. All user requests now blocked";
-                    }
-                    else if (query.ContainsKey("reparse"))
-                    {
-                        if (NUWM.Servers.Core.Reactor.Server.CheckForInternetConnection())
-                        {
-                            SpecialtyParser.Run();
-                            FS = "Started reparse task";
-                        }
-                        else FS = "Error with DNS";
-                    }
+                    else FS = "Error with DNS";
                 }
-                else FS = "Anautorized";
+                //if ((Headers.HeaderExists("user-agent") && Headers.GetHeaderValueOrNull("user-agent").Contains("MaxRev")) ||
+                //    Headers.HeaderExists("mx-ses") &&
+                //    App.Get.Core.AuthManager.IsLogined(null, Headers.GetHeaderValueOrNull("mx-ses")))
+                //{
+
+                //}
+                //else FS = "Anautorized";
             }
-            if (String.IsNullOrEmpty(FS)) FS = "Context undefined";
-            return new Tuple<string, string>(FS, ContentType);
+            if (string.IsNullOrEmpty(FS)) FS = "Context undefined";
+            return Builder.Content(FS).ContentType(ContentType).Build();
         }
 
         #region Specialties
-        public string All()
+
+        [Route("specAll")]
+        public IResponseInfo All()
         {
-            return Serialize(new ResponseWraper()
+            return Builder.Content(new ResponseWraper()
             {
-                Code = (String.IsNullOrEmpty(Specialty.SpecialtyParser.Errors)) ? StatusCode.Success : StatusCode.ServerSideError,
-                ResponseContent = new SpecialtiesVisualiser() { List = MainApp.CurrentParser.res },
-                Error = Specialty.SpecialtyParser.Errors
-            });
+                Code = (string.IsNullOrEmpty(App.Get.SpecialtyParser.HasError)) ? StatusCode.Success : StatusCode.ServerSideError,
+                ResponseContent = new SpecialtiesVisualiser() { List = App.Get.SpecialtyParser.SpecialtyList },
+            }).Build();
         }
-        public string Calc()
+        [Route("calc")]
+        public IResponseInfo Calc()
         {
-            Exception err = null;
-            List<Specialty> obj = new List<Specialty>();
+            Exception err;
+            List<SpecialtyInfo> obj = new List<SpecialtyInfo>();
             try
             {
-                if (query.Keys.Count == 1 && query.ContainsKey("all"))
+                if (Query.Parameters.Count == 1 && Query.HasKey("all"))
                 {
                     return All();
                 }
-                if (query.ContainsKey("hlp"))
+                if (Query.HasKey("hlp"))
                 {
-                    if (String.IsNullOrEmpty(query["hlp"]))
+                    if (string.IsNullOrEmpty(Query["hlp"]))
                     {
-                        return CreateStringResponse(string.Join(',', MainApp.CurrentParser.GetUnique()), err);
+                        return CreateStringResponse(string.Join(',', App.Get.SpecialtyParser.GetUnique()), null);
                     }
                     else
                     {
-                        string[] keys = query["hlp"].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                        List<string> unique = MainApp.CurrentParser.GetUnique();
+                        string[] keys = Query["hlp"].Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        List<string> unique = App.Get.SpecialtyParser.GetUnique();
                         foreach (var t in keys)
                         {
                             unique.Remove(t);
                         }
-                        return CreateStringResponse(string.Join(',', unique), err);
+                        return CreateStringResponse(string.Join(',', unique), null);
                     }
                 }
 
 
-                if (query.ContainsKey("n"))
+                if (Query.HasKey("n"))
                 {
-                    string[] coefnames = query["n"].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                    if (query.ContainsKey("v"))
+                    string[] coefnames = Query["n"].Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    if (Query.HasKey("v"))
                     {
-                        string[] coefs = query["v"].Split(',', StringSplitOptions.RemoveEmptyEntries);
+                        string[] coefs = Query["v"].Split(',', StringSplitOptions.RemoveEmptyEntries);
                         if (coefnames.Count() != coefs.Count())
                             throw new FormatException("InvalidRequest: non-equal count parameters");
 
                         int[] vals = new int[coefs.Count()];
 
                         double avmt = 0;
-                        int pct = 0;
+                        int prior = 0;
                         bool vl = false;
                         for (int i = 0; i < coefs.Count(); i++)
                         {
@@ -330,32 +210,32 @@ namespace APIUtilty
                                 throw new FormatException("InvalidRequest: parameter incorrect");
                             vals[i] = val;
                         }
-                        if (query.ContainsKey("avm"))
+                        if (Query.HasKey("avm"))
                         {
-                            if (!double.TryParse(query["avm"], out double avm))
+                            if (!double.TryParse(Query["avm"], out double avm))
                             {
                                 throw new FormatException("InvalidRequest: parameter incorrect - double expected");
                             }
                             avmt = avm;
                         }
-                        if (query.ContainsKey("pr"))
+                        if (Query.HasKey("pr"))
                         {
-                            if (!int.TryParse(query["pr"], out int pc))
+                            if (!int.TryParse(Query["pr"], out int pc))
                             {
                                 throw new FormatException("InvalidRequest: parameter incorrect - int expected");
                             }
-                            pct = pc;
+                            prior = pc;
                         }
-                        if (query.ContainsKey("vl"))
+                        if (Query.HasKey("vl"))
                         {
-                            if (!bool.TryParse(query["vl"], out bool vill))
+                            if (!bool.TryParse(Query["vl"], out bool vill))
                             {
                                 throw new FormatException("InvalidRequest: parameter incorrect - bool expected");
                             }
                             vl = vill;
                         }
 
-                        return CreateTpResponse(Calculate(coefnames, vals, avmt, pct, vl), err);
+                        return CreateTpResponse(Calculate(coefnames, vals, avmt, prior, vl), null);
 
                     }
                     else
@@ -374,78 +254,101 @@ namespace APIUtilty
             }
             return CreateSPResponse(obj, err);
         }
-        private Tuple<List<Specialty>, CalcMarkInfo> Calculate(string[] coefnames, int[] coefs, double avm, int pct, bool vl)
+        private Tuple<List<CalculatedSpecialty>, CalcMarkInfo> Calculate(string[] coefnames, int[] coefs, double averageMark, int prior, bool village)
         {
-            var cfn = coefnames.ToList();
-            var cf = coefs.ToList();
-            List<Specialty> obj = new List<Specialty>();
-            double[] res = new double[0];
-            var cmi = new CalcMarkInfo();
-
-            var listing = MainApp.CurrentParser.res.ToArray();
+            var year = 2018;
+            var parser = App.Get.SpecialtyParser;
+            var obj = new List<CalculatedSpecialty>();
+            var listing = App.Get.SpecialtyParser.SpecialtyList.ToArray();
             for (int l = 0; l < coefnames.Count(); l++)
             {
-                if (listing.Count() > 0)
+                if (listing.Length > 0)
                 {
                     try
                     {
-                        listing = listing.Where(x => Contains(x.Modulus.CoefName, coefnames)).ToArray();
+                        listing = listing.Where(x => x.Modulus.CoefName[0] != default && Contains(x.Modulus.CoefName, coefnames)).ToArray();
                     }
                     catch
                     {
                         string all = "";
-                        foreach (var i in listing.Where(x => x.Modulus.CoefName.Where(t => t == null).Count() > 0))
+                        foreach (var i in listing.Where(x => x.Modulus.CoefName.Where(t => t == null).Any()))
                         {
                             all += i.Title + '\n' + i.SubTitle + "\n\n";
                         }
-                        Logger.Current.Errors.Add(new Exception(all));
+                        NotifyLoggerError(new Exception(all));
                         listing = listing.Where(x => Contains(x.Modulus.CoefName, coefnames, true)).ToArray();
                     }
-
-
                 }
-                else return new Tuple<List<Specialty>, CalcMarkInfo>(obj, cmi);
+                else
+                {
+                    return new Tuple<List<CalculatedSpecialty>, CalcMarkInfo>(obj, default);
+                }
             }
 
             double min = 200, max = 0;
             foreach (var i in listing)
             {
-                Dictionary<string, double> dictionary = new Dictionary<string, double>();
-                List<string> t = i.Modulus.CoefName.ToList();
-                List<double> x = i.Modulus.Coef.ToList();
+                if (!i.PassMarks.ContainsKey(year)) continue;
+                var dictionary = new Dictionary<string, double>();
+                var t = i.Modulus.CoefName.ToList();
+                var x = i.Modulus.Coef.ToList();
 
                 for (int l = 0; l < t.Count; l++)
                     dictionary.Add(t[l], x[l]);
-                double resx = 0;
+                double accum = 0;
+                string vis = "(";
                 for (int el = 0; el < dictionary.Count; el++)
                 {
                     string xp = dictionary.Keys.Where(cx => cx.ToLower().Contains(t[el].ToLower())).First();
-                    resx += dictionary[xp] * coefs[el];
+                    accum += dictionary[xp] * coefs[el];
+                    vis += $"{dictionary[xp]} * {coefs[el]} + ";
                 }
 
-                var txg = Specialty.converts.Keys.Where(xd => Math.Round(xd, 1) == avm);
-                if (txg.Count() == 0) return new Tuple<List<Specialty>, CalcMarkInfo>(obj, new CalcMarkInfo());
-                var tg = txg.First();
-                resx += 0.1 * Specialty.converts[tg];  // aver mark
-                resx *= 1.02; // regional coefs
-                if (Specialty.specList.Where(dx => i.Title.Contains(dx.Name)).Count() == 1) //branch coef
-                    if (pct == 1 || pct == 2)
-                        resx *= 1.02;
-                if (vl) // village
-                    if (Specialty.specList.Where(xg => xg.Special && xg.InnerCode == i.Code).Count() == 1)
-                        resx *= 1.05;
+                var txg = parser.ConverterTable.Keys.Where(v => Math.Abs(Math.Round(v, 1) - averageMark) < 0.00001);
+                var enumerable = txg as double[] ?? txg.ToArray();
+                if (enumerable.Count() == 0)
+                {
+                    return new Tuple<List<CalculatedSpecialty>, CalcMarkInfo>(obj, default);
+                }
+
+                var tg = enumerable.First();
+                accum += 0.1 * parser.ConverterTable[tg];  // aver mark
+                vis += $"0.1 * {parser.ConverterTable[tg]}";
+
+                accum *= 1.04; // regional coefs
+                vis += $") * 1.04 ";
+
+                //if (parser.SpecialtyList.Where(dx => i.Title.Contains(dx.Title)).Count() == 1) //branch coef
+                //{
+                if (prior == 1 || prior == 2)
+                {
+                    accum *= i.BranchCoef;// 1.02;
+                    vis += $"* {i.BranchCoef} ";
+                }
+                // }
+
+                if (village) // village
+                {
+                    if (i.IsSpecial)//(parser.SpecialtyList.Where(xg => xg.IsSpecial && xg.Code == i.Code).Count() == 1)
+                    {
+                        accum *= 1.05;
+                        vis += $"* 1.05 ";
+                    }
                     else
-                        resx *= 1.02;
-                if (resx > 200) resx = 200;
-                if (resx > max) max = resx;
-                if (resx < min) min = resx;
-                res.Append(resx);
-                obj.Add(i);
-                obj.Last().YourAverMark = Math.Round(resx, 1).ToString();
+                    {
+                        accum *= 1.02;
+                        vis += $"* 1.02 ";
+                    }
+                }
+
+                if (accum > 200) accum = 200;
+                if (accum > max) max = accum;
+                if (accum < min) min = accum;
+                obj.Add(new CalculatedSpecialty(i) { YourAverMark = Math.Round(accum, 1), PassMark = i.PassMarks[year], CalcPath = vis });
             }
-            obj.Sort((y, x) => double.Parse(x.YourAverMark).CompareTo(double.Parse(y.YourAverMark)));
-            obj.OrderBy(x => double.Parse(x.YourAverMark));
-            return new Tuple<List<Specialty>, Specialty.CalcMarkInfo>(obj, new Specialty.CalcMarkInfo() { Aver = (min + max) / 2, Min = min, Max = max });
+            obj.Sort((y, x) => x.YourAverMark.CompareTo(y.YourAverMark)); 
+            return new Tuple<List<CalculatedSpecialty>, CalcMarkInfo>(obj,
+                new CalcMarkInfo { Aver = (min + max) * 1.0 / 2, Min = min, Max = max });
         }
         #endregion
 
@@ -463,20 +366,20 @@ namespace APIUtilty
                 };
             }
             else
-            if (err != null && err.GetType() == typeof(FormatException))
+            if (err.GetType() == typeof(FormatException))
                 resp = new Response() { Code = StatusCode.InvalidRequest, Error = err.Message, Content = null };
-            else if (err != null && err.GetType() == typeof(InvalidOperationException))
+            else if (err.GetType() == typeof(InvalidOperationException))
             {
                 resp = new Response() { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
             }
-            else if (err != null && err.GetType() == typeof(InvalidDataException))
+            else if (err is InvalidDataException)
             {
                 resp = new Response() { Code = StatusCode.NotFound, Error = err.Message, Content = null };
             }
 
             else
             {
-                resp = new Response() { Code = StatusCode.Undefined, Error = (err != null) ? err.Message + "\n" + err.StackTrace : "", Content = obj };
+                resp = new Response() { Code = StatusCode.Undefined, Error = err.Message + "\n" + err.StackTrace, Content = obj };
             }
 
             return resp;
@@ -502,14 +405,15 @@ namespace APIUtilty
             }
             catch (Exception ex)
             {
-                Logger.Current.Errors.Add(new Exception(string.Join(",", arr1) + "\n\n" + string.Join(",", arr2))); Logger.Current.Errors.Add(ex);
+                NotifyLoggerError(new Exception(string.Join(",", arr1) + "\n\n" + string.Join(",", arr2)));
+                NotifyLoggerError(ex);
                 if (force) return false;
-                throw ex;
+                throw;
             }
             return true;
         }
 
-        public static string CreateSPResponse(List<Specialty> obj, Exception err)
+        public IResponseInfo CreateSPResponse(List<SpecialtyInfo> obj, Exception err)
         {
             Response resp;
             if (err != null)
@@ -528,10 +432,9 @@ namespace APIUtilty
                     }
                 };
             }
-            return JsonConvert.SerializeObject(resp);
-
+            return Builder.Content(JsonConvert.SerializeObject(resp)).Build();
         }
-        public static string CreateTpResponse(Tuple<List<Specialty>, Specialty.CalcMarkInfo> obj, Exception err)
+        public IResponseInfo CreateTpResponse(Tuple<List<CalculatedSpecialty>, CalcMarkInfo> obj, Exception err)
         {
             Response resp;
             if (err != null)
@@ -554,36 +457,14 @@ namespace APIUtilty
                     {
                         Code = StatusCode.Success,
                         Error = null,
-                        Content = new object[]{ new SpecialtiesVisualiser()
-                    {
-                        List = obj.Item1
-                    }, obj.Item2}
+                        Content = new object[] { new SpecialtiesVisualiser() { List = obj.Item1 }, obj.Item2 }
                     };
             }
-            return JsonConvert.SerializeObject(resp);
+            return Builder.Content(JsonConvert.SerializeObject(resp)).Build();
 
         }
 
-        public static string CreateErrorResp(Exception err)
-        {
-            Response resp;
-            if (err != null)
-            {
-                resp = ResponseTyper(err, null);
-            }
-            else
-            {
-                resp = new Response()
-                {
-                    Code = StatusCode.Undefined,
-                    Error = "NOT IMPLEMENTED",
-                    Content = null
-                };
-            }
-            return JsonConvert.SerializeObject(resp);
-
-        }
-        public string CreateStringResponse(string obj, Exception err)
+        public IResponseInfo CreateStringResponse(string obj, Exception err)
         {
             Response resp;
             if (err != null)
@@ -599,14 +480,7 @@ namespace APIUtilty
                     Content = obj
                 };
             }
-            return JsonConvert.SerializeObject(resp);
-        }
-
-        private static string Serialize(object data)
-        {
-            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.None };
-            settings.PreserveReferencesHandling = PreserveReferencesHandling.None;
-            return JsonConvert.SerializeObject(data, settings);
+            return Builder.Content(JsonConvert.SerializeObject(resp)).Build();
         }
     }
 }

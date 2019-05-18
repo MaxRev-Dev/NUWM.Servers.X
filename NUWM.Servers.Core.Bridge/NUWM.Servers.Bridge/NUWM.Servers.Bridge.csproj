@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,9 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="MaxRev.Servers.Core">
-      <HintPath>E:\MSR_PUB\MaxRev.Servers.Core.dll</HintPath>
-    </Reference>
+    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.1.7" />
   </ItemGroup>
 
 </Project>

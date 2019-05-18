@@ -1,100 +1,98 @@
-﻿using JSON;
-using MR.Servers;
-using MR.Servers.Core;
-using Newtonsoft.Json;
+﻿using MaxRev.Servers;
 using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using static MR.Servers.Client;
+using System.Net;
+using MaxRev.Servers.Interfaces;
+using MaxRev.Utils.Http;
+using MaxRev.Servers.Core.Http;
 
-namespace NUWM.Servers.Sched
+namespace NUWM.Servers.Core.Sched
 {
     internal sealed class Program
     {
         private static void Main(string[] args)
         {
-            var f = args?[0]?.ToString();
-            if (string.IsNullOrEmpty(f))
-            {
-                Console.WriteLine("You must specify port");
-                Environment.Exit(-1);
-            }
-            new MainApp().Initialize(int.Parse(f));
+            MainApp.Current.Initialize(args);
         }
     }
 
     internal sealed class MainApp
     {
-        public static string[] dirs = new[] {
-                "./addons",
-                "./addons/subjects_parser",
-                "./log"
-        };
-        private static int port;
-        public CancellationTokenSource Cancellation { get; private set; }
-        public static MainApp Current;
-        public enum Dirs { Addons, Subject_Parser}
-        public Reactor Core { get; internal set; }
-        public void Initialize(int port)
+        public static MainApp Current => app ?? (app = new MainApp());
+        public enum Dirs { Addons, Subject_Parser }
+        private static MainApp app;
+        private SubjectParser subjectParser;
+
+        internal IReactor Core { get; private set; }
+        public void Initialize(string[] args)
         {
-            Current = this;
-            MainApp.port = port;
+            var f = args?[0];
+            if (string.IsNullOrEmpty(f))
+            {
+                Console.WriteLine("You must specify port");
+                Environment.Exit(-1);
+            }
+            int port = -1;
+            if (int.TryParse(f, out var portx))
+                port = portx;
+            ReactorStartup.From(args).Configure((with, core) =>
+            {
+                Core = core;
+                core.DirectoryManager.AddDir(Dirs.Addons, "addons");
+                core.DirectoryManager.AddDir(Dirs.Addons, Dirs.Subject_Parser, "subjects_parser");
 
-            Cancellation = new CancellationTokenSource();
-             Core = new Reactor();
-            var bal = Core.GetBalancer(port);
+                //var servers = LoadBalancer.GetServers(Core, "Schedule", 2, (serv, isMain) =>
+                // {
+                //     serv.SetApiControllers(typeof(APIUtilty.API));
+                //     if (serv.Config.Main != null)
+                //         serv.Config.Main.ServerTypeName = new KeyValuePair<string, string>("X-NS-Type", "Schedule");
 
-            Core.DirectoryManager.AddDir(Dirs.Addons, "addons");
-            Core.DirectoryManager.AddDir(Dirs.Addons, Dirs.Subject_Parser, "subjects_parser");
+                //     if (isMain)
+                //     {
+                //         serv.EventMaster.ServerStarting += OnServerStart;
+                //         return serv;
+                //     }
 
-            var servers = LoadBalancer.GetServers(Core, "Schedule", 2, (serv, isMain) =>
-             {
-                 serv.SetApiController(typeof(APIUtilty.API));
+                //     return serv;
+                // });
 
-                 serv.Config.Main.ServerTypeName = new KeyValuePair<string, string>("X-NS-Type", "Schedule");
+                var server = core.GetServer("Schedule", port);
+                server.SetApiControllers(typeof(API));
+                server.Config.CustomRequestPreProcessor = CustomHeaderHandler;
+                server.EventMaster.ServerStarting += OnServerStart;
 
-                 if (isMain)
-                 {
-                     serv.EventMaster.ServerStarting += OnServerStart;
-                     return serv;
-                 } 
-                 
-                 return serv;
-             }); 
-
-             
-             
-
-            Core.Listen(servers).Wait(Cancellation.Token);
-        }
-         
-         
-        
-         
-        
-
-        private void OnServerStart(object sender, object args)
-        {
-            new SubjectParser.SubjectParser();
-           // new Thread(new ThreadStart(new SubjectParser.AutoReplaceHelper().Run)).Start();
-        }
-        public static Version GetVersion()
-        {
-            return System.Reflection.Assembly.GetAssembly(typeof(MainApp)).GetName().Version;
+            }).Run();
         }
 
+        private static void CustomHeaderHandler(IServer server, IClient client, HttpRequest request)
+        {
+            var address = "";
+            try
+            {
+                address = ((IPEndPoint)client.Socket.RemoteEndPoint).ToString();
+            }
+            catch
+            {
+                // ignored
+            }
+
+            server.Logger.TrySet(server.UserStats, request.Path, address,
+                request.Headers.GetHeaderValueOrNull(BasicHeaders.UserAgent),
+                request.Headers.GetHeaderValueOrNull(BasicHeaders.XID));
+        }
+
+
+
+
+
+        private void OnServerStart(IServer server, object args)
+        {
+            subjectParser = new SubjectParser();
+            // new Thread(new ThreadStart(new SubjectParser.AutoReplaceHelper().Run)).Start();
+        }
         public static void Restart()
         {
-            new Task(new Action(() =>
-            {
-                MainApp.Current.Cancellation.Cancel();
-                Task.Delay(1000 * 65).Wait();
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("dotnet", string.Format("NUWM.Servers.Sched.dll {0}", port)));
-                Environment.Exit(0);
-            })).Start();
-
+            Current.Core.Restart();
         }
-         
+
     }
 }

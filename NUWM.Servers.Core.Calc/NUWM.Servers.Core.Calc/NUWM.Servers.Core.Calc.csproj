@@ -1,26 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
-    <Copyright>MaxRev © 2018</Copyright>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Version>3.1.1</Version> 
+    <Copyright>MaxRev © 2019</Copyright>
     <Company>NUWM</Company>
     <Authors>MaxRev</Authors>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.7.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="NUWM.Servers.Core">
-      <HintPath>..\..\NUWM.Servers.Core\NUWM.Servers.Core\bin\Release\netcoreapp2.0\NUWM.Servers.Core.dll</HintPath>
-    </Reference>
+    <PackageReference Include="CsvHelper" Version="12.1.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.4" />
+    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.1.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
 </Project>

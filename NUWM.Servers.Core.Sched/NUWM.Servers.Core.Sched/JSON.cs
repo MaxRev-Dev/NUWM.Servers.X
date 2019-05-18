@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace JSON
+namespace NUWM.Servers.Core.Sched
 {
     public class Response
     {
@@ -35,11 +35,10 @@ namespace JSON
         DeprecatedMethod = 66,
         ServerSideError = 88,
         GatewayTimeout,
+        ServerNotResponsing =90,
         Success = 100
     }
-}
-namespace HierarchyTime
-{
+
     public class BaseSubject
     {
         [JsonProperty("time")]
@@ -51,7 +50,7 @@ namespace HierarchyTime
         [JsonProperty("type")]
         public string Type { get; set; }
     }
-    public partial class SubjectInstance : BaseSubject
+    public partial class SubjectInstance  
     { 
         [JsonProperty("lecturer")]
         public string Lecturer { get; set; }
@@ -74,9 +73,9 @@ namespace HierarchyTime
         [JsonProperty("days")]
         public List<DayInstance> day;
         [JsonProperty("weekstart")]
-        public string GetSdateString { get { return Sdate.ToString("dd.MM.yyyy"); } }
+        public string GetSdateString => Sdate.ToString("dd.MM.yyyy");
         [JsonProperty("weekend")]
-        public string GetEdateString { get { return Edate.ToString("dd.MM.yyyy"); } } 
+        public string GetEdateString => Edate.ToString("dd.MM.yyyy");
     }
     public partial class DayInstance
     {

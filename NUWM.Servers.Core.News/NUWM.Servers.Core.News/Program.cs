@@ -1,12 +1,9 @@
-﻿using Lead;
-using MR.Servers;
-using MR.Servers.Utils;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
 using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
+using MaxRev.Servers;
+using MaxRev.Servers.Configuration;
+using MaxRev.Servers.Interfaces; 
 
 namespace NUWM.Servers.Core.News
 {
@@ -14,97 +11,96 @@ namespace NUWM.Servers.Core.News
     {
         private static void Main(string[] args)
         {
-            var f = args?[0]?.ToString();
+            var f = args?[0];
             if (string.IsNullOrEmpty(f))
             {
                 Console.WriteLine("You must specify port");
                 Environment.Exit(-1);
             }
-            MainApp.GetApp.Initialize(int.Parse(f));
+            App.Get.Initialize(int.Parse(f));
         }
     }
 
-    internal sealed class MainApp
+    public class NewsConfig : AbstractConfigContainer
     {
-        public static int AllUsersCount = 0;
-        internal static int taskDelayH;
-        internal static int cacheAlive;
+        public NewsConfig()
+        {
+            HostUrl = "http://nuwm.edu.ua";
+            AbitUrl = "http://start.nuwm.edu.ua";
+        }
 
-        public static int taskDelayM, pagesDef; 
-        public enum Dirs { Addons, AddonsNews, Log, Cache }
-        private static int port;
-        private static MainApp app;
-        public static MainApp GetApp => app ?? (app = new MainApp());
-        public Server Server { get; private set; }
-        public Reactor Core { get; } = new Reactor();
+        public string AbitUrl { get; set; }
+
+        public string HostUrl { get; set; }
+
+        public int TaskDelayMinutes { get; set; }
+        public int TaskDelayHours { get; set; }
+        public int PagesDefault { get; set; }
+        public int CacheAlive { get; set; }
+    }
+    internal sealed class App
+    {
+        public enum Dirs
+        {
+            Addons,
+            AddonsNews,
+            Log,
+            Cache
+        }
+
+        private static App app;
+        private ConfigManager<NewsConfig> _configManager;
+        public ParserPool ParserPool { get; private set; }
+        public static App Get => app ?? (app = new App());
+        public static int OffsetLen { get; internal set; }
+        public IReactor Core { get; private set; }
+        public NewsConfig Config => _configManager.ConfigInstance;
+
         public void Initialize(int port)
         {
+            ParserPool = new ParserPool();
             var cultureInfo = new CultureInfo("uk-UA");
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
             CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
-            MainApp.port = port; 
-            Core.UnhandledException += OnUnhandledException;
-            Core.Config.Core.ServerHeaderName = "NUWM.Servers.News by MaxRev";
-             
+            _configManager = new ConfigManager<NewsConfig>(new ConfiguratorSettings(Core, configFileName: "news_config.json"));
+
+            ReactorStartup.From(default, new ReactorStartupConfig { AutoregisterControllers = true })
+                .Configure((with, core) =>
+                {
+                    Core = core;
+                    with.Server("News", port, OnServerStart);
+
+                }).Run();
+            //  Core.Config.Core.ServerHeaderName = "NUWM.Servers.News by MaxRev";
+
+            // Server = Core.GetServer("News", port) as IServer;
+
+        }
 
 
-            Server = Core.GetServer("News", port) as Server;
 
-            Server.EventMaster.ServerStarting += OnServerStart;
-
-            Core.ConfigManager.Save();
+        private void OnServerStart(IServer Server)
+        {
             Server.EventMaster.Suspending += async (s, e) =>
             {
-                await (ParserPool.Parser.SaveCache());
+                await ParserPool.SaveCache();
             };
-            Core.Listen(Server).Wait();
-        }
-         
-         
-
-        private void OnServerStart(IServer s, object e)
-        {
             Server.DirectoryManager.AddDir(Dirs.Addons, "addons");
             Server.DirectoryManager.AddDir(Dirs.Addons, Dirs.AddonsNews, "news");
             Server.DirectoryManager.AddDir(Dirs.Cache, "cache");
             Server.DirectoryManager.AddDir(Dirs.Log, "log");
-            Server.Config.Main.ServerTypeName = new KeyValuePair<string, string>("X-NS-Type", "News");
+            // Server.Config.Main.ServerTypeName = new KeyValuePair<string, string>("X-NS-Type", "News");
             Server.ConfigManager.Save();
-            Server.SetApiController(typeof(APIUtilty.API));
 #if DEBUG
             Console.WriteLine("Server starting");
 #endif
-            Lead.ParserPool.Parser.LoadInstantCache();
-
-            #region ParserPoolThread
-            var CurrentParserPool = new Lead.ParserPool();
-            CurrentParserPool.SetCurrent();
-            CurrentParserPool.BaseInitParsers();
-            #endregion
-            new Lead.ParserPool.CacheUpdater();
-            Lead.ParserPool.Parser.ScheduleInstantCacheSave.Schedule_Timer();
-        }
-        public static Version GetVersion()
-        {
-            return System.Reflection.Assembly.GetAssembly(typeof(MainApp)).GetName().Version;
-        }
-
-        public static void Restart()
-        {
-            new Task(new Action(() =>
+            Task.Run(() =>
             {
-                MainApp.GetApp.Server.StopListen();
-                Task.Delay(1000 * 65).Wait();
-                Process.Start(new ProcessStartInfo("dotnet", string.Format("NUWM.Servers.Core.News.dll {0}", port)));
-                Environment.Exit(0);
-            })).Start();
+                ParserPool.LoadInstantCache();
+                ParserPool.SetCurrent();
+                ParserPool.BaseInitParsers();
+            });
 
         }
-
-        private async void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            await Lead.ParserPool.Parser.SaveCache();
-        }
-         
     }
 }

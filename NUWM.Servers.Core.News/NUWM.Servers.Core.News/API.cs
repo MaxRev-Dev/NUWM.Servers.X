@@ -1,57 +1,52 @@
-﻿using JSON;
-using MR.Servers;
-using MR.Servers.Core.Request.Query;
-using MR.Servers.Core.Route.Attributes;
-using MR.Servers.Utils;
-using Newtonsoft.Json;
-using NUWM.Servers.Core.News;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static Lead.ParserPool.Parser;
+using HtmlAgilityPack;
+using MaxRev.Servers.API;
+using MaxRev.Servers.Core.Route;
+using MaxRev.Servers.Utils;
+using MaxRev.Utils;
+using Newtonsoft.Json;
 
-namespace APIUtilty
+namespace NUWM.Servers.Core.News
 {
     [RouteBase("api")]
-    internal class API : CoreAPI
-    { 
+    internal class API : CoreApi
+    {
 
         #region Invokers
         [Route("keys")]
         private string GetKeys()
         {
-            return "API KEYS:" + string.Join('\n', Lead.ParserPool.Current.POOL.Keys.ToArray());
+            return "API KEYS:" + string.Join('\n', ParserPool.Current.POOL.Keys.ToArray());
         }
         [Route("trace")]
         private string GetTrace()
         {
-            ((Server)Server).State.DecApiResponsesUser();
             var all = AllParsersLogger();
-            return Tools.GetBaseTrace(MainApp.GetApp.Core) + "\nAll articles count: " + all.Item2 +'\n'+ all.Item1;
+            return Tools.GetBaseTrace(Server) + "\nAll articles count: " + all.Item2 + '\n' + all.Item1;
         }
 
         [Route("set")]
         public async Task<Tuple<string, string>> SettingTop()
         {
-            ((Server)Server).State.DecApiResponsesUser();
 
             var Query = Info.Query;
-            var headers = Info.Headers;
-            string FS = "", ContentType = "text/plain";
+            string FS, ContentType = "text/plain";
             if (Query.HasKey("saveinstcache"))
             {
                 if (Query.HasKey("key"))
                 {
                     if (Query["key"] == "all")
                     {
-                        await SaveCache();
+                        await App.Get.ParserPool.SaveCache();
                         FS = "saved ALL";
                     }
-                    else if (Lead.ParserPool.Current.POOL.ContainsKey(Query["key"]))
+                    else if (ParserPool.Current.POOL.ContainsKey(Query["key"]))
                     {
-                        await SaveCache(Query["key"]);
+                        await App.Get.ParserPool.SaveCache(Query["key"]);
                         FS = "saved " + Query["key"]; ContentType = "text/plain";
 
                     }
@@ -62,7 +57,7 @@ namespace APIUtilty
                 }
                 else
                 {
-                    ScheduleInstantCacheSave.SaveInstantCache();
+                    App.Get.ParserPool.SaveInstantCache();
                     FS = "saved";
                 }
             }
@@ -70,7 +65,7 @@ namespace APIUtilty
             {
                 if (Query.HasKey("reparse"))
                 {
-                    Lead.ParserPool.Current.BaseInitParsers();
+                    ParserPool.Current.BaseInitParsers();
                     FS = "Reinit task started";
                 }
                 else
@@ -82,19 +77,20 @@ namespace APIUtilty
             return new Tuple<string, string>(FS, ContentType);
         }
 
+        ParserPool pool => App.Get.ParserPool;
+
         [Route("searchNews")]
         public async Task<string> SearchNewsAsync()
         {
             var Query = Info.Query;
-            var headers = Info.Headers;
             try
             {
                 if (Query.HasKey("query"))
                 {
                     string qpar = Query["query"];
-                    int count = 1;
-                    List<NewsItem> news = new List<NewsItem>();
-                    List<System.Threading.Thread> tr = new List<System.Threading.Thread>();
+                    int count;
+                    var news = new List<NewsItem>();
+                    var tr = new List<Task>();
                     try
                     {
                         if (qpar.Contains(','))
@@ -112,34 +108,34 @@ namespace APIUtilty
                         {
                             throw new FormatException("Expected count parameter. Search results may be very huge");
                         }
-
-                        CreateClientRequest request = new CreateClientRequest("http://nuwm.edu.ua/search?text=" + qpar.Replace(' ', '+'));
-
-                        HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-
-                        var rm = await request.GetAsync();
-                        doc.Load(await rm.Content.ReadAsStreamAsync());
                         bool virg = true;
+                        var rm = await RequestAllocator.Instance.UsingPool(new Request("http://nuwm.edu.ua/search?text=" + qpar.Replace(' ', '+')));
+
+                        HtmlDocument doc = new HtmlDocument();
+
+                        doc.Load(await rm.Content.ReadAsStreamAsync());
 
                         var wnode = doc.DocumentNode.Descendants().Where(x =>
                         x.Name == "div"
                         && x.HasClass("news") && x.HasClass("search") &&
                         x.GetAttributeValue("role", "") == "group");
-                        if (!wnode.Any()) { throw new InvalidDataException("Not found"); }
-                        var node = wnode.First();
+                        var nodes = wnode as HtmlNode[] ?? wnode.ToArray();
+                        if (!nodes.Any()) { throw new InvalidDataException("Not found"); }
+                        var node = nodes.First();
                         foreach (var a in node.Elements("article"))
                         {
                             var btnf = a.Descendants("a").Where(x => x.HasClass("btn") && x.HasClass("s2"));
-                            if (btnf.Any())
+                            var htmlNodes = btnf as HtmlNode[] ?? btnf.ToArray();
+                            if (htmlNodes.Any())
                             {
-                                var link = btnf.First().GetAttributeValue("href", "");
+                                var link = htmlNodes.First().GetAttributeValue("href", "");
                                 if (link.Contains("/news"))
                                 {
                                     bool found = false;
-                                    foreach (var i in Lead.ParserPool.Current.POOL.Values)
+                                    foreach (var i in ParserPool.Current.POOL.Values)
                                     {
-                                        var t = i.Newslist.Where(x => x.Url == link);
-                                        if (t.Count() == 1)
+                                        var t = i.Newslist.Where(x => x.Url == link).ToArray();
+                                        if (t.Length == 1)
                                         {
                                             found = true;
                                             news.Add(t.First());
@@ -147,10 +143,10 @@ namespace APIUtilty
                                         }
 
                                     }
-                                    if (InstantCache != null)
+                                    if (pool.InstantCache != null)
                                     {
-                                        var inst = InstantCache.Where(x => x.Url == link);
-                                        if (inst.Count() == 1)
+                                        var inst = pool.InstantCache.Where(x => x.Url == link).ToArray();
+                                        if (inst.Length == 1)
                                         {
                                             news.Add(inst.First());
                                             found = true;
@@ -158,23 +154,21 @@ namespace APIUtilty
                                     }
                                     if (!found)
                                     {
-                                        var u = new NewsItem()
+                                        var u = new NewsItem
                                         {
                                             Excerpt = a.Descendants("p").First().InnerText,
-                                            Title = a.Descendants("a").Where(x => x.HasClass("name")).First().InnerText,
+                                            Title = a.Descendants("a").First(x => x.HasClass("name")).InnerText,
                                             Url = link
                                         };
 
-                                        tr.Add(new System.Threading.Thread(new System.Threading.ParameterizedThreadStart(PageThread)));
-                                        tr.Last().Start(u);
+                                        tr.Add(Task.Run(() => NewsItemDetailed.Process(u)));
                                         news.Add(u);
-                                        virg = false;
-                                        if (InstantCache == null)
+                                        if (pool.InstantCache == null)
                                         {
-                                            InstantCache = new List<NewsItem>();
+                                            pool.InstantCache = new List<NewsItem>();
                                         }
-
-                                        InstantCache.Add(u);
+                                        virg = false;
+                                        pool.InstantCache.Add(u);
                                     }
                                 }
                             }
@@ -183,14 +177,9 @@ namespace APIUtilty
                                 break;
                             }
                         }
-                        while (true)
-                        {
-                            tr = tr.Where(x => x.IsAlive).ToList();
-                            if (tr.Count == 0)
-                            {
-                                break;
-                            }
-                        }
+
+                        await Task.WhenAll(tr);
+
                         if (news.Count == 0)
                         {
                             return JsonConvert.SerializeObject(ResponseTyper(new InvalidDataException("Not Found")));
@@ -209,16 +198,16 @@ namespace APIUtilty
             {
                 return JsonConvert.SerializeObject(ResponseTyper(ex));
             }
-            return JsonConvert.SerializeObject(ResponseTyper(new InvalidOperationException("InvalidKey: query expected"), null));
+            return JsonConvert.SerializeObject(ResponseTyper(new InvalidOperationException("InvalidKey: query expected")));
         }
 
         [Route("getById/{id}")]
         public async Task<string> GetById(int id)
         {
-            var pool = Lead.ParserPool.Current.POOL.Values.Where(x => x.InstituteID == id);
-            if (pool.Count() == 1)
+            var poolx = pool.POOL.Values.Where(x => x.InstituteID == id).ToArray();
+            if (poolx.Length == 1)
             {
-                return await UniversalAsync(pool.First());
+                return await UniversalAsync(poolx.First());
             }
             return null;
         }
@@ -226,13 +215,10 @@ namespace APIUtilty
         [Route("{key}")] // it's dynamic so it must be last in invoke list
         public async Task<string> ProcessWithParser(string key)
         {
-            var Query = Info.Query;
-            var headers = Info.Headers; 
-
-            var pool = Lead.ParserPool.Current.POOL;
-            if (pool.ContainsKey(key))
+            var poolx = pool.POOL;
+            if (poolx.ContainsKey(key))
             {
-                return await UniversalAsync(pool[key]);      
+                return await UniversalAsync(poolx[key]);
             }
             return default;
 
@@ -240,15 +226,13 @@ namespace APIUtilty
         #endregion
 
         #region Service
-        public async Task<string> UniversalAsync(Lead.ParserPool.Parser parser)
-        { 
+        public async Task<string> UniversalAsync(Parser parser)
+        {
             var Query = Info.Query;
-            var headers = Info.Headers;
 
-            var newslist = DeepCopy(parser.Newslist);
+            var newslist = Parser.DeepCopy(parser.Newslist);
             Exception err = null;
             bool toHTML = false;
-            int last = -1;
             List<NewsItem> obj = new List<NewsItem>();
             try
             {
@@ -267,19 +251,19 @@ namespace APIUtilty
                         throw new FormatException("InvalidRequest: expected 1/0 - got " + param);
                     }
 
-                    toHTML = (iparam == 1 ? true : false);
+                    toHTML = iparam == 1;
                 }
                 if (Query.HasKey("uri"))
                 {
-                    if (obj.Count() > 0)
+                    if (obj.Count > 0)
                     {
                         throw new FormatException("InvalidRequest  >> uri & id");
                     }
 
                     string param = Query["uri"];
 
-                    var c = newslist.Where(x => x.Url == param);
-                    if (c.Count() > 0)
+                    var c = newslist.Where(x => x.Url == param).ToArray();
+                    if (c.Any())
                     {
                         obj.Add(c.First());
                     }
@@ -290,7 +274,7 @@ namespace APIUtilty
                 }
                 if (Query.HasKey("query"))
                 {
-                    if (obj.Count() > 0)
+                    if (obj.Any())
                     {
                         throw new FormatException("InvalidRequest  >> query must be unique in request");
                     }
@@ -306,7 +290,10 @@ namespace APIUtilty
                                 obj.Add(t);
                             }
                         }
-                        catch (Exception) { }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
                     }
                     if (obj.Count == 0)
                     {
@@ -315,7 +302,7 @@ namespace APIUtilty
                 }
                 if (Query.HasKey("uriquery"))
                 {
-                    if (obj.Count() > 0)
+                    if (obj.Any())
                     {
                         throw new FormatException("InvalidRequest  >> uriquery must be unique in request");
                     }
@@ -331,7 +318,10 @@ namespace APIUtilty
                                 obj.Add(t);
                             }
                         }
-                        catch (Exception) { }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
                     }
                     if (obj.Count == 0)
                     {
@@ -346,7 +336,7 @@ namespace APIUtilty
                         throw new FormatException("InvalidRequest: expected int - got " + param);
                     }
 
-                    last = iparam;
+                    var last = iparam;
                     if (last > newslist.Count || last < 0)
                     {
                         throw new FormatException("InvalidRequest: value is out of range");
@@ -465,20 +455,18 @@ namespace APIUtilty
                             throw new InvalidOperationException("Server is starting now");
                         }
 
-                        t.Detailed.ContentHTML = parser.Newslist.Where(x => x.Url == t.Url).First().GetText();
+                        t.Detailed.ContentHTML = parser.Newslist.First(x => x.Url == t.Url).GetText();
                     }
                 }
                 if (Query.HasKey("inst"))
                 {
-                    var item = await ParsePageInstant(Query["inst"], toHTML);
+                    var item = await pool.ParsePageInstant(Query["inst"], toHTML);
                     if (item.Item1 != null)
                     {
-                        return API.CreateResponse(new List<NewsItem>(new[] { item.Item1 }), new DivideByZeroException(), item.Item2);
+                        return CreateResponse(new List<NewsItem>(new[] { item.Item1 }), new DivideByZeroException(), item.Item2);
                     }
-                    else
-                    {
-                        throw new InvalidOperationException("Can`t get article. Reason: " + item.Item2.ToString());
-                    }
+
+                    throw new InvalidOperationException("Can`t get article. Reason: " + item.Item2);
                 }
 
                 if (obj.Count == 0)
@@ -495,81 +483,82 @@ namespace APIUtilty
         {
             string resp = "";
             int countAllnews = 0;
-            foreach (var ert in Lead.ParserPool.Current.POOL.Values.OrderByDescending(x => x.Newslist?.Count))
+            foreach (var ert in ParserPool.Current.POOL.Values.OrderByDescending(x => x.Newslist?.Count))
             {
                 TimeSpan k = new TimeSpan();
                 if (ert.scheduler != null)
                 {
-                    k = ert.scheduler.scheduledTime - TimeChron.GetRealTime();
+                    k = ert.scheduler.ScheduledTime - TimeChron.GetRealTime();
                 }
 
                 resp += "\n" + new string('-', 20);
                 if (ert.Newslist != null && ert.Newslist.Count > 0)
                 {
-                    resp += string.Format("\nParser: {0}", ert.xkey);
-                    resp += string.Format("\nNews Articles: {0}", (ert.Newslist != null ? ert.Newslist.Count : 0));
-                    if (k.TotalSeconds == 0)
+                    resp += $"\nParser: {ert.xkey}";
+                    resp += $"\nNews Articles: {(ert.Newslist != null ? ert.Newslist.Count : 0)}";
+                    if (Math.Abs(k.TotalSeconds) < 0.001)
                     {
                         resp += "\nCache is updating now!";
                     }
                     else
                     {
-                        resp += string.Format("\nNext parsing in: {0}d {1}h {2}m {3}s", k.Days, k.Hours, k.Minutes, k.Seconds);
+                        resp += $"\nNext parsing in: {k.Days}d {k.Hours}h {k.Minutes}m {k.Seconds}s";
                     }
 
-                    resp += string.Format("\nCache epoch: {0}", (ert.scheduler != null ? ert.CacheEpoch : 0));
+                    resp += $"\nCache epoch: {(ert.scheduler != null ? ert.CacheEpoch : 0)}";
                 }
                 else
                 {
-                    resp += string.Format("\nParser {0}  not ready now", ert.xkey);
-                    resp += string.Format("\nNext atempt to parse in: {0}d {1}h {2}m {3}s", k.Days, k.Hours, k.Minutes, k.Seconds);
+                    resp += $"\nParser {ert.xkey}  not ready now";
+                    resp += $"\nNext atempt to parse in: {k.Days}d {k.Hours}h {k.Minutes}m {k.Seconds}s";
                 }
                 resp += "\n" + new string('-', 20) + "\n";
-                countAllnews += (ert.Newslist != null ? ert.Newslist.Count : 0);
+                countAllnews += ert.Newslist?.Count ?? 0;
             }
             return new Tuple<string, int>(resp, countAllnews);
         }
         #endregion
-        
+
         #region ErrorHandling
-        private static Response ResponseTyper(Exception err, object obj = null, InstantState state = InstantState.Success)
+        private Response ResponseTyper(Exception err, object obj = null, InstantState state = InstantState.Success)
         {
             Response resp;
             if (err == null)
             {
-                resp = new Response()
+                resp = new Response
                 {
                     Code = StatusCode.Success,
                     Error = "null",
-                    Cache = (state == InstantState.FromCache),
+                    Cache = state == InstantState.FromCache,
                     Content = obj
                 };
             }
             else
-            if (err != null && err.GetType() == typeof(FormatException))
+            if (err.GetType() == typeof(FormatException))
             {
-                resp = new Response() { Code = StatusCode.InvalidRequest, Error = err.Message + "\n" + Tools.AnonymizeStack(err.StackTrace), Content = null };
+                resp = new Response { Code = StatusCode.InvalidRequest, Error = err.Message + "\n" + Tools.AnonymizeStack(err.StackTrace), Content = null };
             }
-            else if (err != null && err.GetType() == typeof(InvalidOperationException))
+            else if (err.GetType() == typeof(InvalidOperationException))
             {
-                resp = new Response() { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
+                resp = new Response { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
             }
-            else if (err != null && err.GetType() == typeof(EntryPointNotFoundException))
+            else if (err.GetType() == typeof(EntryPointNotFoundException))
             {
-                resp = new Response() { Code = StatusCode.DeprecatedMethod, Error = err.Message, Content = null };
+                resp = new Response { Code = StatusCode.DeprecatedMethod, Error = err.Message, Content = null };
             }
-            else if (err != null && err.GetType() == typeof(InvalidDataException))
+            else if (
+                err is InvalidDataException)
             {
-                resp = new Response() { Code = StatusCode.NotFound, Error = err.Message, Content = null };
+                resp = new Response { Code = StatusCode.NotFound, Error = err.Message, Content = null };
             }
-            else if (err != null && err.GetType() == typeof(DivideByZeroException))
+            else if (err.GetType() == typeof(DivideByZeroException))
             {
-                resp = new Response()
+                resp = new Response
                 {
                     Code = StatusCode.Success,
                     Error = null,
                     Cache = (state == InstantState.FromCache),
-                    Content = new NewsItemVisualizer()
+                    Content = new NewsItemVisualizer
                     {
                         NewsItemList = obj as List<NewsItem>
                     }
@@ -577,14 +566,14 @@ namespace APIUtilty
             }
             else
             {
-                resp = new Response() { Code = StatusCode.Undefined, Error = (err != null) ? err.Message + "\n" + Tools.AnonymizeStack(err.StackTrace) : "", Content = obj };
+                resp = new Response { Code = StatusCode.Undefined, Error = err.Message + "\n" + Tools.AnonymizeStack(err.StackTrace), Content = obj };
             }
 
             return resp;
         }
 
-        public static string CreateResponse(List<NewsItem> obj, Exception err,
-            InstantState state = InstantState.Success)
+        public string CreateResponse(List<NewsItem> obj, Exception err,
+             InstantState state = InstantState.Success)
         {
             Response resp;
             if (err != null)
@@ -593,11 +582,11 @@ namespace APIUtilty
             }
             else
             {
-                resp = new Response()
+                resp = new Response
                 {
                     Code = StatusCode.Success,
                     Error = null,
-                    Content = new NewsItemVisualizer()
+                    Content = new NewsItemVisualizer
                     {
                         NewsItemList = obj
                     },
@@ -616,7 +605,7 @@ namespace APIUtilty
             }
             else
             {
-                resp = new Response()
+                resp = new Response
                 {
                     Code = StatusCode.Success,
                     Error = null,
@@ -626,16 +615,16 @@ namespace APIUtilty
             return JsonConvert.SerializeObject(resp);
         }
 
-        public static string CreateErrorResp(Exception err)
+        public string CreateErrorResp(Exception err)
         {
             Response resp;
             if (err != null)
             {
-                resp = ResponseTyper(err, null);
+                resp = ResponseTyper(err);
             }
             else
             {
-                resp = new Response()
+                resp = new Response
                 {
                     Code = StatusCode.Undefined,
                     Error = "NOT IMPLEMENTED",
