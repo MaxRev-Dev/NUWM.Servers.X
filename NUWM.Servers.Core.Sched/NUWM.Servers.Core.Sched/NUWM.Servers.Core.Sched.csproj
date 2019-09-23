@@ -3,17 +3,18 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>3.1.1</Version>
+    <Version>3.1.4</Version>
     <Copyright>MaxRev © 2019</Copyright>
     <Company>NUWM</Company>
     <Authors>MaxRev</Authors>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.4" />
-    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.1.6" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" /> 
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
+    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.2.4-beta4" />
+    <PackageReference Include="MR.Servers.Core.Utils" Version="0.7.0.34" /> 
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3-beta1" /> 
   </ItemGroup> 
 
 </Project>

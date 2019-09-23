@@ -1,11 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using MaxRev.Servers.API;
+using MaxRev.Servers.Core.Exceptions;
 using MaxRev.Servers.Core.Route;
+using MaxRev.Servers.Interfaces;
 using MaxRev.Servers.Utils;
+using MaxRev.Servers.Utils.Logging;
 using MaxRev.Utils;
 using Newtonsoft.Json;
 
@@ -14,7 +17,17 @@ namespace NUWM.Servers.Core.Sched
     [RouteBase("api")]
     public sealed class API : CoreApi
     {
-        public async Task<Tuple<string, string>> PrepareForResponse(string Request, string Content, string action)
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+            if (ModuleContext != default)
+            {
+                ModuleContext.StreamContext.KeepAlive = false;
+                Builder.ContentType("text/json");
+            }
+        }
+
+        public async Task<IResponseInfo> PrepareForResponse(string Request, string Content, string action)
         {
             string FS = null, ContentType = "text/json";
             action = action.Substring(action.IndexOf('/') + 1);
@@ -31,7 +44,7 @@ namespace NUWM.Servers.Core.Sched
                             }
                         case "sched":
                             {
-                                FS = await Schedule();
+                                FS = await Schedule().ConfigureAwait(false);
                                 break;
                             }
                         case "lect":
@@ -41,9 +54,7 @@ namespace NUWM.Servers.Core.Sched
                             }
                         case "set":
                             {
-                                var t = SettingTop();
-                                FS = t.Item1; ContentType = t.Item2;
-                                break;
+                                return await SettingTop();
                             }
                         default:
                             throw new FormatException("InvalidRequest: invalid key parameter");
@@ -62,7 +73,7 @@ namespace NUWM.Servers.Core.Sched
                 FS = Serialize(ResponseTyper(ex));
             }
 
-            return new Tuple<string, string>(FS, ContentType);
+            return Builder.Content(FS).ContentType(ContentType).Build();
         }
         [Route("schedPost", AccessMethod.POST)]
         public string LectPost()
@@ -76,23 +87,21 @@ namespace NUWM.Servers.Core.Sched
                 {
                     var rlect = query["lect"];
                     lect = bool.Parse(rlect);
-                    string date = "";
+                    var date = "";
                     if (query.HasKey("content"))
                     {
-                        string contents = query["content"];
-                        bool auto = false;
+                        var contents = query["content"];
                         if (query.HasKey("auto"))
                         {
-                            string autox = query["auto"]; ;
-                            auto = (autox == "true" || autox == "1") ? true : false;
+                            var _ = query["auto"];
                         }
                         if (query.HasKey("date"))
                         {
 
                             date = query["date"];
                         }
-                        var res = SubjectParser.Current.Parse(date, System.Net.WebUtility.UrlDecode(contents), lect, auto, "");
-                        return API.CreateResponseSubjects(res.Item1, res.Item2);
+                        var res = SubjectParser.Current.Parse(date, WebUtility.UrlDecode(contents), lect);
+                        return CreateResponseSubjects(res.Item1, res.Item2);
                     }
                     throw new FormatException("InvalidRequest: expected content parameter");
                 }
@@ -100,16 +109,16 @@ namespace NUWM.Servers.Core.Sched
             }
             catch (Exception ex)
             {
-                return JsonConvert.SerializeObject(ResponseTyper(ex, null));
+                return JsonConvert.SerializeObject(ResponseTyper(ex));
             }
         }
 
         [Route("trace")]
         private string GetTrace()
         {
-            this.Server.State.OnApiResponse();
-            this.Server.State.DecApiResponseUser();
-
+            Server.State.OnApiResponse();
+            Server.State.DecApiResponseUser();
+            Builder.ContentType("text/plain");
             return Tools.GetBaseTrace(ModuleContext.Server);
         }
 
@@ -120,35 +129,35 @@ namespace NUWM.Servers.Core.Sched
             var query = Info.Query;
             try
             {
-                bool auto = AutoReplaceHelper.Current?.Now ?? false;
+                var auto = AutoReplaceHelper.Current?.Now ?? false;
                 if (query.HasKey("auto"))
                 {
-                    string autox = query["auto"];
+                    var autox = query["auto"];
                     auto = autox == "true" || autox == "1";
                 }
                 if (query.HasKey("group") || query.HasKey("name"))
                 {
-                    string group = Uri.UnescapeDataString(query["group"] ?? "");
-                    string name = Uri.UnescapeDataString(query["name"] ?? "");
+                    var group = Uri.UnescapeDataString(query["group"] ?? "");
+                    var name = Uri.UnescapeDataString(query["name"] ?? "");
 
-                    int year = TimeChron.GetRealTime().Year;
+                    var year = TimeChron.GetRealTime().Year;
                     if (query.HasKey("year"))
                     {
-                        string ryear = query["year"];
+                        var ryear = query["year"];
                         year = int.Parse(ryear);
                     }
 
-                    var type = GetData.RetType.days;
+                    var type = ScheduleKitchen.RetType.days;
                     if (query.HasKey("type"))
                     {
-                        string rtype = query["type"];
+                        var rtype = query["type"];
                         if (rtype == "weeks")
                         {
-                            type = GetData.RetType.weeks;
+                            type = ScheduleKitchen.RetType.weeks;
                         }
                         else if (rtype == "days")
                         {
-                            type = GetData.RetType.days;
+                            type = ScheduleKitchen.RetType.days;
                         }
                         else
                         {
@@ -157,23 +166,24 @@ namespace NUWM.Servers.Core.Sched
                     }
                     if (query.HasKey("sdate"))
                     {
-                        string sdate = query["sdate"];
+                        var sdate = query["sdate"];
                         if (query.HasKey("edate"))
                         {
-                            string edate = query["edate"];
-                            bool isLecturer = !string.IsNullOrEmpty(name);
-                            GetData data = new GetData(isLecturer ? name : group, sdate, edate, isLecturer, type);
+                            var edate = query["edate"];
+                            var isLecturer = !string.IsNullOrEmpty(name);
 
-                            var rp = await data.GetDays(auto);
+                            var data = new ScheduleKitchen(isLecturer ? name : group, sdate, edate, isLecturer, type);
+
+                            var rp = await data.GetDaysAsync(auto).ConfigureAwait(false);
                             if (data.R != null)
                             {
-                                return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser() { Data = rp }));
+                                return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser { Data = rp }));
                             }
 
-                            return JsonConvert.SerializeObject(new Response()
+                            return JsonConvert.SerializeObject(new Response
                             {
                                 Code = StatusCode.Success,
-                                Content = new ScheduleVisualiser()
+                                Content = new ScheduleVisualiser
                                 {
                                     Data = rp
                                 },
@@ -182,79 +192,76 @@ namespace NUWM.Servers.Core.Sched
                         }
                         return CreateErrorResp(new InvalidOperationException("InvalidKey: edate expected - format dd.MM.yyyy"));
                     }
-                    else if (query.HasKey("week"))
+                    if (query.HasKey("week"))
                     {
-                        string rweek = query["week"];
-                        int week = int.Parse(rweek);
-                        if (week > 52 || week < 1)
-                        {
-                            throw new InvalidOperationException("InvalidKey: week is not valid");
-                        }
+                        var rweek = query["week"];
+                        var week = int.Parse(rweek);
+                        CheckWeekRange(week);
 
-                        bool isLecturer = !string.IsNullOrEmpty(name);
+                        var isLecturer = !string.IsNullOrEmpty(name);
 
-                        int cury = TimeChron.GetRealTime().Year;
+                        var cury = TimeChron.GetRealTime().Year;
                         if (year > cury + 1 || year < cury - 1)
                         {
                             throw new InvalidOperationException("InvalidKey: year must be in bounds (current year+-1)");
                         }
 
-                        GetData data = new GetData(isLecturer ? name : group, week, year, isLecturer, type);
-                        var rp = await data.GetDays(auto);
+                        var data = new ScheduleKitchen(isLecturer ? name : group, week, year, isLecturer, type);
+                        var rp = await data.GetDaysAsync(auto).ConfigureAwait(false);
                         if (data.R != null)
                         {
-                            return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser() { Data = rp }));
+                            return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser { Data = rp }));
                         }
 
-                        return JsonConvert.SerializeObject(new Response()
+                        return JsonConvert.SerializeObject(new Response
                         {
                             Code = StatusCode.Success,
-                            Content = new ScheduleVisualiser()
+                            Content = new ScheduleVisualiser
                             {
                                 Data = rp
                             },
                             Error = null
                         });
                     }
-                    else if (query.HasKey("weeks"))
+                    if (query.HasKey("weeks"))
                     {
-                        string rweek = query["weeks"];
+                        var rweek = query["weeks"];
                         string[] weeks = null;
                         if (rweek.Contains(','))
                         {
                             weeks = rweek.Split(',');
                         }
-                        var t1 = int.Parse(weeks.First());
+                        var t1 = int.Parse((weeks ?? throw new BadRequestException("weeks must contain , separator")).First());
                         var t2 = int.Parse(weeks.Last());
-
+                        CheckWeekRange(t1, t2);
                         foreach (var weekq in weeks)
                         {
-                            int week = int.Parse(weekq);
+                            var week = int.Parse(weekq);
                             if (week > 52) week = 52;
                             if (/*week > 52 ||*/ week < 1)
                             {
                                 throw new InvalidOperationException("InvalidKey: week is not valid");
                             }
                         }
-                        bool isLecturer = !string.IsNullOrEmpty(name);
+                        var isLecturer = !string.IsNullOrEmpty(name);
 
-                        int cury = TimeChron.GetRealTime().Year;
+                        var cury = TimeChron.GetRealTime().Year;
                         if (year > cury + 1 || year < cury - 1)
                         {
                             throw new InvalidOperationException("InvalidKey: year must be in bounds (current year+-1)");
                         }
 
-                        GetData data = new GetData(isLecturer ? name : group, t1, t2, year, isLecturer, type);
-                        var rp = await data.GetDays(auto);
+                        var data = new ScheduleKitchen(isLecturer ? name : group, t1, t2, year, isLecturer, type);
+                        var rp = await data.GetDaysAsync(auto).ConfigureAwait(false);
                         if (data.R != null)
                         {
-                            return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser() { Data = rp }));
+                            return JsonConvert.SerializeObject(ResponseTyper(data.R, new ScheduleVisualiser { Data = rp }));
                         }
 
-                        return JsonConvert.SerializeObject(new Response()
+                        return JsonConvert.SerializeObject(new Response
                         {
                             Code = StatusCode.Success,
-                            Content = new ScheduleVisualiser()
+                            Content = new ScheduleVisualiser
                             {
                                 Data = rp
                             },
@@ -267,7 +274,7 @@ namespace NUWM.Servers.Core.Sched
             }
             catch (OperationCanceledException)
             {
-                return JsonConvert.SerializeObject(new Response()
+                return JsonConvert.SerializeObject(new Response
                 {
                     Code = StatusCode.GatewayTimeout,
                     Cache = false,
@@ -277,16 +284,28 @@ namespace NUWM.Servers.Core.Sched
             }
             catch (Exception ex)
             {
-                return JsonConvert.SerializeObject(ResponseTyper(ex, null));
+                Server.Logger.Notify(LogArea.Other, LogType.Info,
+                    $"{ex.GetType()}:{ex.Message}\n{WebUtility.UrlDecode(ModuleContext.Request)}");
+                return JsonConvert.SerializeObject(ResponseTyper(ex));
             }
         }
+
+        private void CheckWeekRange(params int[] weeks)
+        {
+            foreach (var week in weeks)
+                if (week > 52 || week < 1)
+                {
+                    throw new InvalidOperationException("InvalidKey: week is not valid");
+                }
+        }
+
         [Route("set")]
-        public Tuple<string, string> SettingTop()
+        public async Task<IResponseInfo> SettingTop()
         {
             var query = Info.Query;
 
             var core = MainApp.Current.Core;
-            string FS = "Context undefined", ContentType = "text/plain";
+            string FS, ContentType = "text/plain";
             if (query.HasKey("reinit_users")) { core.AuthManager.InitializeUsersDb(); FS = "OK"; }
             else if (query.HasKey("ulog"))
             {
@@ -303,7 +322,7 @@ namespace NUWM.Servers.Core.Sched
             }
             else if (query.HasKey("errors"))
             {
-                if (core.Logger.GetErrorsString() is string s && !string.IsNullOrEmpty(s))
+                if (core.Logger.GetErrorsString() is var s && !string.IsNullOrEmpty(s))
                 {
                     FS = s;
                 }
@@ -319,7 +338,7 @@ namespace NUWM.Servers.Core.Sched
             }
             else if (query.HasKey("sched_pattern_update"))
             {
-                var p = SubjectParser.Current.UpdatePatern();
+                var p = await SubjectParser.Current.UpdatePatern();
                 FS = (p ? "Pattern Updated" :
                      "Pattern not updated or failed to find file");
             }
@@ -342,40 +361,23 @@ namespace NUWM.Servers.Core.Sched
                     FS = "AutoReplace is OFF";
                 }
             }
-            //else if (query.HasKey("clear_stats"))
-            //{
-            //    Server.State.ClearAll();
-            //    FS = "Stats cleared";
-            //}
-            //else if (query.HasKey("users"))
-            //{
-            //    int it = 0;
-            //    FS += "Users:";
-            //    foreach (var i in UserStats.UniqueUsersList)
-            //    {
-            //        FS += "\n[" + ++it + "] " + i;
-            //    }
-
-            //    FS += "\nENDOFLIST";
-            //}
             else
             {
                 FS = "NOT IMPLEMENTED"; ContentType = "text/plain";
             }
-            return new Tuple<string, string>(FS, ContentType);
+            return Builder.Content(FS).ContentType(ContentType).Build();
         }
 
         [Route("lect")]
         public string Lect()
         {
             var query = Info.Query;
-            var headers = Info.Headers;
 
             try
             {
                 if (query.HasKey("name"))
                 {
-                    var name = query["name"]; var surn = "";
+                    var name = query["name"]; string surn;
 
                     if (name.Contains(' '))
                     {
@@ -387,45 +389,33 @@ namespace NUWM.Servers.Core.Sched
                     }
 
                     var obj =
-                        AutoReplaceHelper.Dictionary.Keys.Where(x => x.ToLower().Contains(surn));
+                        AutoReplaceHelper.Dictionary.Keys.Where(x => x.ToLower().Contains(surn)).ToArray();
                     if (obj.Any())
                     {
                         return JsonConvert.SerializeObject(AutoReplaceHelper.Dictionary[obj.First()]);
                     }
-                    else
-                    {
-                        throw new InvalidOperationException("Collection not ready");
-                    }
+
+                    throw new InvalidOperationException("Collection not ready");
                 }
-                else if (query.HasKey("subj"))
+
+                if (query.HasKey("subj"))
                 {
-                    var name = query["subj"]; var surn = "";
+                    var name = query["subj"];
 
-                    if (name.Contains(' '))
-                    {
-                        surn = name.Substring(name.IndexOf(' '));
-                    }
-                    else
-                    {
-                        surn = name;
-                    }
 
-                    List<string> obj = new List<string>();
-                    obj = AutoReplaceHelper.SmartSearch(name);
+                    var obj = AutoReplaceHelper.SmartSearch(name);
                     if (obj.Any())
                     {
                         return JsonConvert.SerializeObject(obj);
                     }
-                    else
-                    {
-                        throw new InvalidOperationException("Collection not ready");
-                    }
+
+                    throw new InvalidOperationException("Collection not ready");
                 }
                 throw new FormatException("InvalidRequest: name expected");
             }
             catch (Exception ex)
             {
-                return JsonConvert.SerializeObject(ResponseTyper(ex, null));
+                return JsonConvert.SerializeObject(ResponseTyper(ex));
             }
         }
 
@@ -434,11 +424,11 @@ namespace NUWM.Servers.Core.Sched
             Response resp;
             if (err != null)
             {
-                resp = ResponseTyper(err, null);
+                resp = ResponseTyper(err);
             }
             else
             {
-                resp = new Response()
+                resp = new Response
                 {
                     Code = StatusCode.Undefined,
                     Error = "NOT IMPLEMENTED",
@@ -454,7 +444,7 @@ namespace NUWM.Servers.Core.Sched
             Response resp;
             if (err == null)
             {
-                resp = new Response()
+                resp = new Response
                 {
                     Code = StatusCode.Success,
                     Error = null,
@@ -463,28 +453,28 @@ namespace NUWM.Servers.Core.Sched
             }
             else if (err.GetType() == typeof(FormatException))
             {
-                resp = new Response() { Code = StatusCode.InvalidRequest, Error = err.Message, Content = null };
+                resp = new Response { Code = StatusCode.InvalidRequest, Error = err.Message, Content = null };
             }
             else if (err.GetType() == typeof(DivideByZeroException))
             {
-                resp = new Response() { Code = StatusCode.ServerNotResponsing, Error = err.Message, Content = null };
+                resp = new Response { Code = StatusCode.ServerNotResponsing, Error = err.Message, Content = null };
             }
             else if (err.GetType() == typeof(InvalidOperationException))
             {
-                resp = new Response() { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
+                resp = new Response { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
             }
             else if (err.GetType() == typeof(EntryPointNotFoundException))
             {
-                resp = new Response() { Code = StatusCode.DeprecatedMethod, Error = err.Message, Content = null };
+                resp = new Response { Code = StatusCode.DeprecatedMethod, Error = err.Message, Content = null };
             }
-            else if (err.GetType() == typeof(InvalidDataException))
+            else if (err is InvalidDataException)
             {
-                resp = new Response() { Code = StatusCode.NotFound, Error = err.Message, Content = null };
+                resp = new Response { Code = StatusCode.NotFound, Error = err.Message, Content = null };
             }
             else
             {
                 MainApp.Current.Core.Logger.NotifyError(LogArea.Other, err);
-                resp = new Response() { Code = StatusCode.Undefined, Error = (err != null) ? err.Message + "\n" + err.StackTrace : "", Content = obj };
+                resp = new Response { Code = StatusCode.Undefined, Error = err.Message + "\n" + err.StackTrace, Content = obj };
             }
 
             return resp;
@@ -499,24 +489,12 @@ namespace NUWM.Servers.Core.Sched
             }
             else
             {
-                if (err != null)
+                resp = new Response
                 {
-                    resp = new Response()
-                    {
-                        Code = StatusCode.ServerSideError,
-                        Error = null,
-                        Content = "Not Found"
-                    };
-                }
-                else
-                {
-                    resp = new Response()
-                    {
-                        Code = StatusCode.Success,
-                        Error = null,
-                        Content = result
-                    };
-                }
+                    Code = StatusCode.Success,
+                    Error = null,
+                    Content = result
+                };
             }
             return JsonConvert.SerializeObject(resp);
         }
@@ -530,7 +508,7 @@ namespace NUWM.Servers.Core.Sched
             }
             else
             {
-                resp = new Response()
+                resp = new Response
                 {
                     Code = StatusCode.Success,
                     Error = null,

@@ -35,7 +35,7 @@ namespace NUWM.Servers.Core.Sched
         DeprecatedMethod = 66,
         ServerSideError = 88,
         GatewayTimeout,
-        ServerNotResponsing =90,
+        ServerNotResponsing = 90,
         Success = 100
     }
 
@@ -50,8 +50,8 @@ namespace NUWM.Servers.Core.Sched
         [JsonProperty("type")]
         public string Type { get; set; }
     }
-    public partial class SubjectInstance  
-    { 
+    public partial class SubjectInstance
+    {
         [JsonProperty("lecturer")]
         public string Lecturer { get; set; }
         [JsonProperty("subgroup")]
