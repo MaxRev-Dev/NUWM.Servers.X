@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.1.7" />
+    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.1.16" />
   </ItemGroup>
 
 </Project>

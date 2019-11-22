@@ -14,15 +14,9 @@
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.4" />
-    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.0.29" />
+    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.1.16" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.5.1" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="MaxRev.Servers.Core">
-      <HintPath>E:\MSR_PUB\MaxRev.Servers.Core.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

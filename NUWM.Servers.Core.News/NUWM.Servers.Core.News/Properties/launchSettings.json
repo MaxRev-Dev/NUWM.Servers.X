@@ -2,7 +2,8 @@
   "profiles": {
     "NUWM.Servers.Core.News": {
       "commandName": "Project",
-      "commandLineArgs": "3006"
+      "commandLineArgs": "3006",
+      "workingDirectory": "./bin"
     }
   }
 }

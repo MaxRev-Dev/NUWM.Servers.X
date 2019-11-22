@@ -177,7 +177,7 @@ namespace NUWM.Servers.Core.Sched
         /// <returns></returns>
         public async Task<object> GetDaysAsync(bool auto)
         {
-            var requestUri = new Uri("http://desk.nuwm.edu.ua/cgi-bin/timetable.cgi");
+            var requestUri = new Uri("http://109.87.215.169/cgi-bin/timetable.cgi?n=700");
             try
             {
                 string data;
@@ -368,7 +368,7 @@ namespace NUWM.Servers.Core.Sched
                 var t = i.Elements("td").ToArray();
                 var ind = t.ElementAt(0).InnerText;
                 var times = t.ElementAt(1).InnerHtml.Replace("<br>", "-");
-                var trashed = FixMalformedTrash(t.ElementAt(2).InnerHtml);
+                var trashed = FixMalformedBlock(t.ElementAt(2).InnerHtml);
                 if (!string.IsNullOrEmpty(trashed.Trim()))
                     slist.AddRange(InnerCheckParse(times, trashed, ind));
             }
@@ -377,13 +377,22 @@ namespace NUWM.Servers.Core.Sched
             return day;
         }
 
-        private string FixMalformedTrash(string innerHtml)
+        private string FixMalformedBlock(string innerHtml)
         {
-            return innerHtml
-                .Replace("<br> <br>", "\r")
+            innerHtml = innerHtml
+                .Replace("<br> <br>", "\r\n")
+                .Replace(" <br> -", "\r\n - ")
                 .Replace("<br> ", " ")
-                .Replace("<br>", "\r")
-                .Replace(" - ", "\r - ");
+                .Replace("<br>", "\r\n");
+            var vx = innerHtml.Split("\r\n");
+            if (vx.Length > 1 && !vx[0].Contains('(') 
+                              && vx[1].Contains('(')
+                              && vx[1].Contains(')'))
+            {
+                return innerHtml.Replace(" - ", "\r\n - ");
+            }
+
+            return innerHtml;
         }
 
         /// <summary>
@@ -397,7 +406,7 @@ namespace NUWM.Servers.Core.Sched
             var tr = node.Element("tr");
             var ind = tr.ChildNodes[0].InnerText;
             var times = tr.ChildNodes[1].InnerHtml.Replace("<br>", "-");
-            var trashed = FixMalformedTrash(tr.ChildNodes[2].InnerHtml);
+            var trashed = FixMalformedBlock(tr.ChildNodes[2].InnerHtml);
             if (!string.IsNullOrEmpty(trashed.Trim()))
                 return InnerCheckParse(times, trashed, ind);
             return default;
@@ -425,7 +434,7 @@ namespace NUWM.Servers.Core.Sched
                     return subj.ToArray(); /*subj.Add(new SubjectInstance(times, "", ind));*/
                 }
 
-                var df = SubjectParser.Current.Parsing(times, trashed.Split('\r', '\n'), TimetableForLecturer);
+                var df = SubjectParser.Current.Parsing(times, trashed.Split("\r\n"), TimetableForLecturer);
                 if (df != null)
                 {
                     subj.AddRange(df);
@@ -549,9 +558,9 @@ namespace NUWM.Servers.Core.Sched
                 var Lhex = BitConverter.ToString(Lwin1251bytes);
                 encLecturer = "%" + Lhex.Replace("-", "%");
             }
-
             return new StringContent(
-                $"faculty=0&teacher={encLecturer}&group={encsname}&sdate={StartDate}&edate={EndDate}&n=700");
+                $"faculty=0&teacher={encLecturer.Replace("%20", "+")}&group={encsname}&sdate={StartDate}&edate={EndDate}&n=700",
+                Encoding.UTF8, "application/x-www-form-urlencoded");
         }
 
         private async Task<string> ParseResponseAsync()

@@ -5,17 +5,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using MaxRev.Servers.API;
+using MaxRev.Servers.API.Response;
 using MaxRev.Servers.Core.Route;
 using MaxRev.Servers.Utils;
 using MaxRev.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
 namespace NUWM.Servers.Core.News
 {
     [RouteBase("api")]
     internal class API : CoreApi
-    {
-
+    { 
+        ParserPool pool => (ParserPool)Services.GetService(typeof(ParserPool));
         #region Invokers
         [Route("keys")]
         private string GetKeys()
@@ -65,7 +67,7 @@ namespace NUWM.Servers.Core.News
             {
                 if (Query.HasKey("reparse"))
                 {
-                    ParserPool.Current.BaseInitParsers();
+                    ParserPool.Current.BaseInitParsers(Services.GetRequiredService<NewsConfig>());
                     FS = "Reinit task started";
                 }
                 else
@@ -75,9 +77,7 @@ namespace NUWM.Servers.Core.News
             }
             FS = !string.IsNullOrEmpty(FS) ? FS : "Context undefined";
             return new Tuple<string, string>(FS, ContentType);
-        }
-
-        ParserPool pool => App.Get.ParserPool;
+        } 
 
         [Route("searchNews")]
         public async Task<string> SearchNewsAsync()
@@ -233,7 +233,7 @@ namespace NUWM.Servers.Core.News
             var newslist = Parser.DeepCopy(parser.Newslist);
             Exception err = null;
             bool toHTML = false;
-            List<NewsItem> obj = new List<NewsItem>();
+            List<NewsItem> obj = newslist;
             try
             {
                 if (Query.HasKey("reparse"))
@@ -495,7 +495,7 @@ namespace NUWM.Servers.Core.News
                 if (ert.Newslist != null && ert.Newslist.Count > 0)
                 {
                     resp += $"\nParser: {ert.xkey}";
-                    resp += $"\nNews Articles: {(ert.Newslist != null ? ert.Newslist.Count : 0)}";
+                    resp += $"\nNews Articles: {ert.Newslist?.Count}";
                     if (Math.Abs(k.TotalSeconds) < 0.001)
                     {
                         resp += "\nCache is updating now!";
@@ -557,7 +557,7 @@ namespace NUWM.Servers.Core.News
                 {
                     Code = StatusCode.Success,
                     Error = null,
-                    Cache = (state == InstantState.FromCache),
+                    Cache = state == InstantState.FromCache,
                     Content = new NewsItemVisualizer
                     {
                         NewsItemList = obj as List<NewsItem>

@@ -10,49 +10,30 @@ using HtmlAgilityPack;
 using MaxRev.Servers.Utils;
 using MaxRev.Utils;
 using MaxRev.Utils.Schedulers;
-using Newtonsoft.Json;
 
 namespace NUWM.Servers.Core.News
 {
-    public class ScheduleInstantCacheSave : BaseScheduler
+    public class Parser : ICloneable
     {
-        private readonly ParserPool pool;
-
-        public ScheduleInstantCacheSave(ParserPool pool) : base(TimeSpan.FromHours(1))
-        {
-            this.pool = pool;
-        }
-
-        protected override void OnTimerElapsed()
-        {
-            var g = File.CreateText(pool.InstP);
-            g.WriteAsync(JsonConvert.SerializeObject(pool.InstantCache)).Wait();
-            g.Close();
-        }
-    }
-    public class Parser
-    {
-        private readonly string url;
-        private bool abitParser;
+        private readonly string _url;
+        private readonly bool _isAbitParser;
         public string xkey;
-        public int pagesDef = 15;
-        private readonly int offsetMins;
+        private int pagesDef = 15;
+        private readonly int _offsetMins;
         private HtmlDocument CurrentDoc;
         public readonly int InstituteID;
         public int CacheEpoch { get; set; }
         public PoolParserScheduler scheduler;
 
-        public Parser(string url, string key, bool abitParser, int institute_id = -100, int offset = 0)
+        public Parser(string url, string key, bool isAbitParser, int institute_id = -100, int offset = 0)
         {
             xkey = key;
-            offsetMins = offset;
-            this.abitParser = abitParser;
+            _offsetMins = offset;
+            _isAbitParser = isAbitParser;
             InstituteID = institute_id;
-            this.url = url;
-            NewsList = new List<NewsItem>();
+            _url = url;
+            _internalList = new List<NewsItem>();
         }
-
-        public string site_url => App.Get.Config.HostUrl;
 
         public async void ParsePagesParallel(Parser parser_obj)
         {
@@ -61,12 +42,11 @@ namespace NUWM.Servers.Core.News
 
         public async Task ParsePages(Parser parser)
         {
-            parser.scheduler = null;
-            if (!abitParser)
+            if (!_isAbitParser)
             {
                 try
                 {
-                    var urlx = parser.url;
+                    var urlx = parser._url;
                     CurrentDoc = new HtmlDocument();
                     var rm = await RequestAllocator.Instance.UsingPool(new Request(urlx));
 
@@ -75,20 +55,15 @@ namespace NUWM.Servers.Core.News
                         CurrentDoc.LoadHtml(await rm.Content.ReadAsStringAsync());
 
                         var news_art = CurrentDoc.DocumentNode.Descendants().Single(x => x.HasClass("news") && x.HasClass("list"));
-                        if (NewsList == null)
+                        if (_internalList == null)
                         {
-                            NewsList = new List<NewsItem>();
+                            _internalList = new List<NewsItem>();
                         }
 
-                        var op = ParseInstance(new Tuple<HtmlNode, int, string>(news_art, 1, url));
-                        if (NewsList.Count > 0)
-                        {
-                            NewsList.AddRange(op.Where(x => NewsList.All(y => x.Url != y.Url)));
-                        }
-                        else
-                        {
-                            NewsList.AddRange(op);
-                        }
+                        var op = ParseInstance(new Tuple<HtmlNode, int, string>(news_art, 1, _url));
+                        _internalList.AddRange(_internalList.Count > 0 ? 
+                            op.Where(x => _internalList.All(y => x.Url != y.Url)) :
+                            op);
 
                         foreach (var t in op.Where(x => x.Detailed == null || x.Detailed == new NewsItemDetailed()))
                         {
@@ -111,9 +86,9 @@ namespace NUWM.Servers.Core.News
                                 CurrentDoc.LoadHtml(str);
 
                                 news_art = CurrentDoc.DocumentNode.Descendants().Single(x => x.HasClass("news") && x.HasClass("list"));
-                                var items = ParseInstance(new Tuple<HtmlNode, int, string>(news_art, id, url));
+                                var items = ParseInstance(new Tuple<HtmlNode, int, string>(news_art, id, _url));
 
-                                NewsList.AddRange(items.Where(x => NewsList.All(y => x.Url != y.Url)));
+                                _internalList.AddRange(items.Where(x => _internalList.All(y => x.Url != y.Url)));
 
                                 foreach (var it in items)
                                 {
@@ -123,7 +98,7 @@ namespace NUWM.Servers.Core.News
                         }
                         try
                         {
-                            NewsList = NewsList.OrderByDescending(x => DateTime.ParseExact(x.Date, "dd MMMM yyyy", CultureInfo.CreateSpecificCulture("uk-UA"))).ToList();
+                            _internalList = _internalList.OrderByDescending(x => DateTime.ParseExact(x.Date, "dd MMMM yyyy", CultureInfo.CreateSpecificCulture("uk-UA"))).ToList();
                         }
                         catch (Exception ex) { App.Get.Core.Logger.NotifyError(LogArea.Other, ex); }
                     }
@@ -137,7 +112,7 @@ namespace NUWM.Servers.Core.News
             else
             {
                 // ABIT PAGES
-                NewsList.AddRange(await AbitNewsParser(parser));
+                _internalList.AddRange(await AbitNewsParser(parser));
                 try
                 {
 
@@ -154,9 +129,9 @@ namespace NUWM.Servers.Core.News
             // Fix of server connection problems)
             try
             {
-                if (NewsList != null && NewsList.Count == 0)
+                if (_internalList != null && _internalList.Count == 0)
                 {
-                    NewsList = DeepCopy(parser.NewsList);
+                    _internalList = DeepCopy(parser._internalList);
                 }
             }
             catch (Exception ex) { App.Get.Core.Logger.NotifyError(LogArea.Other, ex); }
@@ -164,6 +139,7 @@ namespace NUWM.Servers.Core.News
             if (scheduler == null)
             {
                 scheduler = new PoolParserScheduler(ParserPool.Current, xkey);
+                scheduler.ScheduleTimer();
                 //scheduler.ScheduleTimer(xkey, new TimeSpan(), offsetMins, InstituteID);
             }
         }
@@ -171,14 +147,15 @@ namespace NUWM.Servers.Core.News
 
         private async Task<List<NewsItem>> AbitNewsParser(Parser parser)
         {
-            List<NewsItem> items = new List<NewsItem>();
+            var items = new List<NewsItem>();
             try
             {
-                var r = await RequestAllocator.Instance.UsingPool(new Request(parser.url));
+                var r = await RequestAllocator.Instance.UsingPool(new Request(parser._url));
                 if (r.IsSuccessStatusCode)
                 {
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(await r.Content.ReadAsStringAsync());
+                    items.AddRange(await AbitPageItems(doc));
                     var it = doc.DocumentNode.Descendants("div").Where(x => x.HasClass("pagination")).ToArray();
                     if (it.Any())
                     {
@@ -204,7 +181,7 @@ namespace NUWM.Servers.Core.News
                 }
                 else
                 {
-                    App.Get.Core.Logger.NotifyError(LogArea.Other, new Exception($"Failed to get { parser.url}"));
+                    App.Get.Core.Logger.NotifyError(LogArea.Other, new Exception($"Failed to get { parser._url}"));
                 }
             }
             catch (Exception ex) { App.Get.Core.Logger.NotifyError(LogArea.Other, ex); }
@@ -303,7 +280,7 @@ namespace NUWM.Servers.Core.News
                 if (read.Contains(url))
                 {
                     var t = read.Split(url, StringSplitOptions.RemoveEmptyEntries).First();
-                    if (t.Count() == 1)
+                    if (t.Length == 1)
                     {
                         continue;
                     }
@@ -320,91 +297,16 @@ namespace NUWM.Servers.Core.News
             }
             return CurrentPageNews;
         }
-        public class PoolParserScheduler : BaseScheduler
-        {
-            public PoolParserScheduler(ParserPool pool, string par)
-            {
-                Pool = pool;
-                ParserX = par;
-            }
 
-            public ParserPool Pool { get; }
-            private string ParserX { get; }
 
-            //private int id = -100, offset;
-            public async Task ReparseTask()
-            {
-                if (Tools.CheckForInternetConnection())
-                {
-                    await Pool.Saver(ParserX);
-                    var t = Pool.POOL[ParserX];
-                    //offset = t.offsetMins;
-                    var p = new Parser(t.url, ParserX, t.abitParser, t.InstituteID, t.offsetMins) { CacheEpoch = ++t.CacheEpoch };
-                    await p.ParsePages(t);
-                    Pool.POOL[ParserX] = p;
-                    t.CacheEpoch++;
-                }
-                else
-                {
-                    ScheduleTimer();
-                }
-            }
-
-            protected override async void OnTimerElapsed()
-            {
-                await ReparseTask();
-            }
-            //public void Schedule_Timer(string xkey, TimeSpan timeToSleep = new TimeSpan(), int Offset = 0, int ID = 0)
-            //{
-            //    if (ID != 0)
-            //    {
-            //        id = ID;
-            //    }
-
-            //    DateTime nowTime = TimeChron.GetRealTime();
-
-            //    if (timeToSleep == new TimeSpan())
-            //    {
-            //        int delayMins = 0, delayHours = 0;
-            //        if (id != -100)
-            //        {
-            //            delayHours = MainApp.taskDelayH;
-            //        }
-            //        else
-            //        {
-            //            delayMins = MainApp.taskDelayM;
-            //        }
-
-            //        timeToSleep = new TimeSpan(delayHours, delayMins, 0);
-            //    }
-            //    try
-            //    {
-            //        scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, nowTime.Hour, nowTime.Minute, 0, 0).
-            //            AddHours(timeToSleep.Hours).AddMinutes(timeToSleep.Minutes +
-            //            ((Current.POOL[xkey].CacheEpoch == 0) ? Offset : 0));
-            //    }
-            //    catch { Console.WriteLine("error: " + xkey); return; }
-
-            //    if (nowTime > scheduledTime)
-            //    {
-            //        scheduledTime = scheduledTime.AddHours(12);
-            //    }
-
-            //    double tickTime = (scheduledTime - TimeChron.GetRealTime()).TotalMilliseconds;
-            //    timer = new Timer(tickTime);
-            //    timer.Elapsed += Timer_Elapsed;
-            //    timer.Start();
-            //}
-        }
-
-        [field: NonSerialized] public List<NewsItem> NewsList;
+        [field: NonSerialized] private List<NewsItem> _internalList;
         public List<NewsItem> Newslist
         {
-            get => NewsList ?? (NewsList = new List<NewsItem>());
+            get => _internalList ?? (_internalList = new List<NewsItem>());
             set {
                 if (value != null)
                 {
-                    NewsList = value;
+                    _internalList = value;
                 }
             }
         }
@@ -419,5 +321,82 @@ namespace NUWM.Servers.Core.News
                 return (T)formatter.Deserialize(ms);
             }
         }
+
+        public object Clone()
+        {
+            return new Parser(_url, xkey, _isAbitParser, InstituteID, _offsetMins);
+        }
+    }
+    public class PoolParserScheduler : BaseScheduler
+    {
+        public PoolParserScheduler(ParserPool pool, string par)
+        {
+            Pool = pool;
+            ParserX = par;
+        }
+
+        public ParserPool Pool { get; }
+        private string ParserX { get; }
+
+        //private int id = -100, offset;
+        public async Task ReparseTask()
+        {
+            if (Tools.CheckForInternetConnection())
+            {
+                await Pool.Saver(ParserX);
+                var t = Pool.POOL[ParserX];
+                var p = (Parser) t.Clone();
+                p.CacheEpoch = ++t.CacheEpoch;
+                await p.ParsePages(t);
+                Pool.POOL[ParserX] = p;
+                t.CacheEpoch++;
+            }
+        }
+
+        protected override async void OnTimerElapsed()
+        {
+            await ReparseTask();
+        }
+        //public void Schedule_Timer(string xkey, TimeSpan timeToSleep = new TimeSpan(), int Offset = 0, int ID = 0)
+        //{
+        //    if (ID != 0)
+        //    {
+        //        id = ID;
+        //    }
+
+        //    DateTime nowTime = TimeChron.GetRealTime();
+
+        //    if (timeToSleep == new TimeSpan())
+        //    {
+        //        int delayMins = 0, delayHours = 0;
+        //        if (id != -100)
+        //        {
+        //            delayHours = MainApp.taskDelayH;
+        //        }
+        //        else
+        //        {
+        //            delayMins = MainApp.taskDelayM;
+        //        }
+
+        //        timeToSleep = new TimeSpan(delayHours, delayMins, 0);
+        //    }
+        //    try
+        //    {
+        //        scheduledTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, nowTime.Hour, nowTime.Minute, 0, 0).
+        //            AddHours(timeToSleep.Hours).AddMinutes(timeToSleep.Minutes +
+        //            ((Current.POOL[xkey].CacheEpoch == 0) ? Offset : 0));
+        //    }
+        //    catch { Console.WriteLine("error: " + xkey); return; }
+
+        //    if (nowTime > scheduledTime)
+        //    {
+        //        scheduledTime = scheduledTime.AddHours(12);
+        //    }
+
+        //    double tickTime = (scheduledTime - TimeChron.GetRealTime()).TotalMilliseconds;
+        //    timer = new Timer(tickTime);
+        //    timer.Elapsed += Timer_Elapsed;
+        //    timer.Start();
+        //}
     }
 }

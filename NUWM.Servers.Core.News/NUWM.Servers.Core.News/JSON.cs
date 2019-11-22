@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using MaxRev.Servers.API.Response;
 using MaxRev.Utils;
 using Newtonsoft.Json;
 
@@ -79,16 +80,5 @@ namespace NUWM.Servers.Core.News
         public string RelUrl { get; set; }
         //[JsonProperty("page_id")]
         // public int PageId { get; set; }
-    }
-    public enum StatusCode
-    {
-        Undefined = 1,
-        InvalidRequest = 32,
-        NotFound = 33,
-        AccessDenied = 60,
-        DeprecatedMethod = 66,
-        ServerSideError = 88,
-        GatewayTimeout,
-        Success = 100
-    }
+    } 
 }

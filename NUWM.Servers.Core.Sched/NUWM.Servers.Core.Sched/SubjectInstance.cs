@@ -26,7 +26,7 @@
         {
             NullableAll();
             TimeStamp = dateTime;
-            Subject = subject;
+            Subject = subject.Trim(',', ' ');
             LessonNum = int.Parse(num);
         }
     }

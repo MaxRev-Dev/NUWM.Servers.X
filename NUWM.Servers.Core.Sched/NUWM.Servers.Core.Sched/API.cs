@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using MaxRev.Servers.API;
 using MaxRev.Servers.Core.Exceptions;
@@ -116,8 +117,11 @@ namespace NUWM.Servers.Core.Sched
         [Route("trace")]
         private string GetTrace()
         {
-            Server.State.OnApiResponse();
-            Server.State.DecApiResponseUser();
+
+            (Services.GetService(typeof(State)) as State)?.OnApiResponse();
+            (Services.GetService(typeof(State)) as State)?.DecApiResponseUser();
+            //Server.State.OnApiResponse();
+            // Server.State.DecApiResponseUser();
             Builder.ContentType("text/plain");
             return Tools.GetBaseTrace(ModuleContext.Server);
         }

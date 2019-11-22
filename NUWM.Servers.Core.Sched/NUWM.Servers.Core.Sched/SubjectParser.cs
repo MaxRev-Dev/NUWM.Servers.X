@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -81,8 +82,7 @@ namespace NUWM.Servers.Core.Sched
             {
                 throw new InvalidOperationException("Emergency!!! PATTERNS ARE EMPTY");
             }
-
-
+              
             var tm = ScheduleTimeViewItem.GetNum(time);
             list = new List<SubjectInstance>();
             var r = new Regex(patern[isLecturer ? PType.Lect : PType.Stud], RegexOptions.ECMAScript, TimeSpan.FromSeconds(5));
@@ -263,29 +263,32 @@ namespace NUWM.Servers.Core.Sched
                 result.Add(await GetPatternFor(a));
             }
 
-            return !result.Any(x => x == false);
+            return result.All(x => x);
         }
 
+        [SuppressMessage("ReSharper", "StringLiteralTypo")]
         private static string CheckType(string what)
         {
-            what = what.Replace('(', ' ').Replace(')', ' ').TrimStart(' ').TrimEnd(' ');
-            switch (what)
+            what = what.Replace('(', ' ')
+                .Replace(')', ' ')
+                .Trim();
+            return what switch
             {
-                case "Л":
-                    return "Лекція";
-                case "Лаб":
-                    return "Лабораторна робота";
-                case "ПрС":
-                    return "Практичне заняття";
-                case "Екз":
-                    return "Екзамен";
-                case "Зал":
-                    return "Залік";
-                case "ТЕСТ":
-                    return "Тест";
-                default:
-                    return what;
-            }
+                "Л" => "Лекція",
+                "Лаб" => "Лабораторна робота",
+                "ПрС" => "Практичне заняття",
+                "Екз" => "Екзамен",
+                "Зал" => "Залік",
+                "ТЕСТ" => "Тест",
+                "Конс" => "Консультація",
+                "Реф" => "Реферат",
+                "ІнЗн" => "Індивідуальне заняття",
+                "Сем" => "Семінар",
+                "Сам" => "Самостійна робота",
+                "МК" => "Модульний контроль",
+                "КсКР" => what,
+                _ => what
+            };
         }
 
         /// <summary>
@@ -293,16 +296,25 @@ namespace NUWM.Servers.Core.Sched
         /// </summary>
         public class ScheduleTimeViewItem
         {
-            private static readonly ScheduleTimeViewItem[] ViewItems = {
-                new ScheduleTimeViewItem("08:00-09:20/20", "I"),
-                new ScheduleTimeViewItem("09:40-11:00/15", "II"),
-                new ScheduleTimeViewItem("11:15-12:35/25", "III"),
-                new ScheduleTimeViewItem("13:00-14:20/15", "IV"),
-                new ScheduleTimeViewItem("14:35-15:55/10", "V"),
-                new ScheduleTimeViewItem("16:05-17:25/10", "VI"),
-                new ScheduleTimeViewItem("17:35-18:55/10", "VII"),
-                new ScheduleTimeViewItem("19:05-20:25/0", "VIII")
-            };
+            static ScheduleTimeViewItem()
+            {
+                _romanMap = new Dictionary<char, int>
+                  {
+                      {'I', 1}, {'V', 5}, {'X', 10}, {'L', 50}, {'C', 100}, {'D', 500}, {'M', 1000}
+                  };
+                ViewItems = new[]{
+                    new ScheduleTimeViewItem("08:00-09:20/20", "I"),
+                    new ScheduleTimeViewItem("09:40-11:00/15", "II"),
+                    new ScheduleTimeViewItem("11:15-12:35/25", "III"),
+                    new ScheduleTimeViewItem("13:00-14:20/15", "IV"),
+                    new ScheduleTimeViewItem("14:35-15:55/10", "V"),
+                    new ScheduleTimeViewItem("16:05-17:25/10", "VI"),
+                    new ScheduleTimeViewItem("17:35-18:55/10", "VII"),
+                    new ScheduleTimeViewItem("19:05-20:25/0", "VIII")
+                };
+            }
+
+            private static readonly ScheduleTimeViewItem[] ViewItems;
 
             /// <summary>
             /// Delimiter is - and /  so format is "hh:mm-hh:mm/mm" 
@@ -339,10 +351,7 @@ namespace NUWM.Servers.Core.Sched
                 return ViewItems.FirstOrDefault(x => x.LessonNum == int.Parse(num));
             }
 
-            private static readonly Dictionary<char, int> _romanMap = new Dictionary<char, int>
-            {
-                {'I', 1}, {'V', 5}, {'X', 10}, {'L', 50}, {'C', 100}, {'D', 500}, {'M', 1000}
-            };
+            private static readonly Dictionary<char, int> _romanMap;
 
             private static int ConvertRomanToNumber(string text)
             {

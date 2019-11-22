@@ -15,12 +15,14 @@ namespace NUWM.Servers.Core.News
 {
     public class ParserPool : IDisposable
     {
+        private readonly NewsConfig _config;
         public static ParserPool Current;
         private ConcurrentDictionary<string, Parser> ppoll;
         private ExpireCacheUpdater updater;
 
-        public ParserPool()
+        public ParserPool(NewsConfig config)
         {
+            _config = config;
             updater = new ExpireCacheUpdater();
         }
 
@@ -38,21 +40,21 @@ namespace NUWM.Servers.Core.News
             {
                 if (InstantCache != null && InstantCache.Count > 0)
                 {
-                    File.WriteAllTextAsync(InstP, JsonConvert.SerializeObject(InstantCache));
+                    File.WriteAllTextAsync(InstCachePath, JsonConvert.SerializeObject(InstantCache));
                 }
             }
             catch (Exception ex) { App.Get.Core.Logger.NotifyError(LogArea.Other, ex); }
         }
-        public readonly string InstP = Path.Combine(
+        public string InstCachePath => Path.Combine(
             App.Get.Core.DirectoryManager[App.Dirs.Cache], "instantCache.txt");
         public async void LoadInstantCache()
         {
-            if (File.Exists(InstP))
+            if (File.Exists(InstCachePath))
             {
                 try
                 {
                     InstantCache = JsonConvert.DeserializeObject<List<NewsItem>>
-                        (await File.OpenText(InstP).ReadToEndAsync());
+                        (await File.OpenText(InstCachePath).ReadToEndAsync());
                 }
                 catch (Exception)
                 {
@@ -83,7 +85,7 @@ namespace NUWM.Servers.Core.News
                     NewsItem obj;
                     foreach (var i in POOL.Values)
                     {
-                        var u = i.NewsList.Where(x => x.Url.Contains(spl)).ToArray();
+                        var u = i.Newslist.Where(x => x.Url.Contains(spl)).ToArray();
                         if (u.Count() == 1)
                         {
                             obj = Parser.DeepCopy(u.First());
@@ -142,11 +144,11 @@ namespace NUWM.Servers.Core.News
 
 
         #endregion
-        public async void BaseInitParsers()
+        public async void BaseInitParsers(NewsConfig config)
         {
             if (Current.POOL == new ConcurrentDictionary<string, Parser>())
             {
-                var u = new ParserPool();
+                var u = new ParserPool(config);
                 await u.Run();
                 SetCurrent(u);
             }
@@ -170,24 +172,12 @@ namespace NUWM.Servers.Core.News
                 direct = await f.ReadToEndAsync();
             }
 
-            string[] lines = direct.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            //int GetOptionOrDefault(string name, int defaultVal)
-            //{
-            //    if (direct.Contains(name))
-            //        return int.Parse(new Regex($@"(?<={name}\:)[0-9]*").Match(direct).Groups[0].Value);
-            //    return defaultVal;
-            //}
-            //App.OffsetLen = GetOptionOrDefault("offsetLen", 5);
-            //App.Get.Config.TaskDelayMinutes = GetOptionOrDefault("delayM", 5);
-            //App.Get.Config.TaskDelayHours = GetOptionOrDefault("delayH", 1);
-            //App.Get.Config.CacheAlive = GetOptionOrDefault("CacheAliveHours", 12);
-            //App.Get.Config.PagesDefault = GetOptionOrDefault("default_pages_count", 15);
-            return lines;
+            return direct.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries); 
         }
         public async Task Run()
         {
             string[] lines = await InitSettings();
-            int offset = -App.OffsetLen;
+            int offset = -_config.OffsetLen;
             int newsOffset = -App.Get.Config.TaskDelayMinutes;
             Current.LoadInstantCache();
             try
@@ -234,30 +224,28 @@ namespace NUWM.Servers.Core.News
                     {
                         key = "zdn";
                     }
-                    new Task(async () =>
-                    {
-                        Parser parser = new Parser(news_url, key, abit, unid,
-                                unid == -100 ? newsOffset += App.Get.Config.TaskDelayMinutes : offset += App.OffsetLen)
-                        { CacheEpoch = 0 };
-                        try
-                        {
-                            if (!POOL.TryAdd(key, parser))
-                            {
-                                await LoadNewsCache(key, parser);
-                                POOL[key] = parser;
-                            }
-                        }
-                        catch (Exception ex) { App.Get.Core.Logger.NotifyError(LogArea.Other, ex); }
-                        finally
-                        {
-                            if (parser.Newslist.Count == 0)
-                            {
-                                await LoadNewsCache(key, parser);
-                            }
 
-                            RunParseThread(parser);
+                    Parser parser = new Parser(news_url, key, abit, unid,
+                            unid == -100 ? newsOffset += App.Get.Config.TaskDelayMinutes : offset += _config.OffsetLen)
+                    { CacheEpoch = 0 };
+                    try
+                    {
+                        if (!POOL.TryAdd(key, parser))
+                        {
+                            await LoadNewsCache(key, parser);
+                            POOL[key] = parser;
                         }
-                    }).Start();
+                    }
+                    catch (Exception ex) { App.Get.Core.Logger.NotifyError(LogArea.Other, ex); }
+                    finally
+                    {
+                        if (parser.Newslist.Count == 0)
+                        {
+                            await LoadNewsCache(key, parser);
+                        }
+
+                        RunParseThread(parser);
+                    }
                 }
             }
             catch (Exception ex)
@@ -284,19 +272,20 @@ namespace NUWM.Servers.Core.News
                 var f = Path.Combine(App.Get.Core.DirectoryManager[App.Dirs.Cache], "news_" + key + ".txt");
                 if (File.Exists(f))
                 {
-                    await File.OpenText(f).ReadToEndAsync().ContinueWith(t =>
+                    using (var xs = File.OpenText(f))
                     {
-                        var r = JsonConvert.DeserializeObject<List<NewsItem>>(t.Result);
+                        var t = await xs.ReadToEndAsync();
+
+                        var r = JsonConvert.DeserializeObject<List<NewsItem>>(t);
                         if (r != null)
                         {
                             parser.Newslist = r;
                         }
-                    });
+                    }
                 }
             }
             catch (Exception ex) { App.Get.Core.Logger.NotifyError(LogArea.Other, ex); }
         }
-
 
         public async Task SaveCache(string key = "")
         {
@@ -317,20 +306,19 @@ namespace NUWM.Servers.Core.News
 
         public async Task Saver(string ParserX)
         {
-            var ig = POOL[ParserX];
-            if (ig.NewsList != null && ig.NewsList.Count > 0)
+            var parser = POOL[ParserX];
+            if (parser.Newslist != null && parser.Newslist.Count > 0)
             {
-
-                var toper = File.CreateText(Path.Combine(
-                    App.Get.Core.DirectoryManager[App.Dirs.Cache], "news_" + ParserX + ".txt"));
-                await toper.WriteAsync(JsonConvert.SerializeObject(ig.NewsList));
-                toper.Close();
+                using (var f = File.CreateText(Path.Combine(App.Get.Core.DirectoryManager[App.Dirs.Cache], "news_" + ParserX + ".txt")))
+                {
+                    await f.WriteAsync(JsonConvert.SerializeObject(parser.Newslist));
+                }
             }
         }
 
         public void Dispose()
         {
-            updater.StopTimer(); 
+            updater.StopTimer();
         }
     }
 }

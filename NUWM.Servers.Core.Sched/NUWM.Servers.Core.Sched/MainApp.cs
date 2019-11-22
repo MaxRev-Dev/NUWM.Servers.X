@@ -2,8 +2,11 @@
 using System.Net;
 using System.Threading.Tasks;
 using MaxRev.Servers;
+using MaxRev.Servers.API;
 using MaxRev.Servers.Core.Http;
 using MaxRev.Servers.Interfaces;
+using MaxRev.Servers.Utils.Logging;
+using MaxRev.Utils;
 using MaxRev.Utils.Http;
 
 namespace NUWM.Servers.Core.Sched
@@ -28,7 +31,9 @@ namespace NUWM.Servers.Core.Sched
             var port = -1;
             if (int.TryParse(f, out var portx))
                 port = portx;
-            return ReactorStartup.From(args).Configure((with, core) =>
+            return ReactorStartup.From(args)
+                .ConfigureLogger(new LoggerConfiguration { WriteToConsole = true })
+                .Configure((with, core) =>
             {
                 Core = core;
                 core.DirectoryManager
@@ -51,18 +56,19 @@ namespace NUWM.Servers.Core.Sched
                 //     }
 
                 //     return serv;
-                // });
-
-                var server = core.GetServer("Schedule", port);
+                // }); 
+                with.Server("Schedule", out var server,port);
                 server.SetApiControllers(typeof(API));
+                //server.Features.AddFeature(new CustomHeaderHandler());
                 server.CustomRequestPreProcessor = CustomHeaderHandler;
                 server.EventMaster.ServerStarting += (s, e) =>
-                    _subjectParser = new SubjectParser();
+                _subjectParser = new SubjectParser();
+                
 
             }).RunAsync();
         }
 
-        private static void CustomHeaderHandler(IClient client, HttpRequest request)
+        private void CustomHeaderHandler(IClient client, HttpRequest request)
         {
             var address = "";
             try
@@ -74,10 +80,32 @@ namespace NUWM.Servers.Core.Sched
             {
                 // ignored
             }
-
+             
             client.Server.Logger.TrySet(client.Server.UserStats, request.Path, address,
                 request.Headers.GetHeaderValueOrNull(BasicHeaders.UserAgent),
                 request.Headers.GetHeaderValueOrNull(BasicHeaders.XID));
         }
     }
+
+    //internal class CustomHeaderHandler : IRequestPreProcessor
+    //{
+    //    public void Process(IClient client, HttpRequest request)
+    //    {
+    //        var address = "";
+    //        try
+    //        {
+    //            address = request.Headers.GetHeaderValueOrNull(BasicHeaders.XFromIP) ??
+    //                      ((IPEndPoint)client.Socket.RemoteEndPoint).ToString();
+    //        }
+    //        catch
+    //        {
+    //            // ignored
+    //        }
+
+    //        var service = client.Server.Features.GetFeature<UserStats>();
+    //        client.Server.Logger.TrySet(service, request.Path, address,
+    //            request.Headers.GetHeaderValueOrNull(BasicHeaders.UserAgent),
+    //            request.Headers.GetHeaderValueOrNull(BasicHeaders.XID));
+    //    }
+    //}
 }

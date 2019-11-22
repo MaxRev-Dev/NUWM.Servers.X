@@ -77,7 +77,7 @@ namespace NUWM.Servers.Core.Calc
                 }).RunAsync();
         }
 
-        private static void CustomHeaderHandler(IServer server, IClient client, HttpRequest request)
+        private static void CustomHeaderHandler(IClient client, HttpRequest request)
         {
             var address = "";
             try
@@ -89,6 +89,8 @@ namespace NUWM.Servers.Core.Calc
                 // ignored
             }
 
+            var server = client.Server;
+
             server.Logger.TrySet(server.UserStats, request.Path, address,
                 request.Headers.GetHeaderValueOrNull(BasicHeaders.UserAgent),
                 request.Headers.GetHeaderValueOrNull(BasicHeaders.XID));
@@ -97,7 +99,7 @@ namespace NUWM.Servers.Core.Calc
         private void OnServerStart(IServer server)
         {
             server.SetApiControllers(typeof(CalcAPI));
-            server.Config.CustomRequestPreProcessor = CustomHeaderHandler;
+            server.CustomRequestPreProcessor = CustomHeaderHandler;
             FeedbackbHelper = new FeedbackHelper();
             SpecialtyParser = new SpecialtyParser();
             ReparseScheduler = new ParserScheduler(SpecialtyParser, Config);
