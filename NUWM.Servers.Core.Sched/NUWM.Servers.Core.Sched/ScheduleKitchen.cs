@@ -177,7 +177,7 @@ namespace NUWM.Servers.Core.Sched
         /// <returns></returns>
         public async Task<object> GetDaysAsync(bool auto)
         {
-            var requestUri = new Uri("http://109.87.215.169/cgi-bin/timetable.cgi?n=700");
+            var requestUri = new Uri("http://desk.nuwm.edu.ua/cgi-bin/timetable.cgi?n=700");
             try
             {
                 string data;

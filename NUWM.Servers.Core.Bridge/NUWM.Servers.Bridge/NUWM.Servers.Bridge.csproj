@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="MaxRev.Servers.Core" Version="0.7.1.16" />
+    <PackageReference Include="MR.Servers.Core.Utils" Version="0.7.0.37" />
   </ItemGroup>
 
 </Project>

@@ -2,23 +2,37 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using NUWM.Servers.Core.Calc.Extensions;
 
-namespace NUWM.Servers.Core.Calc
+namespace NUWM.Servers.Core.Calc.Models
 {
     interface ICodeItem
     {
-        string Code { get; set; }
+        string Code { get; }
     }
     public class BaseItem : ICodeItem
     {
+        private string _title;
+
         public BaseItem()
         {
             PassMarks = new Dictionary<int, double>();
         }
+
+        public bool IsValid() => Modulus.Coef.All(x => x > 0);
         [JsonProperty("code")]
         public string Code { get; set; }
+
         [JsonProperty("title")]
-        public string Title { get; set; }
+        public string Title
+        {
+            get => _title;
+            set {
+                _title = value;
+                Modulus.Name = _title;
+            }
+        }
+
         [JsonProperty("subtitle")]
         public string SubTitle { get; set; }
         [JsonProperty("special")]
@@ -38,18 +52,8 @@ namespace NUWM.Servers.Core.Calc
     {
         public CalculatedSpecialty(SpecialtyInfo specialty)
         {
-            var tb = specialty.GetType();
-            var properties = tb.GetProperties();
-            var t = GetType();
-            properties.ToList().ForEach(property =>
-            {
-                var isPresent = t.GetProperty(property.Name);
-                if (isPresent != null)
-                {
-                    var value = tb.GetProperty(property.Name).GetValue(specialty, null);
-                    t.GetProperty(property.Name).SetValue(this, value, null);
-                }
-            });
+            // just clone all properties
+            specialty.CloneTo(this);
         }
         [JsonProperty("aver_mark_calc")]
         public double YourAverMark { get; set; }
@@ -58,9 +62,13 @@ namespace NUWM.Servers.Core.Calc
         [JsonProperty("path")]
         public string CalcPath { get; internal set; }
     }
-
+    [Serializable]
     public class SpecialtyInfo : BaseItem
     {
+        internal SpecialtyInfo()
+        {
+
+        }
         [JsonProperty("branch_name")]
         public Item BranchName { get; set; }
         [JsonProperty("page_content")]

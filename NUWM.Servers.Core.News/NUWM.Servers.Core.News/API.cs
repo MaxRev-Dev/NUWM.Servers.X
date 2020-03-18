@@ -1,39 +1,58 @@
-﻿using System;
+﻿using JSON;
+using Lead;
+using MaxRev.Servers.API.Controllers;
+using MaxRev.Servers.Core.Route;
+using MaxRev.Servers.Interfaces;
+using MaxRev.Servers.Utils;
+using MaxRev.Utils;
+using MaxRev.Utils.Methods;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using NUWM.Servers.Core.News;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
-using MaxRev.Servers.API;
-using MaxRev.Servers.API.Response;
-using MaxRev.Servers.Core.Route;
-using MaxRev.Servers.Utils;
-using MaxRev.Utils;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+using static Lead.InstantCacher;
 
-namespace NUWM.Servers.Core.News
+namespace APIUtilty
 {
     [RouteBase("api")]
     internal class API : CoreApi
-    { 
-        ParserPool pool => (ParserPool)Services.GetService(typeof(ParserPool));
-        #region Invokers
-        [Route("keys")]
-        private string GetKeys()
+    {
+        protected override void OnInitialized()
         {
-            return "API KEYS:" + string.Join('\n', ParserPool.Current.POOL.Keys.ToArray());
-        }
-        [Route("trace")]
-        private string GetTrace()
-        {
-            var all = AllParsersLogger();
-            return Tools.GetBaseTrace(Server) + "\nAll articles count: " + all.Item2 + '\n' + all.Item1;
+            if (ModuleContext != default)
+            {
+                ModuleContext.StreamContext.KeepAlive = false;
+            }
         }
 
-        [Route("set")]
-        public async Task<Tuple<string, string>> SettingTop()
+        private ParserPool parserPool => Services.GetRequiredService<ParserPool>();
+        private CacheManager _cacheManager => Services.GetRequiredService<CacheManager>();
+        #region Invokers
+        [Route("keys")]
+        public string GetKeys()
         {
+            return "API KEYS:" + string.Join('\n', parserPool.Keys.ToArray());
+        }
+        [Route("trace")]
+        public string GetTrace()
+        {
+            //Server.State.DecApiResponseUser();
+            var all = AllParsersLogger();
+            return Tools.GetBaseTrace(ModuleContext) + $"\nAll articles count: " + all.Item2 + '\n' + all.Item1;
+        }
+        [Route("news_config")]
+        private string JsonConfig()
+        {
+            return MainApp.Config.Serialize();
+        }
+        [Route("set")]
+        public async Task<IResponseInfo> SettingTopAsync()
+        {
+            //Server.State.DecApiResponseUser();
 
             var Query = Info.Query;
             string FS, ContentType = "text/plain";
@@ -43,12 +62,12 @@ namespace NUWM.Servers.Core.News
                 {
                     if (Query["key"] == "all")
                     {
-                        await App.Get.ParserPool.SaveCache();
+                        await _cacheManager.SaveCacheAsync().ConfigureAwait(false);
                         FS = "saved ALL";
                     }
-                    else if (ParserPool.Current.POOL.ContainsKey(Query["key"]))
+                    else if (parserPool.ContainsKey(Query["key"]))
                     {
-                        await App.Get.ParserPool.SaveCache(Query["key"]);
+                        await _cacheManager.SaveCacheAsync(Query["key"]).ConfigureAwait(false);
                         FS = "saved " + Query["key"]; ContentType = "text/plain";
 
                     }
@@ -59,7 +78,7 @@ namespace NUWM.Servers.Core.News
                 }
                 else
                 {
-                    App.Get.ParserPool.SaveInstantCache();
+                    await parserPool.InstantCache.SaveInstantCacheAsync().ConfigureAwait(false);
                     FS = "saved";
                 }
             }
@@ -67,7 +86,7 @@ namespace NUWM.Servers.Core.News
             {
                 if (Query.HasKey("reparse"))
                 {
-                    ParserPool.Current.BaseInitParsers(Services.GetRequiredService<NewsConfig>());
+                    parserPool.InitRun();
                     FS = "Reinit task started";
                 }
                 else
@@ -76,8 +95,9 @@ namespace NUWM.Servers.Core.News
                 }
             }
             FS = !string.IsNullOrEmpty(FS) ? FS : "Context undefined";
-            return new Tuple<string, string>(FS, ContentType);
-        } 
+            return
+                Builder.Content(FS).ContentType(ContentType).Build();
+        }
 
         [Route("searchNews")]
         public async Task<string> SearchNewsAsync()
@@ -87,160 +107,101 @@ namespace NUWM.Servers.Core.News
             {
                 if (Query.HasKey("query"))
                 {
-                    string qpar = Query["query"];
-                    int count;
-                    var news = new List<NewsItem>();
-                    var tr = new List<Task>();
+                    string query = Query["query"];
+
                     try
                     {
-                        if (qpar.Contains(','))
+                        int count;
+                        if (query.Contains(','))
                         {
-                            var t = qpar.Split(',');
-                            count = int.Parse(t[0]);
+                            var rawQuery = query.Split(',');
+                            count = int.Parse(rawQuery[0]);
                             if (count > 1000)
                             {
                                 throw new FormatException("Freak: server might fall");
                             }
 
-                            qpar = t[1];
+                            query = rawQuery[1];
                         }
                         else
                         {
                             throw new FormatException("Expected count parameter. Search results may be very huge");
                         }
-                        bool virg = true;
-                        var rm = await RequestAllocator.Instance.UsingPool(new Request("http://nuwm.edu.ua/search?text=" + qpar.Replace(' ', '+')));
 
-                        HtmlDocument doc = new HtmlDocument();
 
-                        doc.Load(await rm.Content.ReadAsStreamAsync());
+                        var search = Services.GetRequiredService<SearchService>();
 
-                        var wnode = doc.DocumentNode.Descendants().Where(x =>
-                        x.Name == "div"
-                        && x.HasClass("news") && x.HasClass("search") &&
-                        x.GetAttributeValue("role", "") == "group");
-                        var nodes = wnode as HtmlNode[] ?? wnode.ToArray();
-                        if (!nodes.Any()) { throw new InvalidDataException("Not found"); }
-                        var node = nodes.First();
-                        foreach (var a in node.Elements("article"))
+                        var (result, virg) = await search.QueryAsync(query, count).ConfigureAwait(false);
+
+
+                        if (result.Count == 0)
                         {
-                            var btnf = a.Descendants("a").Where(x => x.HasClass("btn") && x.HasClass("s2"));
-                            var htmlNodes = btnf as HtmlNode[] ?? btnf.ToArray();
-                            if (htmlNodes.Any())
-                            {
-                                var link = htmlNodes.First().GetAttributeValue("href", "");
-                                if (link.Contains("/news"))
-                                {
-                                    bool found = false;
-                                    foreach (var i in ParserPool.Current.POOL.Values)
-                                    {
-                                        var t = i.Newslist.Where(x => x.Url == link).ToArray();
-                                        if (t.Length == 1)
-                                        {
-                                            found = true;
-                                            news.Add(t.First());
-                                            break;
-                                        }
-
-                                    }
-                                    if (pool.InstantCache != null)
-                                    {
-                                        var inst = pool.InstantCache.Where(x => x.Url == link).ToArray();
-                                        if (inst.Length == 1)
-                                        {
-                                            news.Add(inst.First());
-                                            found = true;
-                                        }
-                                    }
-                                    if (!found)
-                                    {
-                                        var u = new NewsItem
-                                        {
-                                            Excerpt = a.Descendants("p").First().InnerText,
-                                            Title = a.Descendants("a").First(x => x.HasClass("name")).InnerText,
-                                            Url = link
-                                        };
-
-                                        tr.Add(Task.Run(() => NewsItemDetailed.Process(u)));
-                                        news.Add(u);
-                                        if (pool.InstantCache == null)
-                                        {
-                                            pool.InstantCache = new List<NewsItem>();
-                                        }
-                                        virg = false;
-                                        pool.InstantCache.Add(u);
-                                    }
-                                }
-                            }
-                            if (news.Count == count)
-                            {
-                                break;
-                            }
-                        }
-
-                        await Task.WhenAll(tr);
-
-                        if (news.Count == 0)
-                        {
-                            return JsonConvert.SerializeObject(ResponseTyper(new InvalidDataException("Not Found")));
+                            return ResponseTyper(new InvalidDataException("Not Found")).Serialize();
                         }
 
 
-                        return JsonConvert.SerializeObject(ResponseTyper(null, news, (virg ? InstantState.FromCache : InstantState.Success)));
+                        return ResponseTyper(null, result, virg ? InstantState.FromCache : InstantState.Success).Serialize();
                     }
                     catch (Exception ex)
                     {
-                        return JsonConvert.SerializeObject(ResponseTyper(ex, news));
+                        return ResponseTyper(ex).Serialize();
                     }
                 }
             }
             catch (Exception ex)
             {
-                return JsonConvert.SerializeObject(ResponseTyper(ex));
+                return ResponseTyper(ex).Serialize();
             }
-            return JsonConvert.SerializeObject(ResponseTyper(new InvalidOperationException("InvalidKey: query expected")));
+            return ResponseTyper(new InvalidOperationException("InvalidKey: query expected")).Serialize();
         }
 
-        [Route("getById/{id}")]
-        public async Task<string> GetById(int id)
+        /// <exception cref="T:System.OverflowException"><paramref>s</paramref> represents a number less than <see cref="System.Int32.MinValue"></see> or greater than <see cref="System.Int32.MaxValue"></see>.</exception> 
+        [Route("getById")]
+        public async Task<Response> GetByIdAsync()
         {
-            var poolx = pool.POOL.Values.Where(x => x.InstituteID == id).ToArray();
-            if (poolx.Length == 1)
+            var id = int.Parse(Info.Query["id"]);
+            var pool = parserPool.Values.Where(x => x.InstituteID == id).ToArray();
+            if (pool.Count() == 1)
             {
-                return await UniversalAsync(poolx.First());
+                return await UniversalAsync(pool.First()).ConfigureAwait(false);
             }
-            return null;
+            return ResponseTyper(new Exception("Undefined ID"));
         }
 
         [Route("{key}")] // it's dynamic so it must be last in invoke list
-        public async Task<string> ProcessWithParser(string key)
+        public async Task<Response> ProcessWithParserAsync(string key)
         {
-            var poolx = pool.POOL;
-            if (poolx.ContainsKey(key))
+            var pool = parserPool;
+            if (pool.ContainsKey(key))
             {
-                return await UniversalAsync(poolx[key]);
+                return await UniversalAsync(pool[key]).ConfigureAwait(false);
             }
-            return default;
+            return ResponseTyper(new Exception("Undefined key"));
 
         }
         #endregion
 
         #region Service
-        public async Task<string> UniversalAsync(Parser parser)
+
+        public async Task<Response> UniversalAsync(Parser parser)
         {
             var Query = Info.Query;
 
-            var newslist = Parser.DeepCopy(parser.Newslist);
+            var newslist = parser.Newslist.ToList();
             Exception err = null;
             bool toHTML = false;
-            List<NewsItem> obj = newslist;
+            int last;
+            List<NewsItem> obj = new List<NewsItem>();
             try
             {
+                if (newslist.Count == 0)
+                    throw new InvalidOperationException("Server is starting now");
+
                 if (Query.HasKey("reparse"))
                 {
                     if (Query["reparse"] == "true")
                     {
-                        parser.scheduler.ReparseTask().Start();
+                        parserPool.Schedulers[parser.Key].ReparseTask();
                     }
                 }
                 if (Query.HasKey("html"))
@@ -274,7 +235,7 @@ namespace NUWM.Servers.Core.News
                 }
                 if (Query.HasKey("query"))
                 {
-                    if (obj.Any())
+                    if (obj.Count > 0)
                     {
                         throw new FormatException("InvalidRequest  >> query must be unique in request");
                     }
@@ -302,7 +263,7 @@ namespace NUWM.Servers.Core.News
                 }
                 if (Query.HasKey("uriquery"))
                 {
-                    if (obj.Any())
+                    if (obj.Count > 0)
                     {
                         throw new FormatException("InvalidRequest  >> uriquery must be unique in request");
                     }
@@ -336,7 +297,7 @@ namespace NUWM.Servers.Core.News
                         throw new FormatException("InvalidRequest: expected int - got " + param);
                     }
 
-                    var last = iparam;
+                    last = iparam;
                     if (last > newslist.Count || last < 0)
                     {
                         throw new FormatException("InvalidRequest: value is out of range");
@@ -349,6 +310,10 @@ namespace NUWM.Servers.Core.News
                     else if (last > 0 && last <= newslist.Count)
                     {
                         obj = parser.Newslist.Take(last).ToList();
+                    }
+                    if (obj.Count == 0)
+                    {
+                        throw new InvalidDataException("Not found");
                     }
                 }
                 if (Query.HasKey("after"))
@@ -381,9 +346,13 @@ namespace NUWM.Servers.Core.News
                             obj = newslist.TakeWhile(x => !x.Url.Contains(param)).ToList();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        throw new FormatException("InvalidRequest  >> invalid format or it`s magic");
+                        throw new FormatException("InvalidRequest  >> invalid format or it`s magic", ex);
+                    }
+                    if (obj.Count == 0)
+                    {
+                        throw new InvalidDataException("Not found");
                     }
                 }
                 if (Query.HasKey("before"))
@@ -413,9 +382,13 @@ namespace NUWM.Servers.Core.News
                             obj = newslist.SkipWhile(x => !x.Url.Contains(param)).Skip(1).Take(10).ToList();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        throw new FormatException("InvalidRequest >> invalid format or it`s magic");
+                        throw new FormatException("InvalidRequest >> invalid format or it`s magic", ex);
+                    }
+                    if (obj.Count == 0)
+                    {
+                        throw new InvalidDataException("Not found");
                     }
                 }
                 if (Query.HasKey("offset"))
@@ -440,10 +413,15 @@ namespace NUWM.Servers.Core.News
                             obj = newslist.Skip(int.Parse(param)).Take(10).ToList();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        throw new FormatException("InvalidRequest  >> invalid format or it`s magic");
+                        throw new FormatException("InvalidRequest  >> invalid format or it`s magic", ex);
                     }
+                }
+                else
+                {
+                    if (obj.Count == 0)
+                        obj = newslist.Take(10).ToList();
                 }
 
                 if (!toHTML)
@@ -452,7 +430,7 @@ namespace NUWM.Servers.Core.News
                     {
                         if (t.Detailed == null)
                         {
-                            throw new InvalidOperationException("Server is starting now");
+                            throw new InvalidOperationException($"Server is starting now. Progress of parser: {newslist.Count(x => x.Detailed != null)}/{newslist.Count}");
                         }
 
                         t.Detailed.ContentHTML = parser.Newslist.First(x => x.Url == t.Url).GetText();
@@ -460,13 +438,15 @@ namespace NUWM.Servers.Core.News
                 }
                 if (Query.HasKey("inst"))
                 {
-                    var item = await pool.ParsePageInstant(Query["inst"], toHTML);
+                    var item = await parserPool.InstantCache.ParsePageInstantAsync(Query["inst"], toHTML).ConfigureAwait(false);
                     if (item.Item1 != null)
                     {
                         return CreateResponse(new List<NewsItem>(new[] { item.Item1 }), new DivideByZeroException(), item.Item2);
                     }
-
-                    throw new InvalidOperationException("Can`t get article. Reason: " + item.Item2);
+                    else
+                    {
+                        throw new InvalidOperationException("Can`t get article. Reason: " + item.Item2.ToString());
+                    }
                 }
 
                 if (obj.Count == 0)
@@ -476,6 +456,8 @@ namespace NUWM.Servers.Core.News
             }
             catch (Exception ex) { err = ex; }
 
+            newslist.Clear();
+
             return CreateResponse(obj, err, InstantState.FromCache);
         }
 
@@ -483,44 +465,51 @@ namespace NUWM.Servers.Core.News
         {
             string resp = "";
             int countAllnews = 0;
-            foreach (var ert in ParserPool.Current.POOL.Values.OrderByDescending(x => x.Newslist?.Count))
+            foreach (Parser parser in parserPool.Values.OrderByDescending(x => x.Newslist?.Count))
             {
-                TimeSpan k = new TimeSpan();
-                if (ert.scheduler != null)
+                TimeSpan k = default;
+
+                PoolParserScheduler scheduler = default;
+                if (parserPool.Schedulers.ContainsKey(parser.Key)
+                    && parserPool.Schedulers[parser.Key] != default)
                 {
-                    k = ert.scheduler.ScheduledTime - TimeChron.GetRealTime();
+                    scheduler = parserPool.Schedulers[parser.Key];
+                    k = scheduler.ScheduledTime - TimeChron.GetRealTime();
                 }
 
                 resp += "\n" + new string('-', 20);
-                if (ert.Newslist != null && ert.Newslist.Count > 0)
+                if (parser.Newslist != null && parser.Newslist.Count > 0)
                 {
-                    resp += $"\nParser: {ert.xkey}";
-                    resp += $"\nNews Articles: {ert.Newslist?.Count}";
-                    if (Math.Abs(k.TotalSeconds) < 0.001)
+                    resp += $"\nParser: {parser.Key}";
+                    // resp += $"\nObject size: {ert.Size()}";
+                    resp += $"\nNews Articles: {parser.Newslist?.Count}";
+                    if (Math.Abs(k.TotalSeconds) < 0.00001)
                     {
                         resp += "\nCache is updating now!";
                     }
                     else
                     {
-                        resp += $"\nNext parsing in: {k.Days}d {k.Hours}h {k.Minutes}m {k.Seconds}s";
+                        var u = scheduler?.ScheduledTime ?? TimeChron.GetRealTime();
+                        var dx = $"{u.ToLongTimeString()} {u.ToShortDateString()}";
+                        resp += $"\nNext parsing in: {k.Days}d {k.Hours}h {k.Minutes}m {k.Seconds}s ({dx})";
                     }
 
-                    resp += $"\nCache epoch: {(ert.scheduler != null ? ert.CacheEpoch : 0)}";
+                    resp += $"\nCache epoch: { parser.CacheEpoch }";
                 }
                 else
                 {
-                    resp += $"\nParser {ert.xkey}  not ready now";
+                    resp += $"\nParser {parser.Key}  not ready now";
                     resp += $"\nNext atempt to parse in: {k.Days}d {k.Hours}h {k.Minutes}m {k.Seconds}s";
                 }
                 resp += "\n" + new string('-', 20) + "\n";
-                countAllnews += ert.Newslist?.Count ?? 0;
+                countAllnews += parser.Newslist?.Count ?? 0;
             }
             return new Tuple<string, int>(resp, countAllnews);
         }
         #endregion
 
         #region ErrorHandling
-        private Response ResponseTyper(Exception err, object obj = null, InstantState state = InstantState.Success)
+        private static Response ResponseTyper(Exception err, object obj = null, InstantState state = InstantState.Success)
         {
             Response resp;
             if (err == null)
@@ -529,29 +518,28 @@ namespace NUWM.Servers.Core.News
                 {
                     Code = StatusCode.Success,
                     Error = "null",
-                    Cache = state == InstantState.FromCache,
+                    Cache = (state == InstantState.FromCache),
                     Content = obj
                 };
             }
             else
-            if (err.GetType() == typeof(FormatException))
+            if (err is FormatException)
             {
-                resp = new Response { Code = StatusCode.InvalidRequest, Error = err.Message + "\n" + Tools.AnonymizeStack(err.StackTrace), Content = null };
+                resp = new Response { Code = StatusCode.InvalidRequest, Error = (err.Message + "\n" + Tools.AnonymizeStack(err.StackTrace)).Trim(), Content = null };
             }
-            else if (err.GetType() == typeof(InvalidOperationException))
+            else if (err is InvalidOperationException)
             {
                 resp = new Response { Code = StatusCode.ServerSideError, Error = err.Message, Content = null };
             }
-            else if (err.GetType() == typeof(EntryPointNotFoundException))
+            else if (err is EntryPointNotFoundException)
             {
                 resp = new Response { Code = StatusCode.DeprecatedMethod, Error = err.Message, Content = null };
             }
-            else if (
-                err is InvalidDataException)
+            else if (err is InvalidDataException)
             {
                 resp = new Response { Code = StatusCode.NotFound, Error = err.Message, Content = null };
             }
-            else if (err.GetType() == typeof(DivideByZeroException))
+            else if (err is DivideByZeroException)
             {
                 resp = new Response
                 {
@@ -572,8 +560,8 @@ namespace NUWM.Servers.Core.News
             return resp;
         }
 
-        public string CreateResponse(List<NewsItem> obj, Exception err,
-             InstantState state = InstantState.Success)
+        public virtual Response CreateResponse(List<NewsItem> obj, Exception err,
+            InstantState state = InstantState.Success)
         {
             Response resp;
             if (err != null)
@@ -593,7 +581,8 @@ namespace NUWM.Servers.Core.News
                     Cache = state == InstantState.FromCache
                 };
             }
-            return JsonConvert.SerializeObject(resp);
+
+            return resp;
         }
 
         public string CreateStringResponse(string obj, Exception err)
@@ -615,7 +604,7 @@ namespace NUWM.Servers.Core.News
             return JsonConvert.SerializeObject(resp);
         }
 
-        public string CreateErrorResp(Exception err)
+        public static string CreateErrorResp(Exception err)
         {
             Response resp;
             if (err != null)

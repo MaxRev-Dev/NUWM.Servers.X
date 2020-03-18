@@ -1,26 +1,26 @@
-﻿using MaxRev.Servers.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using MaxRev.Servers.Configuration;
 
 namespace NUWM.Servers.Core.News
 {
     public class NewsConfig : AbstractConfigContainer
     {
-        public NewsConfig()
+        public NewsConfig(IServiceProvider services)
         {
-            HostUrl = "http://nuwm.edu.ua";
-            AbitUrl = "http://start.nuwm.edu.ua";
-            TaskDelayMinutes = 10;
-            TaskDelayHours = 1;
-            OffsetLen = 5;
+
         }
+        public int ParserOffsetMinutes { get; set; }
+        public int ReparseTaskDelayMinutes { get; set; }
+        public int ReparseTaskDelayHours { get; set; }
+        public int CacheAliveHours { get; set; }
+        public int DefaultPagesCount { get; set; }
+        public List<NewsUrlDefinition> Urls { get; set; } = new List<NewsUrlDefinition>();
+    }
 
-        public string AbitUrl { get; set; }
-
-        public string HostUrl { get; set; }
-
-        public int TaskDelayMinutes { get; set; }
-        public int TaskDelayHours { get; set; }
-        public int PagesDefault { get; set; }
-        public int CacheAlive { get; set; }
-        public int OffsetLen { get; set; }
+    public class NewsUrlDefinition
+    {
+        public string Url { get; set; }
+        public int InstituteID { get; set; } = -100;
     }
 }

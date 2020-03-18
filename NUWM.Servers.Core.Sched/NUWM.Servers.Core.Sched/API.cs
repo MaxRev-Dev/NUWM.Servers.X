@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MaxRev.Servers.API;
+using MaxRev.Servers.API.Controllers;
 using MaxRev.Servers.Core.Exceptions;
 using MaxRev.Servers.Core.Route;
 using MaxRev.Servers.Interfaces;
@@ -237,16 +238,11 @@ namespace NUWM.Servers.Core.Sched
                         }
                         var t1 = int.Parse((weeks ?? throw new BadRequestException("weeks must contain , separator")).First());
                         var t2 = int.Parse(weeks.Last());
-                        CheckWeekRange(t1, t2);
-                        foreach (var weekq in weeks)
-                        {
-                            var week = int.Parse(weekq);
-                            if (week > 52) week = 52;
-                            if (/*week > 52 ||*/ week < 1)
-                            {
-                                throw new InvalidOperationException("InvalidKey: week is not valid");
-                            }
-                        }
+
+                        // Android bugs...
+                        if (t1 > 52) t1 = 52;
+                        if (t2 > 52) t2 = 52;
+                        //CheckWeekRange(t1, t2);
                         var isLecturer = !string.IsNullOrEmpty(name);
 
                         var cury = TimeChron.GetRealTime().Year;

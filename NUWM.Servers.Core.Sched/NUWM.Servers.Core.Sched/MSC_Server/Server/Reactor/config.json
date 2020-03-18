@@ -1,0 +1,59 @@
+{
+  "Core": {
+    "ServerPort": 3001,
+    "SslConfig": {
+      "CertPath": "",
+      "CertPassword": "",
+      "EnabledProtocols": "Tls, Tls11, Tls12",
+      "ProxyUsesServerCertificate": true
+    },
+    "Http2Enabled": false,
+    "Http2MaxConcurrentStreams": 200,
+    "BalancerConfig": {
+      "BalancerManualServers": [],
+      "BalancerMaxServers": 5
+    },
+    "BufferLimits": {
+      "MaxFileSizeForCompressingMB": 10,
+      "MaxPostContentPayloadMB": 1024,
+      "MaxHeadersLengthBytes": 16384,
+      "DefaultBufferLength": 16384
+    }
+  },
+  "Basic": {
+    "ServerHeaderName": "Hi from MaxRev.Servers.Core",
+    "CultureInfoName": "uk-UA",
+    "BasicEncoding": "utf-8",
+    "LoggerDelay": "01:00:00",
+    "Redirect": {
+      "*/example_com/": "*/other_com/"
+    },
+    "AutorizationEnabled": false,
+    "IncludeErrorInfoInResponse": false
+  },
+  "Communication": {
+    "AllowOrigin": "*",
+    "ExposedHeaders": "*",
+    "AllowedMethods": "GET, HEAD, POST, PUT, OPTIONS",
+    "ContentEncoding": "GZip, Deflate, Br",
+    "MaxClientCacheAge": 3000,
+    "ClientCacheLocation": "public",
+    "AuthorizationJwtExpires": "01:00:00",
+    "SocketTimeoutMs": 5000,
+    "KeepAliveSec": 300
+  },
+  "FileSystem": {
+    "PublicWww": "www",
+    "BaseDirectory": "MSC_Server\\Server",
+    "WorkingDirectory": "MSC_Server\\Data",
+    "FileAccess": true,
+    "FileListing": false
+  },
+  "ContentProcessors": {
+    "CssMinify": true,
+    "HtmlMinify": true,
+    "EnableImageProcessing": false,
+    "CompressMedia": false,
+    "UseCompressionCache": true
+  }
+}

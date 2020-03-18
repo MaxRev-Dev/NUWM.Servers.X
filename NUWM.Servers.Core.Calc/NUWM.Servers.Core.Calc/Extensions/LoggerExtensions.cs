@@ -1,9 +1,9 @@
 ﻿using System.Globalization;
 using MaxRev.Servers.Interfaces;
-using MaxRev.Servers.Utils;
+using MaxRev.Servers.Utils.Logging;
 using MaxRev.Utils;
 
-namespace NUWM.Servers.Core.Calc
+namespace NUWM.Servers.Core.Calc.Extensions
 {
     internal static class LoggerExtensions
     {
@@ -24,7 +24,7 @@ namespace NUWM.Servers.Core.Calc
         public static bool LogWrite(this ILogger logger, UserStats stats, string address, string request, string user, string xid)
         {
             string usrx;
-            address = address ?? "";
+            address ??= "";
             if (!string.IsNullOrEmpty(xid))
             {
                 var t = UserStats.Parse(xid);
@@ -39,5 +39,4 @@ namespace NUWM.Servers.Core.Calc
             return true;
         }
     }
-
 }

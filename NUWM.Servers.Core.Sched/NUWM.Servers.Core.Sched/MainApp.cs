@@ -1,13 +1,13 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
-using MaxRev.Servers;
-using MaxRev.Servers.API;
+﻿using MaxRev.Servers;
 using MaxRev.Servers.Core.Http;
 using MaxRev.Servers.Interfaces;
 using MaxRev.Servers.Utils.Logging;
-using MaxRev.Utils;
 using MaxRev.Utils.Http;
+using System;
+using System.Net;
+using System.Threading.Tasks;
+using MaxRev.Servers.Core.Events;
+using MaxRev.Utils;
 
 namespace NUWM.Servers.Core.Sched
 {
@@ -31,7 +31,10 @@ namespace NUWM.Servers.Core.Sched
             var port = -1;
             if (int.TryParse(f, out var portx))
                 port = portx;
-            return ReactorStartup.From(args)
+            return ReactorStartup.From(args, new ReactorStartupConfig
+            {
+                AutoregisterControllers = true,
+            })
                 .ConfigureLogger(new LoggerConfiguration { WriteToConsole = true })
                 .Configure((with, core) =>
             {
@@ -56,19 +59,28 @@ namespace NUWM.Servers.Core.Sched
                 //     }
 
                 //     return serv;
-                // }); 
-                with.Server("Schedule", out var server,port);
-                server.SetApiControllers(typeof(API));
-                //server.Features.AddFeature(new CustomHeaderHandler());
-                server.CustomRequestPreProcessor = CustomHeaderHandler;
-                server.EventMaster.ServerStarting += (s, e) =>
-                _subjectParser = new SubjectParser();
-                
-
+                // });  
+                with.Server(builder =>
+                {
+                    builder.Name("Schedule")
+                        .Port(port).Configure(server =>
+                        {
+                            server.SetApiControllers(typeof(API));
+                        })
+                        .Features(x =>
+                        {
+                            x.AddFeature(new CustomHeaderHandler());
+                            x.GetFeature<IServerEvents>().ServerStarting += (s, e) =>
+                                _subjectParser = new SubjectParser();
+                        });
+                });
             }).RunAsync();
         }
+    }
 
-        private void CustomHeaderHandler(IClient client, HttpRequest request)
+    internal class CustomHeaderHandler : IRequestPreProcessor
+    {
+        public void Process(IClient client, HttpRequest request)
         {
             var address = "";
             try
@@ -80,32 +92,11 @@ namespace NUWM.Servers.Core.Sched
             {
                 // ignored
             }
-             
-            client.Server.Logger.TrySet(client.Server.UserStats, request.Path, address,
+
+            var service = client.Server.Features.GetFeature<UserStats>();
+            client.Server.Logger.TrySet(service, request.Path, address,
                 request.Headers.GetHeaderValueOrNull(BasicHeaders.UserAgent),
                 request.Headers.GetHeaderValueOrNull(BasicHeaders.XID));
         }
     }
-
-    //internal class CustomHeaderHandler : IRequestPreProcessor
-    //{
-    //    public void Process(IClient client, HttpRequest request)
-    //    {
-    //        var address = "";
-    //        try
-    //        {
-    //            address = request.Headers.GetHeaderValueOrNull(BasicHeaders.XFromIP) ??
-    //                      ((IPEndPoint)client.Socket.RemoteEndPoint).ToString();
-    //        }
-    //        catch
-    //        {
-    //            // ignored
-    //        }
-
-    //        var service = client.Server.Features.GetFeature<UserStats>();
-    //        client.Server.Logger.TrySet(service, request.Path, address,
-    //            request.Headers.GetHeaderValueOrNull(BasicHeaders.UserAgent),
-    //            request.Headers.GetHeaderValueOrNull(BasicHeaders.XID));
-    //    }
-    //}
 }

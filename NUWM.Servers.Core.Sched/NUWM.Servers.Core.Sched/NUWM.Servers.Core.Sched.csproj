@@ -12,8 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.16" />
-    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.2.4-beta8" />
-    <PackageReference Include="MR.Servers.Core.Utils" Version="0.7.0.34" /> 
+    <PackageReference Include="MaxRev.Servers.Core" Version="0.7.3-beta5" /> 
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3-beta1" /> 
   </ItemGroup> 
 

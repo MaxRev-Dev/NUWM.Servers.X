@@ -27,10 +27,25 @@ namespace NUWM.Servers.Bridge
                         {
                             Code = StatusCode.ServerNotResponding,
                             Error = new object[] { error }
-                        });
+                        }, "application/json");
                     }).Link(
                         Convert.ToInt16(args[0]), //source client
                         Convert.ToInt16(args[1])); //localhost dest client
+
+                    //var b = with.CreateBridgeServerBuilder();
+                    //b.OnUnavailable(async sender =>
+                    //{
+                    //    string error = "It's NUWM.Servers.Bridge response. One of NUWM.Servers is anavailable now";
+                    //    await sender.SendFromCodeAsync(System.Net.HttpStatusCode.OK, new JsonResponseContainer
+                    //    {
+                    //        Code = StatusCode.ServerNotResponding,
+                    //        Error = new object[] { error }
+                    //    }, "application/json");
+                    //});
+                    //b.Link(
+                    //    Convert.ToInt16(args[0]), //source client
+                    //    Convert.ToInt16(args[1])); //localhost dest client
+                    //with.Bridge(b);
                 }).RunAsync();
             }
 

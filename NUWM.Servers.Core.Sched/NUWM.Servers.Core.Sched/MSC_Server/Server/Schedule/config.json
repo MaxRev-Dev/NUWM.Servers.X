@@ -1,0 +1,8 @@
+{
+  "Main": {
+    "AccessFolders": {
+      "/www": "www"
+    },
+    "Name": "Schedule"
+  }
+}
