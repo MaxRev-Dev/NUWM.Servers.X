@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "NUWM.Servers.Core.Uptime": {
-      "commandName": "Project",
-      "commandLineArgs": "3000"
-    }
-  }
-}

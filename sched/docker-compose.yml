@@ -1,0 +1,23 @@
+version '3'
+
+services:
+ sched_service:
+   build: .
+   image: sched
+   container_name: sched
+   ports:
+     - 4002:4002
+   volumes:
+     - ./server_data:/app/MSC_Server
+     - /home/maxrev/certs:/certs
+   environment:
+     - VIRTUAL_HOST=calc.nuwm.edu.ua 
+     - VIRTUAL_PORT=4002
+     - LETSENCRYPT_HOST=calc.nuwm.edu.ua 
+     - LETSENCRYPT_EMAIL=tea_ak16@nuwm.edu.ua
+   networks:
+     - nuwee-api
+
+networks:
+  nuwee-api: 
+   external: true

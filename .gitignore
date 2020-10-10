@@ -7,7 +7,8 @@
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
+.ionide
+nginx-proxy/certs
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db

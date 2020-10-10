@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUWM.Servers.Core.Sched", "NUWM.Servers.Core.Sched.csproj", "{3831F9B6-8011-4152-8FBF-C164250255FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3831F9B6-8011-4152-8FBF-C164250255FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3831F9B6-8011-4152-8FBF-C164250255FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3831F9B6-8011-4152-8FBF-C164250255FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3831F9B6-8011-4152-8FBF-C164250255FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {43730F05-C1CD-411C-A9F3-4B380B1FA88F}
+	EndGlobalSection
+EndGlobal

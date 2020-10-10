@@ -1,0 +1,23 @@
+version '3'
+
+services:
+ news_service:
+   build: .
+   image: news
+   container_name: news
+   ports:
+     - 4001:4001
+   volumes:
+     - ./server_data:/app/MSC_Server
+     - /home/maxrev/certs:/certs
+   environment:
+     - VIRTUAL_HOST=calc.nuwm.edu.ua 
+     - VIRTUAL_PORT=4001
+     - LETSENCRYPT_HOST=calc.nuwm.edu.ua 
+     - LETSENCRYPT_EMAIL=tea_ak16@nuwm.edu.ua
+   networks:
+     - nuwee-api
+
+networks:
+  nuwee-api: 
+   external: true
