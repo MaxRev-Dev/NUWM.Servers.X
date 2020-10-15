@@ -6,6 +6,7 @@ using MaxRev.Utils.Http;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using MaxRev.Servers.Configuration;
 using MaxRev.Servers.Core.Events;
 using MaxRev.Utils;
 
@@ -17,6 +18,8 @@ namespace NUWM.Servers.Core.Sched
         public enum Dirs { Addons, Subject_Parser }
         private static MainApp app;
         private SubjectParser _subjectParser;
+        private ConfigManager<SchedConfig> _cfgMan;
+        internal SchedConfig Config => _cfgMan.ConfigInstance;
 
         internal IReactor Core { get; private set; }
 
@@ -46,20 +49,8 @@ namespace NUWM.Servers.Core.Sched
                     .GetFor<Dirs>(MaxRev.Servers.Utils.Filesystem.Dirs.WorkDir)
                     .AddDir(Dirs.Addons, Dirs.Subject_Parser, "subjects_parser");
 
-                //var servers = LoadBalancer.GetServers(Core, "Schedule", 2, (serv, isMain) =>
-                // {
-                //     serv.SetApiControllers(typeof(APIUtilty.API));
-                //     if (serv.Config.Main != null)
-                //         serv.Config.Main.ServerTypeName = new KeyValuePair<string, string>("X-NS-Type", "Schedule");
+                _cfgMan = new ConfigManager<SchedConfig>(new ConfiguratorSettings(core, configFileName:"schedConfig.json"));
 
-                //     if (isMain)
-                //     {
-                //         serv.EventMaster.ServerStarting += OnServerStart;
-                //         return serv;
-                //     }
-
-                //     return serv;
-                // });  
                 with.Server(builder =>
                 {
                     builder.Name("Schedule")

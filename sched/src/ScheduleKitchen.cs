@@ -177,7 +177,7 @@ namespace NUWM.Servers.Core.Sched
         /// <returns></returns>
         public async Task<object> GetDaysAsync(bool auto)
         {
-            var requestUri = new Uri("http://desk.nuwm.edu.ua/cgi-bin/timetable.cgi?n=700");
+            var requestUri = new Uri(MainApp.Current.Config.BaseUrl);
             try
             {
                 string data;
@@ -259,7 +259,7 @@ namespace NUWM.Servers.Core.Sched
                 (x => (x.Name == "div" && x.HasClass("jumbotron"))).ToList();
             if (y.Any())
             {
-                var footer = y.First().Descendants().Where(x => x.HasClass("container")).FirstOrDefault();
+                var footer = y.First().Descendants().FirstOrDefault(x => x.HasClass("container"));
                 if (footer != default)
                 {
                     foreach (var r in footer.Elements("div"))
@@ -385,7 +385,7 @@ namespace NUWM.Servers.Core.Sched
                 .Replace("<br> ", " ")
                 .Replace("<br>", "\r\n");
             var vx = innerHtml.Split("\r\n");
-            if (vx.Length > 1 && !vx[0].Contains('(') 
+            if (vx.Length > 1 && !vx[0].Contains('(')
                               && vx[1].Contains('(')
                               && vx[1].Contains(')'))
             {
