@@ -9,7 +9,7 @@ using NUWM.Servers.Core.Calc.Services;
 
 namespace NUWM.Servers.Core.Calc.API
 {
-    [RouteBase("api/feedback")]
+    [RouteBase("calc/api/feedback")]
     public class FeedbackController : CoreApi
     { 
         [Route("", AccessMethod.POST)]

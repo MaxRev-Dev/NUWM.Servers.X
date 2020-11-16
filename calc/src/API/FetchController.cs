@@ -7,7 +7,7 @@ using NUWM.Servers.Core.Calc.Services;
 
 namespace NUWM.Servers.Core.Calc.API
 {
-    [RouteBase("api/fetch")]
+    [RouteBase("calc/api/fetch")]
     public class FetchController : CoreApi
     {
         protected override void OnInitialized()

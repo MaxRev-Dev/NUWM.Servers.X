@@ -18,7 +18,7 @@ using static Lead.InstantCacher;
 
 namespace APIUtilty
 {
-    [RouteBase("api")]
+    [RouteBase("news/api")]
     internal class API : CoreApi
     {
         protected override void OnInitialized()

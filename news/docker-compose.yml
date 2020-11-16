@@ -1,4 +1,4 @@
-version '3'
+version: '3'
 
 services:
  news_service:
@@ -6,7 +6,7 @@ services:
    image: news
    container_name: news
    ports:
-     - 4001:4001
+     - 3001:4001
    volumes:
      - ./server_data:/app/MSC_Server
      - /home/maxrev/certs:/certs

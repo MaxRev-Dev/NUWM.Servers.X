@@ -55,10 +55,10 @@ namespace NUWM.Servers.Core.Calc.Services
 
         private void Preprocess(string host, ref string html)
         {
-            html = html.Replace("src=\"/", $"src=\"http://{host}/");
-            html = html.Replace("href=\"/", $"href=\"http://{host}/");
-            html = html.Replace("src=\"./", $"src=\"http://{host}/");
-            html = html.Replace("href=\"./", $"href=\"http://{host}/");
+            html = html.Replace("src=\"/", $"src=\"https://{host}/");
+            html = html.Replace("href=\"/", $"href=\"https://{host}/");
+            html = html.Replace("src=\"./", $"src=\"https://{host}/");
+            html = html.Replace("href=\"./", $"href=\"https://{host}/");
             html = html.Replace("&nbsp;", "");
         }
 

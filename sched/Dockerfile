@@ -13,4 +13,4 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1
 WORKDIR /app
 COPY --from=build-env /app/out .
-ENTRYPOINT ["dotnet", "NUWM.Servers.Core.Calc.dll", "4002"]
+ENTRYPOINT ["dotnet", "NUWM.Servers.Core.Sched.dll", "4002"]
