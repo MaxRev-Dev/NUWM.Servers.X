@@ -4,16 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using JSON;
-using MaxRev.Servers.Utils;
-using MaxRev.Servers.Utils.Filesystem;
 using MaxRev.Servers.Utils.Logging;
 using MaxRev.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using NUWM.Servers.Core.News;
+using NUWEE.Servers.Core.News.Json;
+using NUWEE.Servers.Core.News.Parsers;
 
-namespace Lead
+namespace NUWEE.Servers.Core.News.Updaters
 {
     public class InstantCacher
     {
@@ -95,7 +93,7 @@ namespace Lead
                         .FirstOrDefault(x => x.Url.Contains(spl));
                     if (item != default)
                     {
-                        var obj = Parser.DeepCopy(item);
+                        var obj = Utils.DeepCopy(item);
                         obj.Detailed.ContentHTML = html ? item.Detailed.ContentHTML : item.GetText();
                         return new Tuple<NewsItem, InstantState>(obj, state);
                     }
@@ -132,7 +130,7 @@ namespace Lead
 
                         InstantCacheList.Add(item);
 
-                        var ret = Parser.DeepCopy(item);
+                        var ret = Utils.DeepCopy(item);
                         ret.Detailed.ContentHTML = html ? ret.Detailed.ContentHTML : ret.GetText();
                         return new Tuple<NewsItem, InstantState>(ret, InstantState.Success);
                     }

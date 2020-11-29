@@ -2,11 +2,10 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using JSON;
-using Lead;
 using MaxRev.Utils;
+using NUWEE.Servers.Core.News.Json;
 
-namespace APIUtilty
+namespace NUWEE.Servers.Core.News.Parsers
 {
     internal class SearchService
     {
@@ -55,7 +54,7 @@ namespace APIUtilty
                     var link = btnf.First().GetAttributeValue("href", "");
                     if (link.Contains("/news"))
                     {
-                        bool found = false;
+                        var found = false;
                         foreach (var i in _parserPool.Values)
                         {
                             var t = i.Newslist.Where(x => x.Url == link).ToArray();

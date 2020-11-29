@@ -2,16 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using JSON;
 using MaxRev.Servers.Interfaces;
-using MaxRev.Servers.Utils;
-using MaxRev.Servers.Utils.Filesystem;
 using MaxRev.Servers.Utils.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using NUWM.Servers.Core.News;
+using NUWEE.Servers.Core.News.Json;
+using NUWEE.Servers.Core.News.Parsers;
 
-namespace Lead
+namespace NUWEE.Servers.Core.News.Updaters
 {
     public class CacheManager
     {
@@ -24,7 +22,7 @@ namespace Lead
             _services = services;
         }
 
-        public async Task LoadNewsCacheAsync(Parser parser)
+        public async Task LoadNewsCacheAsync(AbstractParser parser)
         {
             var path = Path.Combine(
                 MainApp.GetApp.DirectoryManager[MainApp.Dirs.Cache],

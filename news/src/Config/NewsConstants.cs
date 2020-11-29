@@ -1,4 +1,4 @@
-﻿namespace JSON
+﻿namespace NUWEE.Servers.Core.News.Config
 {
     public class NewsConstants
     {

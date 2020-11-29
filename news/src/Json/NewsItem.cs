@@ -1,46 +1,12 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net.Http;
-using System.Text.RegularExpressions;
 using MaxRev.Utils;
+using Newtonsoft.Json;
 
-namespace JSON
+namespace NUWEE.Servers.Core.News.Json
 {
-    public class ResponseV2 : Response
-    {
-        public ResponseV2(Response response)
-        {
-            Code = response.Code;
-            Cache = response.Cache;
-            Error = response.Error;
-            Content = response.Content;
-        }
-
-        [JsonProperty("successful")]
-        public bool IsSuccessful => Code == StatusCode.Success;
-    }
-
-    public class Response
-    {
-        [JsonProperty("code")]
-        public StatusCode Code { get; set; }
-        [JsonProperty("cache")]
-        public bool Cache { get; set; }
-        [JsonProperty("error")]
-        public object Error { get; set; }
-        [JsonProperty("response")]
-        public object Content { get; set; }
-
-
-    }
-    public class ResponseWraper : Response
-    {
-        [JsonProperty("response")]
-        public object ResponseContent { get; set; }
-    }
     [Serializable]
     public partial class NewsItem
     {
@@ -90,33 +56,10 @@ namespace JSON
                 if (value != null)
                 {
                     if (ImageCached) return;
-
-                    try
-                    {
-                        var nimg = Regex.Replace(value, @"\d*x\d*", "0");
-                        using (var f = new Request(nimg))
-                        {
-                            var m = RequestAllocator.Instance.UsingPoolAsync(f).Result;
-                            ImageCached = true;
-                            m.EnsureSuccessStatusCode();
-                            if (m.Content.Headers.ContentLength > 100)
-                            {
-                                img = nimg;
-                                return;
-                            }
-                        }
-                    }
-                    catch (HttpRequestException)
-                    {
-                        //403 etc.
-                    }
-                    catch (AggregateException) { }
-                    catch (RegexMatchTimeoutException)
-                    {
-                        // ignored
-                    }
-
                     img = value;
+
+                    if (Utils.OriginalImageCheck(ref img))
+                        ImageCached = true;
                 }
                 else
                     img = null;
@@ -191,16 +134,5 @@ namespace JSON
         [JsonProperty("related")]
         public string RelUrl { get; set; }
 
-    }
-    public enum StatusCode
-    {
-        Undefined = 1,
-        InvalidRequest = 32,
-        NotFound = 33,
-        AccessDenied = 60,
-        DeprecatedMethod = 66,
-        ServerSideError = 88,
-        GatewayTimeout,
-        Success = 100
     }
 }

@@ -2,9 +2,9 @@
 using MaxRev.Servers.Utils;
 using MaxRev.Utils.Schedulers;
 using Microsoft.Extensions.DependencyInjection;
-using NUWM.Servers.Core.News;
+using NUWEE.Servers.Core.News.Parsers;
 
-namespace Lead
+namespace NUWEE.Servers.Core.News.Updaters
 {
     [Serializable]
     public class PoolParserScheduler : BaseScheduler
@@ -35,7 +35,7 @@ namespace Lead
                 parser.CacheEpoch = ++oldOne.CacheEpoch;
                 await parser.ParsePagesAsync(parser.Url).ConfigureAwait(false);
                 _parserPool[ParserKey] = parser;
-                oldOne?.Dispose();
+                oldOne.Dispose();
             }
             else
             {
@@ -46,7 +46,7 @@ namespace Lead
 
         }
 
-        public PoolParserScheduler WithParameters(Parser parser, TimeSpan after)
+        public PoolParserScheduler WithParameters(AbstractParser parser, TimeSpan after)
         {
             int delayMins = 0, delayHours = 0;
 

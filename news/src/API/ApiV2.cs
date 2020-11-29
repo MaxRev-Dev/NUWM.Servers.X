@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using JSON;
-using Lead;
 using MaxRev.Servers.Core.Route;
+using NUWEE.Servers.Core.News.Json;
+using NUWEE.Servers.Core.News.Updaters;
 
-namespace APIUtilty
+namespace NUWEE.Servers.Core.News.API
 {
     [RouteBase("api2")]
     internal class ApiV2 : API

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace NUWM.Servers.Core.News
+namespace NUWEE.Servers.Core.News
 {
     internal sealed class Program
     {

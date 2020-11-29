@@ -5,15 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MaxRev.Servers.Interfaces;
-using MaxRev.Servers.Utils;
 using MaxRev.Servers.Utils.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using NUWM.Servers.Core.News;
+using NUWEE.Servers.Core.News.Updaters;
 
-namespace Lead
+namespace NUWEE.Servers.Core.News.Parsers
 {
     [Serializable]
-    public class ParserPool : IDictionary<string, Parser>
+    public class ParserPool : IDictionary<string, AbstractParser>
     {
         public static string site_url = "http://nuwm.edu.ua",
             site_abit_url = "http://start.nuwm.edu.ua";
@@ -32,8 +31,8 @@ namespace Lead
         }
 
 
-        private ConcurrentDictionary<string, Parser> _internalPool { get; }
-             = new ConcurrentDictionary<string, Parser>();
+        private ConcurrentDictionary<string, AbstractParser> _internalPool { get; }
+             = new ConcurrentDictionary<string, AbstractParser>();
         internal Dictionary<string, PoolParserScheduler> Schedulers { get; }
             = new Dictionary<string, PoolParserScheduler>();
         internal InstantCacher InstantCache => _services.GetRequiredService<InstantCacher>();
@@ -42,16 +41,16 @@ namespace Lead
 
         public void InitRun()
         {
-            int offset = 0;
-            int newsOffset = 0;
+            var offset = 0;
+            var newsOffset = 0;
             InstantCache.Load();
             try
             {
                 foreach (var s in MainApp.Config.Urls)
                 {
-                    string news_url = s.Url;
-                    int unid = s.InstituteID;
-                    string key = null; bool abit = false;
+                    var news_url = s.Url;
+                    var unid = s.InstituteID;
+                    string key = null; var abit = false;
                     if (news_url.Contains("start.nuwm.edu.ua"))
                     {
                         if (news_url.Contains("kolonka-novyn"))
@@ -129,7 +128,7 @@ namespace Lead
             }
             catch (Exception ex) { _logger.NotifyError(LogArea.Other, ex); }
         }
-        private void RunParseThread(Parser parser)
+        private void RunParseThread(AbstractParser parser)
         {
             try
             {
@@ -143,7 +142,7 @@ namespace Lead
 
         #region IDictionaryImpl
 
-        public IEnumerator<KeyValuePair<string, Parser>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, AbstractParser>> GetEnumerator()
         {
             return _internalPool.GetEnumerator();
         }
@@ -154,7 +153,7 @@ namespace Lead
         }
 
         /// <exception cref="T:System.OverflowException">The dictionary already contains the maximum number of elements (<see cref="System.Int32.MaxValue"></see>).</exception>
-        public void Add(KeyValuePair<string, Parser> item)
+        public void Add(KeyValuePair<string, AbstractParser> item)
         {
             _internalPool.TryAdd(item.Key, item.Value);
         }
@@ -164,17 +163,17 @@ namespace Lead
             _internalPool.Clear();
         }
 
-        public bool Contains(KeyValuePair<string, Parser> item)
+        public bool Contains(KeyValuePair<string, AbstractParser> item)
         {
             return _internalPool.Contains(item);
         }
 
-        public void CopyTo(KeyValuePair<string, Parser>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<string, AbstractParser>[] array, int arrayIndex)
         {
             throw new NotImplementedException();
         }
 
-        public bool Remove(KeyValuePair<string, Parser> item)
+        public bool Remove(KeyValuePair<string, AbstractParser> item)
         {
             return _internalPool.TryRemove(item.Key, out _);
         }
@@ -184,7 +183,7 @@ namespace Lead
         public bool IsReadOnly => false;
 
         /// <exception cref="T:System.OverflowException">The dictionary already contains the maximum number of elements (<see cref="System.Int32.MaxValue"></see>).</exception>
-        public void Add(string key, Parser value)
+        public void Add(string key, AbstractParser value)
         {
             _internalPool.TryAdd(key, value);
         }
@@ -199,12 +198,12 @@ namespace Lead
             return _internalPool.TryRemove(key, out _);
         }
 
-        public bool TryGetValue(string key, out Parser value)
+        public bool TryGetValue(string key, out AbstractParser value)
         {
             return _internalPool.TryGetValue(key, out value);
         }
 
-        public Parser this[string key]
+        public AbstractParser this[string key]
         {
             get => _internalPool[key];
             set => _internalPool[key] = value;
@@ -212,7 +211,7 @@ namespace Lead
 
         public ICollection<string> Keys => _internalPool.Keys;
 
-        public ICollection<Parser> Values => _internalPool.Values;
+        public ICollection<AbstractParser> Values => _internalPool.Values;
 
 
         #endregion

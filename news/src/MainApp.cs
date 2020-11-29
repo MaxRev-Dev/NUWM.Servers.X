@@ -1,8 +1,7 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
-using APIUtilty;
-using Lead;
 using MaxRev.Servers;
 using MaxRev.Servers.Configuration;
 using MaxRev.Servers.Core.Events;
@@ -10,8 +9,11 @@ using MaxRev.Servers.Interfaces;
 using MaxRev.Servers.Utils.Logging;
 using MaxRev.Utils.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
+using NUWEE.Servers.Core.News.Config;
+using NUWEE.Servers.Core.News.Parsers;
+using NUWEE.Servers.Core.News.Updaters;
 
-namespace NUWM.Servers.Core.News
+namespace NUWEE.Servers.Core.News
 {
     internal sealed class MainApp
     {
@@ -35,40 +37,46 @@ namespace NUWM.Servers.Core.News
             {
                 AutoregisterControllers = true
             });
-            runtime.ConfigureLogger(new LoggerConfiguration{LoggingAreas = LogArea.Full, WriteToConsole = true}).Configure((with, core) =>
-            {
-                Core = core;
-                Core.Config.Basic.ServerHeaderName = "NUWM.Servers.News by MaxRev";
-
-                Server = Core.GetServer("News", port);
-                
-                with.Services(c =>
+            runtime.ConfigureLogger(new LoggerConfiguration
+                    {LoggingAreas = LogArea.Full, WriteToConsole = true})
+                .Configure((with, core) =>
                 {
-                    c.AddSingleton(x => core.Logger);
-                    c.AddSingleton<ParserPool>();
-                    c.AddSingleton<SearchService>();
-                    c.AddSingleton<ParserFactory>();
-                    c.AddTransient<NewsParser>();
-                    c.AddTransient<AbitNewsParser>();
-                    c.AddSingleton<CacheManager>();
-                    c.AddTransient<PoolParserScheduler>();
-                    c.AddSingleton<InstantCacheSaveScheduler>();
-                    c.AddSingleton<InstantCacher>();
-                }); 
-                Server.Features.GetFeature<IServerEvents>().ServerStarting += OnServerStart;
+                    Core = core;
+                    Core.Config.Basic.ServerHeaderName =
+                        "NUWEE.Servers.News by MaxRev";
 
-                Core.ConfigManager.Save();
-                Core.UnhandledException += (s, e) =>
-                {
-                    TrySaveAsync(Core.Services.GetRequiredService<CacheManager>()).Wait();
-                };
-                Server.Features.GetFeature<IServerEvents>().Suspending += (s, e) =>
-                {
-                    var _cacheManager = Server.Parent.Services.GetRequiredService<CacheManager>();
-                    TrySaveAsync(_cacheManager).Wait();
-                };
+                    Server = Core.GetServer("News", port);
 
-            });
+                    with.Services(c =>
+                    {
+                        c.AddSingleton(x => core.Logger);
+                        c.AddSingleton<ParserPool>();
+                        c.AddSingleton<SearchService>();
+                        c.AddSingleton<ParserFactory>();
+                        c.AddTransient<NewsParser>();
+                        c.AddTransient<AbitNewsParser>();
+                        c.AddSingleton<CacheManager>();
+                        c.AddTransient<PoolParserScheduler>();
+                        c.AddSingleton<InstantCacheSaveScheduler>();
+                        c.AddSingleton<InstantCacher>();
+                    });
+                    Server.Features.GetFeature<IServerEvents>().ServerStarting
+                        += OnServerStart; 
+
+                    Core.ConfigManager.Save();
+                    Core.UnhandledException += (s, e) =>
+                    {
+                        TrySaveAsync(Core.Services
+                            .GetRequiredService<CacheManager>()).Wait();
+                    };
+                    Server.Features.GetFeature<IServerEvents>().Suspending +=
+                        (s, e) =>
+                        {
+                            var _cacheManager = Server.Parent.Services
+                                .GetRequiredService<CacheManager>();
+                            TrySaveAsync(_cacheManager).Wait();
+                        }; 
+                });
             return runtime.RunAsync();
         }
 
@@ -76,8 +84,7 @@ namespace NUWM.Servers.Core.News
         {
             return cacheManager.SaveCacheAsync();
         }
-
-
+         
         private void OnServerStart(IServer s, object e)
         {
             NewsConfig =
@@ -87,9 +94,8 @@ namespace NUWM.Servers.Core.News
             dm.AddDir(Dirs.Addons, "addons");
             dm.AddDir(Dirs.Addons, Dirs.AddonsNews, "news");
             dm.AddDir(Dirs.Cache, "cache");
-
-            //Server.Config.Main.ServerTypeName = new KeyValuePair<string, string>("X-NS-Type", "News"); 
-
+            /*= new KeyValuePair<string, string>("X-NS-Type", "News");*/
+            
             Task.Run(() =>
             {
                 Server.Parent.Services.GetRequiredService<ParserPool>().InstantCache.Load();

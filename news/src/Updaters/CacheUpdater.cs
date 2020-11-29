@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using MaxRev.Utils;
 using MaxRev.Utils.Schedulers;
-using NUWM.Servers.Core.News;
+using NUWEE.Servers.Core.News.Parsers;
 
-namespace Lead
+namespace NUWEE.Servers.Core.News.Updaters
 {
     [Serializable]
     public class CacheUpdater : BaseScheduler
@@ -25,7 +25,7 @@ namespace Lead
                 Task.Run(() => UpdateParser(i));
             }
         }
-        private static async void UpdateParser(Parser obj)
+        private static async void UpdateParser(AbstractParser obj)
         {
             try
             {

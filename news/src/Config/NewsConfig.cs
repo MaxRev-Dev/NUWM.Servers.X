@@ -1,12 +1,12 @@
-﻿using System;
+﻿using MaxRev.Servers.Configuration;
+using System;
 using System.Collections.Generic;
-using MaxRev.Servers.Configuration;
 
-namespace NUWM.Servers.Core.News
+namespace NUWEE.Servers.Core.News.Config
 {
     public class NewsConfig : AbstractConfigContainer
     {
-        public NewsConfig(IServiceProvider services)
+        public NewsConfig(IServiceProvider _)
         {
 
         }

@@ -1,6 +1,4 @@
-﻿using JSON;
-using Lead;
-using MaxRev.Servers.API.Controllers;
+﻿using MaxRev.Servers.API.Controllers;
 using MaxRev.Servers.Core.Route;
 using MaxRev.Servers.Interfaces;
 using MaxRev.Servers.Utils;
@@ -8,15 +6,18 @@ using MaxRev.Utils;
 using MaxRev.Utils.Methods;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using NUWM.Servers.Core.News;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static Lead.InstantCacher;
+using NUWEE.Servers.Core.News.Json;
+using NUWEE.Servers.Core.News.Parsers;
+using NUWEE.Servers.Core.News.Updaters;
+using static NUWEE.Servers.Core.News.Updaters.InstantCacher;
+using NUWM.Servers.Core.News.Json;
 
-namespace APIUtilty
+namespace NUWEE.Servers.Core.News.API
 {
     [RouteBase("api")]
     internal class API : CoreApi
@@ -108,7 +109,7 @@ namespace APIUtilty
             {
                 if (Query.HasKey("query"))
                 {
-                    string query = Query["query"];
+                    var query = Query["query"];
 
                     try
                     {
@@ -184,15 +185,15 @@ namespace APIUtilty
 
         #region Service
 
-        public async Task<Response> UniversalAsync(Parser parser)
+        public async Task<Response> UniversalAsync(AbstractParser parser)
         {
             var Query = Info.Query;
 
             var newslist = parser.Newslist.ToList();
             Exception err = null;
-            bool toHTML = false;
+            var toHTML = false;
             int last;
-            List<NewsItem> obj = new List<NewsItem>();
+            var obj = new List<NewsItem>();
             try
             {
                 if (newslist.Count == 0)
@@ -208,7 +209,7 @@ namespace APIUtilty
                 if (Query.HasKey("html"))
                 {
                     var param = Query["html"];
-                    if (!int.TryParse(param, out int iparam))
+                    if (!int.TryParse(param, out var iparam))
                     {
                         throw new FormatException("InvalidRequest: expected 1/0 - got " + param);
                     }
@@ -222,7 +223,7 @@ namespace APIUtilty
                         throw new FormatException("InvalidRequest  >> uri & id");
                     }
 
-                    string param = Query["uri"];
+                    var param = Query["uri"];
 
                     var c = newslist.Where(x => x.Url == param).ToArray();
                     if (c.Any())
@@ -241,7 +242,7 @@ namespace APIUtilty
                         throw new FormatException("InvalidRequest  >> query must be unique in request");
                     }
 
-                    string param = Query["query"];
+                    var param = Query["query"];
 
                     foreach (var t in newslist)
                     {
@@ -269,7 +270,7 @@ namespace APIUtilty
                         throw new FormatException("InvalidRequest  >> uriquery must be unique in request");
                     }
 
-                    string param = Query["uriquery"];
+                    var param = Query["uriquery"];
 
                     foreach (var t in newslist)
                     {
@@ -292,8 +293,8 @@ namespace APIUtilty
                 }
                 if (Query.HasKey("last"))
                 {
-                    string param = Query["last"];
-                    if (!int.TryParse(param, out int iparam))
+                    var param = Query["last"];
+                    if (!int.TryParse(param, out var iparam))
                     {
                         throw new FormatException("InvalidRequest: expected int - got " + param);
                     }
@@ -319,16 +320,16 @@ namespace APIUtilty
                 }
                 if (Query.HasKey("after"))
                 {
-                    string param = Query["after"];
+                    var param = Query["after"];
                     try
                     {
                         if (param.Contains(','))
                         {
-                            string[] spar = param.Split(',');
-                            if (int.TryParse(spar[0], out int countparam))
+                            var spar = param.Split(',');
+                            if (int.TryParse(spar[0], out var countparam))
                             {
                                 obj = newslist.TakeWhile(x => !x.Url.Contains(spar[1])).ToList();
-                                int count = obj.Count - countparam;
+                                var count = obj.Count - countparam;
                                 if (count > 0 && count < obj.Count)
                                 {
                                     obj = obj.Skip(count).ToList();
@@ -358,13 +359,13 @@ namespace APIUtilty
                 }
                 if (Query.HasKey("before"))
                 {
-                    string param = Query["before"];
+                    var param = Query["before"];
                     try
                     {
                         if (param.Contains(','))
                         {
-                            string[] spar = param.Split(',');
-                            if (int.TryParse(spar[0], out int count))
+                            var spar = param.Split(',');
+                            if (int.TryParse(spar[0], out var count))
                             {
                                 obj = newslist.SkipWhile(x => !x.Url.Contains(spar[1])).Skip(1).ToList();
                                 if (count > obj.Count)
@@ -394,13 +395,13 @@ namespace APIUtilty
                 }
                 if (Query.HasKey("offset"))
                 {
-                    string param = Query["offset"];
+                    var param = Query["offset"];
                     try
                     {
                         if (param.Contains(','))
                         {
-                            string[] spar = param.Split(',');
-                            if (int.TryParse(spar[0], out int skip) && int.TryParse(spar[1], out int count))
+                            var spar = param.Split(',');
+                            if (int.TryParse(spar[0], out var skip) && int.TryParse(spar[1], out var count))
                             {
                                 obj = newslist.Skip(skip).Take(count).ToList();
                             }
@@ -464,9 +465,9 @@ namespace APIUtilty
 
         private Tuple<string, int> AllParsersLogger()
         {
-            string resp = "";
-            int countAllnews = 0;
-            foreach (Parser parser in parserPool.Values.OrderByDescending(x => x.Newslist?.Count))
+            var resp = "";
+            var countAllnews = 0;
+            foreach (AbstractParser parser in parserPool.Values.OrderByDescending(x => x.Newslist?.Count))
             {
                 TimeSpan k = default;
 
