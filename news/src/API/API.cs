@@ -33,6 +33,7 @@ namespace NUWEE.Servers.Core.News.API
 
         private ParserPool parserPool => Services.GetRequiredService<ParserPool>();
         private CacheManager _cacheManager => Services.GetRequiredService<CacheManager>();
+
         #region Invokers
         [Route("keys")]
         public string GetKeys()

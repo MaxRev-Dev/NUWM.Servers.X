@@ -111,8 +111,7 @@ namespace NUWEE.Servers.Core.News.Json
                         {
                             var uri = i.FirstChild.Attributes["src"].Value;
 
-                            var finalUri = ParserPool.site_url + uri.Substring(1);
-                            Utils.OriginalImageCheck(ref finalUri);
+                            var finalUri = ParserPool.site_url + uri.Substring(1); 
                             cache.Detailed.ImagesLinks.Add(finalUri);
                         }
                     }

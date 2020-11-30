@@ -10,6 +10,8 @@ namespace NUWEE.Servers.Core.News
 {
     internal static class Utils
     {
+        private static Regex _rgxPhoto = new Regex(@"(?<=photo.).*(?=\/)");
+
         public static int GetIso8601WeekOfYear(DateTime time)
         {
             DayOfWeek day = CultureInfo.InvariantCulture.Calendar.GetDayOfWeek(time);
@@ -24,16 +26,22 @@ namespace NUWEE.Servers.Core.News
         {
             try
             {
-                var nimg = value.Replace(new Regex(@"(?<=photo.).*(?=\/)").Match(value).Value, "0");
-                using (var f = new Request(nimg))
+                var match = _rgxPhoto.Match(value);
+                if (match.Success)
                 {
-                    var m = RequestAllocator.Instance.UsingPoolAsync(f).Result;
-                    m.EnsureSuccessStatusCode();
-                    if (m.Content.Headers.ContentLength > 100)
+                    var nimg = value.Replace(match.Value,  "0");
+                    using (var f = new Request(nimg))
                     {
-                        value = nimg;
+                        var m = RequestAllocator.Instance.UsingPoolAsync(f)
+                            .Result;
+                        m.EnsureSuccessStatusCode();
+                        if (m.Content.Headers.ContentLength > 100)
+                        {
+                            value = nimg;
+                        }
                     }
                 }
+
                 return true;
             }
             catch (HttpRequestException)
