@@ -19,7 +19,7 @@ using NUWM.Servers.Core.News.Json;
 
 namespace NUWEE.Servers.Core.News.API
 {
-    [RouteBase("api")]
+    [RouteBase("news/api")]
     internal class API : CoreApi
     {
         protected override void OnInitialized()

@@ -16,7 +16,7 @@ using Newtonsoft.Json;
 
 namespace NUWM.Servers.Core.Sched
 {
-    [RouteBase("api")]
+    [RouteBase("sched/api")]
     public sealed class API : CoreApi
     {
         protected override void OnInitialized()

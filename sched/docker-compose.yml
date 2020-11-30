@@ -1,4 +1,4 @@
-version '3'
+version: '3'
 
 services:
  sched_service:
@@ -6,7 +6,7 @@ services:
    image: sched
    container_name: sched
    ports:
-     - 4002:4002
+     - 3002:4002
    volumes:
      - ./server_data:/app/MSC_Server
      - /home/maxrev/certs:/certs

@@ -20,7 +20,7 @@ using NUWM.Servers.Core.Calc.Services.Parsers;
 
 namespace NUWM.Servers.Core.Calc.API
 {
-    [RouteBase("api")]
+    [RouteBase("/calc/api")]
     internal class CalcAPI : CoreApi
     {
         private Query Query => Info.Query;
