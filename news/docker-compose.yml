@@ -5,6 +5,7 @@ services:
    build: .
    image: news
    container_name: news
+   restart: always
    ports:
      - 3001:4001
    volumes:

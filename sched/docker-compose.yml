@@ -5,6 +5,7 @@ services:
    build: .
    image: sched
    container_name: sched
+   restart: always
    ports:
      - 3002:4002
    volumes:

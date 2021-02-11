@@ -5,6 +5,7 @@ services:
    build: .
    image: calc
    container_name: calc
+   restart: always
    ports:
      - 3000:4000
    volumes:

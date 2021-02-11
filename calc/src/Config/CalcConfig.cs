@@ -10,6 +10,7 @@ namespace NUWM.Servers.Core.Calc.Config
         public TimeSpan UpdateDelay { get; set; }
         public double UkrOlimpMark { get; }
         public Dictionary<string, InfoNode> FetchMap { get; set; }
+        public int CurrentYear { get; set; }
 
         public CalcConfig(IServiceProvider _)
         {
@@ -20,6 +21,7 @@ namespace NUWM.Servers.Core.Calc.Config
                 {"ua_olimp_info", ((InfoNode)"/html/body/div[1]/div/div/div/section/div[2]/article/div|http://start.nuwm.edu.ua/olimpiada")},
                 {"nuwm_prep_info",((InfoNode)"/html/body/div[2]/div/div/div/section/article|http://nuwm.edu.ua/navchaljno-naukovi-instituti/zaochno-distancijnogho-navchannja/viddilennja-dovuzivsjkoji-pidghotovkita-profiljnogho-navchannja/pidghotovchi")},
             };
+            CurrentYear = 2020;
         }
     }
 

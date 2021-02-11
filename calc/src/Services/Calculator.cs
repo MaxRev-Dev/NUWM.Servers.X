@@ -65,7 +65,7 @@ namespace NUWM.Servers.Core.Calc.Services
             double? prepCourses,
             int? ukrOlimp)
         {
-            var year = TimeChron.GetRealTime().Year - 1;
+            var year = _config.CurrentYear;
             var obj = new List<CalculatedSpecialty>();
             IEnumerable<SpecialtyInfo> listing;
 
