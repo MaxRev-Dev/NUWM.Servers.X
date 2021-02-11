@@ -380,6 +380,8 @@ namespace NUWM.Servers.Core.Sched
         private string FixMalformedBlock(string innerHtml)
         {
             innerHtml = innerHtml
+                .Replace("<div class='link'>", "\r\n")
+                .Replace("</div>", "\r\n")
                 .Replace("<br> <br>", "\r\n")
                 .Replace(" <br> -", "\r\n - ")
                 .Replace("<br> ", " ")

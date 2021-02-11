@@ -22,7 +22,7 @@ namespace NUWM.Servers.Core.Sched
 
         private Dictionary<PType, string> patern;
 
-        private List<SubjectInstance> list; 
+        private List<SubjectInstance> list;
         private Exception err;
         public Dictionary<string, string> AR;
         public static SubjectParser Current;
@@ -81,12 +81,12 @@ namespace NUWM.Servers.Core.Sched
             {
                 throw new InvalidOperationException("Emergency!!! PATTERNS ARE EMPTY");
             }
-              
+
             var tm = ScheduleTimeViewItem.GetNum(time);
             list = new List<SubjectInstance>();
             var r = new Regex(patern[isLecturer ? PType.Lect : PType.Stud], RegexOptions.ECMAScript, TimeSpan.FromSeconds(5));
             if (!isLecturer) subjectS = subjectS.Select(x => ' ' + x).ToArray();
-            foreach (var sub in subjectS)
+            foreach (var sub in subjectS.Where(x => x.Length > 2))
             {
                 var mc = r.Matches(sub.Replace('\r', ' '));
 
