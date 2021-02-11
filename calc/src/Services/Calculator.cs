@@ -65,7 +65,7 @@ namespace NUWM.Servers.Core.Calc.Services
             double? prepCourses,
             int? ukrOlimp)
         {
-            var year = _config.CurrentYear;
+            var year = _config.CurrentYear - 1;
             var obj = new List<CalculatedSpecialty>();
             IEnumerable<SpecialtyInfo> listing;
 
